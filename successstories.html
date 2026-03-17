@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Success Stories — FairGame Initiative</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    .featured-story { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: var(--border); border-top: 3px solid var(--green-600); margin-bottom: 48px; }
+    @media (max-width: 760px) { .featured-story { grid-template-columns: 1fr; } }
+    .featured-quote { background: var(--green-900); padding: 48px 44px; display: flex; flex-direction: column; justify-content: center; }
+    .featured-mark { font-family: var(--ff-serif); font-size: 4rem; color: var(--green-400); opacity: 0.5; line-height: 0.7; margin-bottom: 16px; }
+    .featured-text { font-family: var(--ff-serif); font-style: italic; font-size: 1.15rem; color: var(--white); line-height: 1.65; margin-bottom: 24px; }
+    .featured-attr { font-size: 0.78rem; color: rgba(255,255,255,0.45); letter-spacing: 0.08em; text-transform: uppercase; }
+    .featured-attr strong { color: var(--green-400); font-weight: 500; }
+    .featured-context { background: var(--gray-50); padding: 48px 44px; }
+    .featured-context h3 { color: var(--green-900); margin-bottom: 14px; }
+    .featured-context p { font-size: 0.9rem; color: var(--gray-500); margin-bottom: 12px; line-height: 1.75; }
+    .achievement-tag { display: inline-block; padding: 4px 10px; background: var(--green-600); color: var(--white); font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 8px; }
+
+    .stories-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: var(--border); }
+    @media (max-width: 860px) { .stories-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .stories-grid { grid-template-columns: 1fr; } }
+    .story-card { padding: 28px 24px; border-right: var(--border); border-bottom: var(--border); background: var(--white); }
+    .story-card:nth-child(3n) { border-right: none; }
+    .story-school { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gray-300); margin-bottom: 10px; }
+    .story-quote { font-family: var(--ff-serif); font-style: italic; font-size: 0.96rem; color: var(--gray-700); margin-bottom: 14px; line-height: 1.65; }
+    .story-quote::before { content: '\201C'; color: var(--green-400); }
+    .story-quote::after  { content: '\201D'; color: var(--green-400); }
+    .story-name { font-size: 0.84rem; font-weight: 500; color: var(--green-900); margin-bottom: 8px; }
+    .story-badge { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green-700); background: var(--green-50); padding: 2px 7px; }
+
+    .share-cta { background: var(--gray-50); border: var(--border); padding: 40px; text-align: center; margin-top: 48px; }
+    .share-cta h3 { color: var(--green-900); margin-bottom: 10px; }
+    .share-cta p { color: var(--gray-500); font-size: 0.92rem; margin-bottom: 20px; max-width: 480px; margin-left: auto; margin-right: auto; }
+  </style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo"><img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'" />FairGame</a>
+    <button class="nav-hamburger">☰</button>
+    <ul class="nav-links">
+      <li class="dropdown"><a href="#">Resources ▾</a><div class="dropdown-menu"><a href="/starthere.html">Start Here</a><a href="/setupguide.html">Setup Guide</a><a href="/stateresources.html">State Resources</a><a href="/researchguide.html">Research Guide</a><a href="/teachers-professionals.html">For Teachers</a></div></li>
+      <li class="dropdown"><a href="#">Get Involved ▾</a><div class="dropdown-menu"><a href="/volunteer.html">Volunteer / Judge</a><a href="/donate.html">Donate</a><a href="/#portal">Ambassador Portal</a><a href="/#portal">Teacher Portal</a></div></li>
+      <li><a href="/successstories.html">Stories</a></li>
+      <li><a href="/donate.html">Donate</a></li>
+      <li><a href="/starthere.html" class="nav-cta">Get Started</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="/">Home</a><span>/</span>Success Stories</div>
+    <span class="overline">Student &amp; School Outcomes</span>
+    <h1>Success Stories</h1>
+    <p>Students who went from no science fair program to ISEF, national recognition, and beyond.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+
+    <div class="reveal">
+      <span class="overline">Featured Story</span>
+      <h2 style="margin-bottom:24px;">From first project to internationals</h2>
+      <div class="featured-story">
+        <div class="featured-quote">
+          <div class="featured-mark">"</div>
+          <div class="featured-text">I genuinely know that I wouldn't have made it to ISEF without Kyla. She read through everything and answered all my questions. I think one time we were on a Zoom call for two hours. But now I'm going to internationals!</div>
+          <div class="featured-attr"><strong>Rishi Pampati</strong><br>Walnut Hills High School, Cincinnati, Ohio</div>
+        </div>
+        <div class="featured-context">
+          <h3>How Rishi got to ISEF</h3>
+          <p>Rishi came to FairGame as a student at Walnut Hills High School looking for guidance on his research project. He had a strong idea but needed support navigating the science fair process — from experimental design through the competition pathway.</p>
+          <p>Through FairGame's individual mentorship program, Rishi was connected with Kyla Fallis, FairGame's founder and a multi-award-winning science fair competitor herself (ISEF qualifier, EPA Award recipient). Over several months and many hours of calls and document reviews, Rishi developed and refined his project.</p>
+          <p>Rishi advanced from his school fair through district and state competitions, ultimately qualifying for Regeneron ISEF — the world's largest pre-college science competition.</p>
+          <div class="achievement-tag">ISEF Qualifier</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- School stories -->
+    <div class="reveal" style="margin-top:64px;">
+      <span class="overline">School Programs</span>
+      <h2 style="margin-bottom:24px;">Schools we've supported</h2>
+      <div class="stories-grid">
+        <div class="story-card">
+          <div class="story-school">Bath High School &mdash; Lima, Ohio</div>
+          <div class="story-quote">First science fair program launched for the 2026&ndash;27 school year after a preliminary meeting in February 2026.</div>
+          <div class="story-name">Program Status: Active Partner</div>
+          <div class="story-badge">2026&ndash;27 Launch</div>
+        </div>
+        <div class="story-card">
+          <div class="story-school">Lima Senior High School &mdash; Lima, Ohio</div>
+          <div class="story-quote">FairGame partnership established to bring competitive science fair programming to one of Allen County's largest public schools.</div>
+          <div class="story-name">Program Status: Active Partner</div>
+          <div class="story-badge">Active Partner</div>
+        </div>
+        <div class="story-card">
+          <div class="story-school">Linden-McKinley STEM Academy &mdash; Columbus</div>
+          <div class="story-quote">Science fair program development underway at Columbus City Schools' STEM-focused high school.</div>
+          <div class="story-name">Program Status: In Development</div>
+          <div class="story-badge">In Development</div>
+        </div>
+        <div class="story-card">
+          <div class="story-school">Reynoldsburg High School &mdash; Reynoldsburg, Ohio</div>
+          <div class="story-quote">Outreach and partnership development ongoing for the 2026&ndash;27 school year.</div>
+          <div class="story-name">Program Status: Outreach</div>
+          <div class="story-badge">Outreach</div>
+        </div>
+        <div class="story-card">
+          <div class="story-school">Ashtabula High School &mdash; Ashtabula, Ohio</div>
+          <div class="story-quote">Northeast Ohio school with no existing science fair program — in early planning stages for launch.</div>
+          <div class="story-name">Program Status: Early Stage</div>
+          <div class="story-badge">Early Stage</div>
+        </div>
+        <div class="story-card">
+          <div class="story-school">Your school here</div>
+          <div class="story-quote">We're looking for up to 10 school partners for the 2026&ndash;27 school year. Program is free and fully supported.</div>
+          <div class="story-name">Apply for partnership</div>
+          <a href="mailto:fairgameinitiative@outlook.com" class="story-badge" style="text-decoration:none;cursor:pointer;">Apply &rarr;</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="share-cta reveal">
+      <h3>Have a story to share?</h3>
+      <p>If FairGame helped you or your school, we'd love to feature your story. Student spotlights, teacher testimonials, and school transformation stories are all welcome.</p>
+      <a href="mailto:fairgameinitiative@outlook.com?subject=Story Submission" class="btn btn-primary">Share Your Story &rarr;</a>
+    </div>
+
+  </div>
+</section>
+
+<script>
+const ro = new IntersectionObserver(e => e.forEach(x => { if(x.isIntersecting){x.target.classList.add('vis');ro.unobserve(x.target);}}),{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+document.querySelector('.nav-hamburger').addEventListener('click',()=>{const nl=document.querySelector('.nav-links');const o=nl.style.display==='flex';Object.assign(nl.style,{display:o?'none':'flex',flexDirection:'column',position:'fixed',top:'68px',left:'0',right:'0',background:'var(--white)',padding:'8px 0 16px',borderBottom:'var(--border)',boxShadow:'var(--shadow-md)'});});
+</script>
+</body>
+</html>

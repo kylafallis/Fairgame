@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Research Guide — FairGame Initiative</title>
+  <meta name="description" content="From choosing a project topic to building your display board — everything a student needs to develop a winning science fair project." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    .phase-steps { display: flex; flex-direction: column; gap: 0; }
+    .phase-step { display: grid; grid-template-columns: 56px 1fr; gap: 24px; align-items: start; padding: 28px 0; border-bottom: var(--border); }
+    .phase-num { font-family: var(--ff-serif); font-size: 2rem; font-weight: 700; color: var(--green-400); line-height: 1; }
+    .phase-step h3 { color: var(--green-900); margin-bottom: 8px; }
+    .phase-step p { font-size: 0.9rem; color: var(--gray-500); margin-bottom: 10px; line-height: 1.7; }
+    .phase-step ul { padding-left: 18px; font-size: 0.88rem; color: var(--gray-500); }
+    .phase-step li { margin-bottom: 5px; line-height: 1.6; }
+    .tip-box { background: var(--green-50); border-left: 3px solid var(--green-500); padding: 14px 16px; margin-top: 12px; font-size: 0.86rem; color: var(--green-800); line-height: 1.65; }
+    .tip-box strong { font-weight: 500; display: block; margin-bottom: 3px; }
+    .dl-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 16px; border: var(--border); background: var(--white); margin-bottom: 8px; }
+    .dl-row-name { font-size: 0.88rem; font-weight: 500; color: var(--gray-900); }
+    .dl-row-desc { font-size: 0.76rem; color: var(--gray-500); margin-top: 2px; }
+    .dl-btn { flex-shrink: 0; padding: 7px 14px; background: var(--green-600); color: var(--white); font-size: 0.76rem; font-weight: 500; font-family: var(--ff-sans); border: none; cursor: pointer; transition: background 0.15s; }
+    .dl-btn:hover { background: var(--green-700); }
+    .dl-btn.locked { background: var(--gray-200); color: var(--gray-500); cursor: default; }
+  </style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo"><img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'" />FairGame</a>
+    <button class="nav-hamburger">☰</button>
+    <ul class="nav-links">
+      <li class="dropdown"><a href="#">Resources ▾</a><div class="dropdown-menu"><a href="/starthere.html">Start Here</a><a href="/setupguide.html">Setup Guide</a><a href="/stateresources.html">State Resources</a><a href="/researchguide.html">Research Guide</a><a href="/teachers-professionals.html">For Teachers</a></div></li>
+      <li class="dropdown"><a href="#">Get Involved ▾</a><div class="dropdown-menu"><a href="/volunteer.html">Volunteer / Judge</a><a href="/donate.html">Donate</a><a href="/#portal">Ambassador Portal</a><a href="/#portal">Teacher Portal</a></div></li>
+      <li><a href="/successstories.html">Stories</a></li>
+      <li><a href="/donate.html">Donate</a></li>
+      <li><a href="/starthere.html" class="nav-cta">Get Started</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="/">Home</a><span>/</span><a href="/starthere.html">Resources</a><span>/</span>Research Guide</div>
+    <span class="overline">For Students</span>
+    <h1>Research Guide</h1>
+    <p>From choosing a topic to standing at your display board — a complete guide to developing a strong science fair project.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+
+    <div style="margin-bottom:48px;" class="reveal">
+      <span class="overline">Step by Step</span>
+      <h2>The six phases of a science fair project</h2>
+      <p style="color:var(--gray-500);font-size:0.97rem;margin-top:8px;">Work through these in order. Each phase builds on the last — skipping steps is the most common reason projects fall apart at the fair.</p>
+    </div>
+
+    <div class="phase-steps reveal">
+
+      <div class="phase-step" id="topic">
+        <div class="phase-num">1</div>
+        <div>
+          <h3>Choosing a topic</h3>
+          <p>The best science fair projects come from genuine curiosity — things you already wonder about. Start broad, then narrow down to something testable.</p>
+          <ul>
+            <li>Ask "What would happen if..." or "Does X affect Y?"</li>
+            <li>Look at everyday problems in your community, school, or home</li>
+            <li>Browse previous ISEF award-winning projects for inspiration (not to copy)</li>
+            <li>Make sure you can actually run the experiment — consider time, materials, and access</li>
+            <li>Avoid topics that require controlled substances, human subjects without IRB approval, or vertebrate animals without proper protocols</li>
+          </ul>
+          <div class="tip-box"><strong>What judges look for in topic selection:</strong> Originality and genuine inquiry. A modest, well-executed original idea beats an ambitious project that copies existing research.</div>
+        </div>
+      </div>
+
+      <div class="phase-step" id="design">
+        <div class="phase-num">2</div>
+        <div>
+          <h3>Designing your experiment</h3>
+          <p>A strong experimental design is the backbone of a good project. This is where most students need the most help.</p>
+          <ul>
+            <li><strong>Hypothesis:</strong> A specific, testable prediction — "If [X], then [Y], because [reason]"</li>
+            <li><strong>Independent variable:</strong> What you change (only one)</li>
+            <li><strong>Dependent variable:</strong> What you measure</li>
+            <li><strong>Constants:</strong> Everything else you keep the same</li>
+            <li><strong>Control group:</strong> Your baseline for comparison</li>
+            <li><strong>Sample size:</strong> The more trials, the better. Minimum 3 trials per condition.</li>
+          </ul>
+          <p>Write out your procedure in enough detail that someone else could replicate your experiment exactly from your description. This is how real science works.</p>
+          <div class="tip-box"><strong>Common mistake:</strong> Changing more than one variable at a time. If you change two things and get a result, you can't know which change caused it.</div>
+        </div>
+      </div>
+
+      <div class="phase-step" id="data">
+        <div class="phase-num">3</div>
+        <div>
+          <h3>Collecting and analyzing data</h3>
+          <p>Keep a lab notebook from day one. Write down everything — even failed trials and unexpected results. Judges respect honesty about what didn't work.</p>
+          <ul>
+            <li>Use a consistent data table for every trial</li>
+            <li>Record raw data — don't average before you've saved the originals</li>
+            <li>Calculate mean, median, and standard deviation where appropriate</li>
+            <li>Create graphs that clearly show the relationship between your variables</li>
+            <li>Use appropriate graph types: bar charts for categories, line graphs for continuous data</li>
+          </ul>
+          <div class="tip-box"><strong>About unexpected results:</strong> If your data doesn't support your hypothesis, that's not a failure. Explain what you think caused it and what you'd do differently. Judges value honest analysis over forced conclusions.</div>
+        </div>
+      </div>
+
+      <div class="phase-step" id="display">
+        <div class="phase-num">4</div>
+        <div>
+          <h3>Creating your display board</h3>
+          <p>Your display board is your project's first impression. It needs to communicate your entire project clearly within about 60 seconds of a judge looking at it.</p>
+          <ul>
+            <li>Standard size: 36&rdquo; tall &times; 48&rdquo; wide (tri-fold board)</li>
+            <li>Required sections: Title, Purpose/Question, Hypothesis, Materials, Procedure, Results, Conclusion, References</li>
+            <li>Use clear headers, legible font (minimum 18pt for body text), and consistent color scheme</li>
+            <li>Charts and graphs should be large enough to read from two feet away</li>
+            <li>Your written research paper sits separately on the table in front of the board</li>
+          </ul>
+          <div class="dl-row" style="margin-top:14px;"><div><div class="dl-row-name">Display Board Layout Template</div><div class="dl-row-desc">Canva template — pre-sized with all required sections</div></div><button class="dl-btn locked">Download (Portal)</button></div>
+          <div class="dl-row"><div><div class="dl-row-name">Poster Layout Guide</div><div class="dl-row-desc">Spacing, font, and content guidelines</div></div><button class="dl-btn locked">Download (Portal)</button></div>
+        </div>
+      </div>
+
+      <div class="phase-step" id="present">
+        <div class="phase-num">5</div>
+        <div>
+          <h3>Presenting to judges</h3>
+          <p>You'll have approximately 5&ndash;10 minutes with each judge. Most of it will be conversation, not a formal presentation. Judges want to understand how you think, not just what you found.</p>
+          <ul>
+            <li>Prepare a 2-minute opening summary of your project — purpose, method, key result, conclusion</li>
+            <li>Practice answering: "Why did you choose this topic?" and "What would you do differently?"</li>
+            <li>Know your data. Be ready to explain every number on your display board</li>
+            <li>Dress professionally. First impressions matter.</li>
+            <li>It's completely fine to say "I don't know, but here's what I think might explain it"</li>
+          </ul>
+          <div class="tip-box"><strong>What judges actually care about:</strong> Your understanding of your own project. A student who can explain their experimental design in their own words beats a polished student who memorized a script.</div>
+        </div>
+      </div>
+
+      <div class="phase-step" id="compete">
+        <div class="phase-num">6</div>
+        <div>
+          <h3>Understanding the competition pathway</h3>
+          <p>If your school participates in OAS, winning at your school fair can advance you all the way to international competition.</p>
+          <ul>
+            <li><strong>School Fair</strong> &rarr; top projects advance to District Science Day</li>
+            <li><strong>OAS District Science Day</strong> &rarr; top projects advance to State Science Day</li>
+            <li><strong>OAS State Science Day</strong> &rarr; top projects qualify for Regeneron ISEF (international)</li>
+            <li>Many specialized awards at each level: EPA Special Award, ASM Materials Award, and more</li>
+          </ul>
+          <p>See the full Ohio competition pathway, deadlines, and contact information on the <a href="/stateresources.html" style="color:var(--green-600);">State Resources page</a>.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="reveal" style="margin-top:64px;">
+      <span class="overline">Templates &amp; Downloads</span>
+      <h2 style="margin-bottom:24px;">Student resources</h2>
+      <div class="dl-row"><div><div class="dl-row-name">Research Paper Template</div><div class="dl-row-desc">Standard science fair research paper format with section guides</div></div><button class="dl-btn locked">Download (Portal)</button></div>
+      <div class="dl-row"><div><div class="dl-row-name">Lab Notebook Data Table</div><div class="dl-row-desc">Printable data recording sheet for experiments</div></div><button class="dl-btn locked">Download (Portal)</button></div>
+      <div class="dl-row"><div><div class="dl-row-name">Project Proposal Form</div><div class="dl-row-desc">Outline your hypothesis and experimental design before you begin</div></div><button class="dl-btn locked">Download (Portal)</button></div>
+      <div class="dl-row"><div><div class="dl-row-name">Display Board Checklist</div><div class="dl-row-desc">Verify your board has all required sections before fair day</div></div><button class="dl-btn locked">Download (Portal)</button></div>
+      <p style="margin-top:14px;font-size:0.82rem;color:var(--gray-500);">Student downloads are accessible after applying for the <a href="/#portal" style="color:var(--green-600);">Ambassador Portal</a>, or ask your teacher to request Teacher Portal access.</p>
+    </div>
+
+    <div class="reveal" style="margin-top:64px;background:var(--green-900);padding:40px;">
+      <h3 style="color:var(--white);margin-bottom:10px;">Need a mentor?</h3>
+      <p style="color:rgba(255,255,255,0.6);margin-bottom:20px;font-size:0.94rem;">Our student ambassador program connects you with a STEM professional who can answer your questions, review your experimental design, and help you prepare for judging.</p>
+      <a href="/#portal" class="btn btn-white">Apply for Mentorship &rarr;</a>
+    </div>
+
+  </div>
+</section>
+
+<script>
+const ro = new IntersectionObserver(e => e.forEach(x => { if(x.isIntersecting){x.target.classList.add('vis');ro.unobserve(x.target);}}),{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+document.querySelector('.nav-hamburger').addEventListener('click',()=>{const nl=document.querySelector('.nav-links');const o=nl.style.display==='flex';Object.assign(nl.style,{display:o?'none':'flex',flexDirection:'column',position:'fixed',top:'68px',left:'0',right:'0',background:'var(--white)',padding:'8px 0 16px',borderBottom:'var(--border)',boxShadow:'var(--shadow-md)'});});
+</script>
+</body>
+</html>

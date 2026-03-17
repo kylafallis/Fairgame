@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>For Teachers &amp; Professionals — FairGame Initiative</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    .tab-nav { display: flex; gap: 0; border-bottom: 2px solid var(--gray-200); margin-bottom: 40px; }
+    .tab-btn { padding: 12px 24px; font-size: 0.88rem; font-weight: 500; background: none; border: none; color: var(--gray-500); border-bottom: 2px solid transparent; margin-bottom: -2px; cursor: pointer; font-family: var(--ff-sans); transition: all 0.15s; }
+    .tab-btn.active { color: var(--green-700); border-bottom-color: var(--green-600); }
+    .tab-panel { display: none; } .tab-panel.active { display: block; }
+    .dl-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: var(--border); }
+    @media (max-width: 760px) { .dl-grid-3 { grid-template-columns: 1fr 1fr; } }
+    .dl-card { padding: 22px 20px; border-right: var(--border); border-bottom: var(--border); background: var(--white); display: flex; flex-direction: column; }
+    .dl-card:nth-child(3n) { border-right: none; }
+    .dl-card h4 { color: var(--green-900); margin-bottom: 6px; font-size: 0.9rem; }
+    .dl-card p { font-size: 0.8rem; color: var(--gray-500); flex: 1; margin-bottom: 16px; line-height: 1.55; }
+    .dl-card-btn { padding: 8px 14px; background: var(--green-600); color: var(--white); border: none; font-size: 0.76rem; font-weight: 500; font-family: var(--ff-sans); cursor: pointer; align-self: flex-start; transition: background 0.15s; }
+    .dl-card-btn:hover { background: var(--green-700); }
+    .dl-card-btn.locked { background: var(--gray-200); color: var(--gray-500); cursor: default; }
+  </style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo"><img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'" />FairGame</a>
+    <button class="nav-hamburger">☰</button>
+    <ul class="nav-links">
+      <li class="dropdown"><a href="#">Resources ▾</a><div class="dropdown-menu"><a href="/starthere.html">Start Here</a><a href="/setupguide.html">Setup Guide</a><a href="/stateresources.html">State Resources</a><a href="/researchguide.html">Research Guide</a><a href="/teachers-professionals.html">For Teachers</a></div></li>
+      <li class="dropdown"><a href="#">Get Involved ▾</a><div class="dropdown-menu"><a href="/volunteer.html">Volunteer / Judge</a><a href="/donate.html">Donate</a><a href="/#portal">Ambassador Portal</a><a href="/#portal">Teacher Portal</a></div></li>
+      <li><a href="/successstories.html">Stories</a></li>
+      <li><a href="/donate.html">Donate</a></li>
+      <li><a href="/starthere.html" class="nav-cta">Get Started</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="/">Home</a><span>/</span><a href="/starthere.html">Resources</a><span>/</span>For Teachers</div>
+    <span class="overline">Educators &amp; STEM Professionals</span>
+    <h1>Teachers &amp; Professionals</h1>
+    <p>Resources, downloads, and tools for educators running science fairs and STEM professionals who want to get involved.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="showTab('teachers',this)">For Teachers</button>
+      <button class="tab-btn" onclick="showTab('judges',this)">For Judges &amp; Mentors</button>
+      <button class="tab-btn" onclick="showTab('admins',this)">For Administrators</button>
+    </div>
+
+    <div class="tab-panel active" id="tab-teachers">
+      <div class="reveal">
+        <span class="overline">Teacher Resources</span>
+        <h2 style="margin-bottom:8px;">Everything you need in the classroom</h2>
+        <p style="color:var(--gray-500);margin-bottom:32px;font-size:0.96rem;">Curriculum materials, communication templates, and professional development tools. Most resources below require a free Teacher Portal account.</p>
+        <div class="dl-grid-3">
+          <div class="dl-card"><h4>Lesson Plans — Grades 6&ndash;8</h4><p>Ohio Standards-aligned lesson plans covering scientific method, hypothesis formation, experimental design, and data analysis.</p><button class="dl-card-btn locked">Portal Access</button></div>
+          <div class="dl-card"><h4>Lesson Plans — Grades 9&ndash;12</h4><p>Advanced lesson plans for high school science fair projects. Includes research paper writing and statistical analysis.</p><button class="dl-card-btn locked">Portal Access</button></div>
+          <div class="dl-card"><h4>Student Worksheets Pack</h4><p>Printable handouts for every phase: topic selection, experimental design, data collection, analysis, and display board.</p><button class="dl-card-btn locked">Portal Access</button></div>
+          <div class="dl-card"><h4>Grading Rubrics Pack</h4><p>Rubrics for project proposals, research papers, display boards, and oral presentations. OAS scoring criteria included.</p><button class="dl-card-btn locked">Portal Access</button></div>
+          <div class="dl-card"><h4>Parent Communication Letters</h4><p>Introduction letter, permission slip, and project deadline reminder templates. Editable Word format.</p><button class="dl-card-btn locked">Portal Access</button></div>
+          <div class="dl-card"><h4>Mentor Training Guide</h4><p>How to guide students through the scientific process without doing the work for them. Includes common stumbling blocks.</p><button class="dl-card-btn locked">Portal Access</button></div>
+          <div class="dl-card"><h4>OAS ProjectBoard Walkthrough</h4><p>Step-by-step guide to registering your fair and students on ProjectBoard. Screenshots included.</p><button class="dl-card-btn locked">Portal Access</button></div>
+          <div class="dl-card"><h4>Judging Score Cards</h4><p>Official FairGame judging score cards — vertical and horizontal formats. Print-ready PDFs.</p><a href="/Documents/2026-Judging-Score-Cards-Vertical-layout.pdf" target="_blank" class="dl-card-btn">Download</a></div>
+          <div class="dl-card"><h4>Science Fair Timeline Poster</h4><p>Classroom-ready poster showing the full year timeline. 11&times;17 printable format.</p><button class="dl-card-btn locked">Portal Access</button></div>
+        </div>
+        <p style="margin-top:16px;font-size:0.82rem;color:var(--gray-500);">Don't have portal access yet? <a href="/#portal" style="color:var(--green-600);">Request Teacher Portal access &rarr;</a></p>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-judges">
+      <div class="reveal">
+        <span class="overline">STEM Professionals</span>
+        <h2 style="margin-bottom:8px;">Why judge or mentor?</h2>
+        <p style="color:var(--gray-500);margin-bottom:28px;font-size:0.96rem;">A 3&ndash;5 hour time commitment has an outsized impact on a student's trajectory. Many ISEF qualifiers cite their judges and mentors as the reason they kept going.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-bottom:40px;">
+          <div class="card-green">
+            <h4 style="color:var(--green-900);margin-bottom:10px;">Judging</h4>
+            <ul style="padding-left:18px;font-size:0.86rem;color:var(--gray-500);">
+              <li style="margin-bottom:6px;">3&ndash;5 hours on fair day</li>
+              <li style="margin-bottom:6px;">Evaluate 5&ndash;10 student projects in your expertise area</li>
+              <li style="margin-bottom:6px;">OAS scoring rubric provided — no prior experience needed</li>
+              <li style="margin-bottom:6px;">Counts toward corporate volunteer hour requirements</li>
+              <li style="margin-bottom:6px;">School, district, or state level opportunities</li>
+            </ul>
+            <a href="/volunteer.html" class="btn btn-primary" style="margin-top:16px;font-size:0.82rem;">Sign Up to Judge &rarr;</a>
+          </div>
+          <div class="card-green">
+            <h4 style="color:var(--green-900);margin-bottom:10px;">Mentoring</h4>
+            <ul style="padding-left:18px;font-size:0.86rem;color:var(--gray-500);">
+              <li style="margin-bottom:6px;">1&ndash;2 hours per month during the project cycle</li>
+              <li style="margin-bottom:6px;">Guide a student through experimental design and analysis</li>
+              <li style="margin-bottom:6px;">Virtual mentoring available — no geographic constraints</li>
+              <li style="margin-bottom:6px;">Training materials provided through our portal</li>
+              <li style="margin-bottom:6px;">Matched based on your area of expertise</li>
+            </ul>
+            <a href="/volunteer.html" class="btn btn-primary" style="margin-top:16px;font-size:0.82rem;">Apply to Mentor &rarr;</a>
+          </div>
+        </div>
+        <div class="dl-grid-3">
+          <div class="dl-card"><h4>Judge Training Manual</h4><p>OAS-approved orientation materials including scoring criteria, effective questioning techniques, and judge ethics.</p><a href="/Documents/2026-Judging-Score-Cards-Vertical-layout.pdf" target="_blank" class="dl-card-btn">Download</a></div>
+          <div class="dl-card"><h4>Mentor Handbook</h4><p>How to support student research without crossing the line into doing it for them. Common scenarios and suggested responses.</p><button class="dl-card-btn locked">Portal Access</button></div>
+          <div class="dl-card"><h4>Special Awards Guide</h4><p>Overview of special category awards available at district and state level — EPA, ASM, IEEE, and others.</p><button class="dl-card-btn locked">Portal Access</button></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="tab-admins">
+      <div class="reveal">
+        <span class="overline">School Administrators</span>
+        <h2 style="margin-bottom:8px;">The case for science fairs</h2>
+        <p style="color:var(--gray-500);margin-bottom:28px;font-size:0.96rem;">Science fairs deliver measurable academic benefits aligned with Ohio Learning Standards, and FairGame removes nearly all the logistical burden from your staff.</p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:32px;">
+          <div style="border:var(--border);padding:20px;"><h4 style="color:var(--green-900);margin-bottom:8px;">Academic Outcomes</h4><p style="font-size:0.82rem;color:var(--gray-500);">Research skills, scientific literacy, data analysis, public speaking — all directly aligned with Ohio Learning Standards for Science grades 6&ndash;12.</p></div>
+          <div style="border:var(--border);padding:20px;"><h4 style="color:var(--green-900);margin-bottom:8px;">College Preparation</h4><p style="font-size:0.82rem;color:var(--gray-500);">Science fair participation is a demonstrated differentiator in college applications. ISEF qualifiers receive priority consideration at top universities.</p></div>
+          <div style="border:var(--border);padding:20px;"><h4 style="color:var(--green-900);margin-bottom:8px;">Community Visibility</h4><p style="font-size:0.82rem;color:var(--gray-500);">Science fairs generate positive local press, build industry partnerships, and demonstrate your school's commitment to STEM education.</p></div>
+        </div>
+        <div class="dl-grid-3">
+          <div class="dl-card"><h4>Administrator Proposal Template</h4><p>One-page pitch document with cost data, time estimates, and academic ROI for your school board presentation.</p><button class="dl-card-btn locked">Portal Access</button></div>
+          <div class="dl-card"><h4>Budget Template</h4><p>Full cost breakdown for a $300&ndash;$2,000 school fair with notes on where to cut and where not to.</p><button class="dl-card-btn locked">Portal Access</button></div>
+          <div class="dl-card"><h4>Standards Alignment Map</h4><p>How science fair project phases map to specific Ohio Learning Standards by grade band.</p><button class="dl-card-btn locked">Portal Access</button></div>
+        </div>
+        <div style="margin-top:28px;padding:28px;background:var(--green-900);">
+          <h4 style="color:var(--white);margin-bottom:8px;">Schedule a free consultation</h4>
+          <p style="color:rgba(255,255,255,0.6);font-size:0.88rem;margin-bottom:16px;">30 minutes with the FairGame team. We'll review your school's situation and give you a specific, realistic action plan — no commitment required.</p>
+          <a href="mailto:fairgameinitiative@outlook.com" class="btn btn-white">Book a Call &rarr;</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+function showTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+const ro = new IntersectionObserver(e => e.forEach(x => { if(x.isIntersecting){x.target.classList.add('vis');ro.unobserve(x.target);}}),{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+document.querySelector('.nav-hamburger').addEventListener('click',()=>{const nl=document.querySelector('.nav-links');const o=nl.style.display==='flex';Object.assign(nl.style,{display:o?'none':'flex',flexDirection:'column',position:'fixed',top:'68px',left:'0',right:'0',background:'var(--white)',padding:'8px 0 16px',borderBottom:'var(--border)',boxShadow:'var(--shadow-md)'});});
+</script>
+</body>
+</html>

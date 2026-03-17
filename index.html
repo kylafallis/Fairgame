@@ -1,0 +1,1353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>FairGame Initiative — Science Fairs Without Barriers</title>
+  <meta name="description" content="FairGame Initiative brings competitive STEM opportunities to rural and low-income schools across Ohio and beyond — completely free." />
+  <meta property="og:title" content="FairGame Initiative" />
+  <meta property="og:description" content="Science Fairs Without Barriers — free resources, mentorship, and support for every school." />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    /*  TOKENS  */
+    :root {
+      /* Green palette — same family as current site, just dialed in */
+      --green-900: #1c3a1c;
+      --green-800: #254f25;
+      --green-700: #2d6030;
+      --green-600: #357a38;   /* primary action */
+      --green-500: #4a9e4e;
+      --green-400: #6ab86e;   /* accent / highlight */
+      --green-100: #e8f5e9;
+      --green-50:  #f1faf2;
+
+      --white:     #ffffff;
+      --gray-50:   #f8f9f8;
+      --gray-100:  #f0f2f0;
+      --gray-200:  #e2e6e2;
+      --gray-300:  #c8cec8;
+      --gray-500:  #6b756b;
+      --gray-700:  #3a3f3a;
+      --gray-900:  #1a1e1a;
+
+      --pink-accent: #e8768a;   /* keeps existing brand pink star */
+
+      --ff-serif: 'Playfair Display', Georgia, serif;
+      --ff-sans:  'DM Sans', system-ui, sans-serif;
+
+      /* Radii: 0 everywhere except inputs = 3px */
+      --r-input: 3px;
+      --r-none:  0px;
+
+      --nav-h: 68px;
+      --border: 1px solid var(--gray-200);
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.07);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.09);
+    }
+
+    /*  RESET  */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--ff-sans);
+      background: var(--white);
+      color: var(--gray-900);
+      font-size: 16px;
+      line-height: 1.65;
+      overflow-x: hidden;
+    }
+    img { display: block; max-width: 100%; }
+    a { color: inherit; text-decoration: none; }
+    button { cursor: pointer; font-family: inherit; border-radius: 0; }
+
+    /*  TYPE  */
+    h1, h2, h3, h4 { font-family: var(--ff-serif); line-height: 1.2; }
+    h1 { font-size: clamp(2.4rem, 5vw, 3.8rem); font-weight: 700; }
+    h2 { font-size: clamp(1.85rem, 3.5vw, 2.75rem); font-weight: 600; }
+    h3 { font-size: clamp(1.15rem, 2vw, 1.45rem); font-weight: 600; }
+    h4 { font-size: 1rem; font-weight: 600; font-family: var(--ff-sans); }
+
+    .overline {
+      font-family: var(--ff-sans);
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--green-600);
+      display: block;
+      margin-bottom: 10px;
+    }
+
+    /*  LAYOUT  */
+    .container { max-width: 1160px; margin: 0 auto; padding: 0 40px; }
+    .section    { padding: 96px 0; }
+    .section-sm { padding: 64px 0; }
+    @media (max-width: 768px) {
+      .container { padding: 0 20px; }
+      .section { padding: 60px 0; }
+    }
+
+    /*  BUTTONS  */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 26px;
+      font-family: var(--ff-sans);
+      font-size: 0.84rem;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      border: none;
+      border-radius: 0;
+      transition: all 0.18s;
+      cursor: pointer;
+      line-height: 1;
+    }
+    .btn-primary {
+      background: var(--green-600);
+      color: var(--white);
+    }
+    .btn-primary:hover { background: var(--green-700); }
+
+    .btn-outline {
+      background: transparent;
+      color: var(--green-700);
+      border: 1.5px solid var(--green-600);
+    }
+    .btn-outline:hover { background: var(--green-50); }
+
+    .btn-white {
+      background: var(--white);
+      color: var(--green-700);
+    }
+    .btn-white:hover { background: var(--green-50); }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--gray-500);
+      padding: 10px 0;
+      font-size: 0.82rem;
+    }
+    .btn-ghost:hover { color: var(--gray-900); }
+
+    /*  INPUTS  */
+    input[type="text"], input[type="email"], textarea, select {
+      border-radius: var(--r-input);   /* ONLY place with any radius */
+      font-family: var(--ff-sans);
+      font-size: 0.9rem;
+      border: 1.5px solid var(--gray-300);
+      padding: 11px 14px;
+      outline: none;
+      width: 100%;
+      background: var(--white);
+      color: var(--gray-900);
+      transition: border-color 0.15s;
+    }
+    input:focus, textarea:focus, select:focus {
+      border-color: var(--green-500);
+    }
+    input::placeholder { color: var(--gray-300); }
+
+
+    /* ── HERO PORTAL STRIP (inside the dark hero) ───────────── */
+    .hero-portal-strip {
+      border-top: 1px solid rgba(106,184,110,0.2);
+      padding: 16px 0;
+      background: rgba(0,0,0,0.15);
+    }
+    .hero-portal-inner {
+      display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
+    }
+    .hero-portal-label {
+      font-size: 0.65rem; font-weight: 500; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--green-400);
+      padding: 2px 8px; border: 1px solid rgba(106,184,110,0.3);
+      white-space: nowrap;
+    }
+    .hero-portal-desc {
+      font-size: 0.84rem; color: rgba(255,255,255,0.5); flex: 1;
+    }
+    .hero-portal-btns { display: flex; gap: 10px; flex-shrink: 0; flex-wrap: wrap; }
+    .hero-portal-btn {
+      padding: 8px 18px;
+      font-size: 0.78rem; font-weight: 500;
+      border-radius: 100px;
+      text-decoration: none;
+      transition: all 0.18s;
+      white-space: nowrap;
+      font-family: var(--ff-sans);
+    }
+    .hero-portal-btn--solid {
+      background: var(--green-600); color: var(--white);
+      border: 1.5px solid var(--green-600);
+    }
+    .hero-portal-btn--solid:hover { background: var(--green-500); border-color: var(--green-500); }
+    .hero-portal-btn--outline {
+      background: transparent; color: rgba(255,255,255,0.8);
+      border: 1.5px solid rgba(255,255,255,0.3);
+    }
+    .hero-portal-btn--outline:hover { border-color: rgba(255,255,255,0.7); color: var(--white); }
+    @media (max-width: 640px) {
+      .hero-portal-inner { flex-direction: column; align-items: flex-start; gap: 10px; }
+      .hero-portal-desc { display: none; }
+    }
+
+    /*  NAV  */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: var(--nav-h);
+      background: transparent;
+      border-bottom: 1px solid transparent;
+      display: flex; align-items: center;
+      transition: background 0.3s ease, border-color 0.3s ease;
+    }
+    nav.scrolled {
+      background: var(--green-900);
+      border-bottom-color: rgba(255,255,255,0.08);
+    }
+    .nav-inner {
+      width: 100%; max-width: 1160px; margin: 0 auto; padding: 0 40px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: var(--ff-serif);
+      font-size: 1.25rem; font-weight: 700;
+      color: var(--white);
+      display: flex; align-items: center; gap: 9px;
+    }
+    .nav-logo img { height: 32px; width: auto; }
+    .nav-links { display: flex; align-items: center; list-style: none; gap: 0; }
+    .nav-links > li > a {
+      display: block; padding: 0 15px; height: var(--nav-h);
+      line-height: var(--nav-h);
+      font-size: 0.855rem; font-weight: 400;
+      color: rgba(255,255,255,0.82);
+      transition: color 0.15s;
+    }
+    .nav-links > li > a:hover { color: var(--white); }
+    .nav-links .dropdown { position: relative; }
+    .nav-links .dropdown-menu {
+      display: none; position: absolute; top: var(--nav-h); left: 0;
+      background: var(--green-900);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-top: 2px solid var(--green-600);
+      min-width: 185px;
+      box-shadow: var(--shadow-md);
+      flex-direction: column;
+    }
+    .nav-links .dropdown:hover .dropdown-menu { display: flex; }
+    .nav-links .dropdown-menu a {
+      padding: 11px 16px; font-size: 0.84rem;
+      color: rgba(255,255,255,0.75); border-bottom: 1px solid rgba(255,255,255,0.06);
+      height: auto; line-height: 1.4;
+    }
+    .nav-links .dropdown-menu a:last-child { border-bottom: none; }
+    .nav-links .dropdown-menu a:hover { background: rgba(255,255,255,0.07); color: var(--white); }
+    .nav-cta {
+      background: var(--green-600) !important;
+      color: var(--white) !important;
+      padding: 10px 20px !important;
+      height: auto !important; line-height: 1 !important;
+      font-size: 0.84rem !important; font-weight: 500 !important;
+      margin-left: 10px;
+      border-radius: 0 !important;
+    }
+    .nav-cta:hover { background: var(--green-700) !important; }
+    .nav-hamburger { display: none; background: none; border: none; font-size: 1.4rem; color: var(--gray-700); }
+
+    /*  HERO  */
+    .hero {
+      padding-top: 0;           /* nav is now transparent so content goes full height */
+      background: var(--green-900);
+      background-image: url('/Images/science-fair-hero.jpg');
+      background-size: cover;
+      background-position: center 30%;
+      position: relative;
+      overflow: hidden;
+    }
+    /* Dark green overlay so text stays readable */
+    .hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: linear-gradient(
+        135deg,
+        rgba(28,58,28,0.88) 0%,
+        rgba(28,58,28,0.72) 60%,
+        rgba(28,58,28,0.55) 100%
+      );
+      z-index: 0;
+    }
+    .hero-noise {
+      position: absolute; inset: 0; pointer-events: none;
+      opacity: 0; /* no longer needed with photo */
+    }
+    .hero-inner {
+      position: relative; z-index: 1;
+      display: grid; grid-template-columns: 1fr 420px; gap: 80px;
+      align-items: center;
+      padding: calc(var(--nav-h) + 72px) 0 96px;
+    }
+    @media (max-width: 960px) {
+      .hero-inner { grid-template-columns: 1fr; gap: 48px; }
+    }
+    .hero-left { }
+    .hero-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(106,184,110,0.15);
+      border: 1px solid rgba(106,184,110,0.3);
+      padding: 5px 12px 5px 8px;
+      margin-bottom: 28px;
+    }
+    .hero-tag-dot { width: 6px; height: 6px; background: var(--green-400); border-radius: 50%; }
+    .hero-tag span { font-size: 0.75rem; color: var(--green-400); font-weight: 500; letter-spacing: 0.05em; }
+    .hero h1 {
+      color: var(--white);
+      margin-bottom: 20px;
+    }
+    .hero h1 em { font-style: italic; color: var(--green-400); }
+    .hero-sub {
+      color: rgba(255,255,255,0.6);
+      font-size: 1.05rem; font-weight: 300;
+      max-width: 500px;
+      margin-bottom: 36px;
+      line-height: 1.75;
+    }
+    .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+
+    /* Hero stats */
+    .hero-stats {
+      margin-top: 64px; padding-top: 40px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      display: grid; grid-template-columns: repeat(4, 1fr);
+    }
+    @media (max-width: 640px) {
+      .hero-stats { grid-template-columns: repeat(2, 1fr); gap: 0; }
+    }
+    .hero-stat {
+      padding: 0 24px 0 0;
+      border-right: 1px solid rgba(255,255,255,0.1);
+    }
+    .hero-stat + .hero-stat { padding-left: 24px; }
+    .hero-stat:last-child { border-right: none; }
+    .hero-stat-n {
+      font-family: var(--ff-serif);
+      font-size: 2.2rem; font-weight: 700;
+      color: var(--white); line-height: 1;
+      margin-bottom: 4px;
+    }
+    .hero-stat-n .g { color: var(--green-400); }
+    .hero-stat-l { font-size: 0.75rem; color: rgba(255,255,255,0.45); letter-spacing: 0.04em; }
+
+    /* Hero card (right side) */
+    .hero-card {
+      background: var(--white);
+      padding: 32px;
+      border-top: 3px solid var(--green-600);
+    }
+    .hero-card-label {
+      font-size: 0.7rem; font-weight: 500; letter-spacing: 0.15em;
+      text-transform: uppercase; color: var(--green-600); margin-bottom: 10px;
+    }
+    .hero-card h3 {
+      font-family: var(--ff-serif);
+      font-size: 1.25rem; color: var(--gray-900); margin-bottom: 20px;
+    }
+    .hero-mini-quiz { }
+    .hero-quiz-q { font-size: 0.88rem; font-weight: 500; color: var(--gray-700); margin-bottom: 10px; }
+    .hero-quiz-options { display: flex; flex-direction: column; gap: 6px; }
+    .hero-quiz-opt {
+      display: block;
+      padding: 9px 14px;
+      border: 1.5px solid var(--gray-200);
+      background: var(--white);
+      font-size: 0.84rem; color: var(--gray-700);
+      cursor: pointer; transition: all 0.14s;
+      text-align: left; width: 100%;
+    }
+    .hero-quiz-opt:hover { border-color: var(--green-500); background: var(--green-50); color: var(--green-800); }
+    .hero-quiz-opt.active { border-color: var(--green-600); background: var(--green-50); color: var(--green-800); font-weight: 500; }
+    .hero-quiz-icon { display: none; }
+
+    /*  IMPACT BAND  */
+
+    /*  QUIZ SECTION  */
+    .quiz-section { background: var(--gray-50); border-top: var(--border); }
+    .quiz-header { text-align: center; margin-bottom: 44px; }
+    .quiz-header h2 { color: var(--green-900); margin-bottom: 8px; }
+    .quiz-header p { color: var(--gray-500); font-size: 0.98rem; }
+
+    .quiz-box {
+      max-width: 640px; margin: 0 auto;
+      background: var(--white);
+      border: var(--border);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+    }
+    .quiz-track { height: 3px; background: var(--gray-100); }
+    .quiz-track-fill { height: 100%; background: var(--green-600); transition: width 0.35s ease; }
+    .quiz-body { padding: 36px 40px 40px; }
+    @media (max-width: 640px) { .quiz-body { padding: 24px 20px 28px; } }
+
+    .quiz-step { display: none; }
+    .quiz-step.active { display: block; }
+    .quiz-step-lbl {
+      font-size: 0.68rem; font-weight: 500; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--gray-300); margin-bottom: 8px;
+    }
+    .quiz-q {
+      font-family: var(--ff-serif);
+      font-size: 1.4rem; font-weight: 600; color: var(--green-900);
+      margin-bottom: 24px; line-height: 1.3;
+    }
+    .quiz-opts { display: flex; flex-direction: column; gap: 6px; }
+    .quiz-opt {
+      display: block;
+      padding: 10px 16px;
+      border: 1.5px solid var(--gray-200);
+      background: var(--white);
+      cursor: pointer; transition: all 0.14s;
+      text-align: left; font-size: 0.88rem;
+      color: var(--gray-700); font-family: var(--ff-sans);
+      width: 100%;
+    }
+    .quiz-opt:hover { border-color: var(--green-500); background: var(--green-50); }
+    .quiz-opt.sel { border-color: var(--green-600); background: var(--green-50); color: var(--green-900); font-weight: 500; }
+    .quiz-opt-em { display: none; }
+
+    .quiz-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 28px; padding-top: 20px; border-top: var(--border); }
+
+    /* Quiz result */
+    .quiz-result { display: none; }
+    .quiz-result.active { display: block; }
+    .result-banner {
+      background: var(--green-900); padding: 28px 32px;
+      margin: -36px -40px 28px;
+    }
+    @media (max-width: 640px) { .result-banner { margin: -24px -20px 20px; padding: 20px; } }
+    .result-role { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: var(--green-400); margin-bottom: 6px; }
+    .result-title { font-family: var(--ff-serif); font-size: 1.3rem; color: var(--white); }
+
+    .result-links { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+    .result-link {
+      display: flex; align-items: center; gap: 12px;
+      padding: 13px 14px;
+      border: var(--border);
+      background: var(--gray-50);
+      color: var(--gray-900); font-size: 0.9rem;
+      transition: all 0.14s;
+    }
+    .result-link:hover { border-color: var(--green-500); background: var(--green-50); }
+    .result-link-icon {
+      width: 32px; height: 32px; flex-shrink: 0;
+      background: var(--green-900);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.85rem; color: var(--green-400);
+    }
+    .result-link strong { display: block; font-size: 0.88rem; margin-bottom: 1px; font-weight: 500; }
+    .result-link span { font-size: 0.76rem; color: var(--gray-500); }
+    .result-link-arrow { margin-left: auto; color: var(--gray-300); font-size: 0.9rem; }
+
+    .result-cta { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 24px; }
+
+    .email-row { display: flex; gap: 0; }
+    .email-row input { border-right: none; flex: 1; border-radius: var(--r-input) 0 0 var(--r-input); }
+    .email-row button { border-radius: 0 var(--r-input) var(--r-input) 0; padding: 11px 18px; background: var(--green-600); color: var(--white); border: 1.5px solid var(--green-600); font-size: 0.82rem; font-weight: 500; letter-spacing: 0.04em; font-family: var(--ff-sans); flex-shrink: 0; }
+    .email-row button:hover { background: var(--green-700); }
+    .email-caption { font-size: 0.8rem; color: var(--gray-500); margin-bottom: 8px; }
+    .msg-ok  { font-size: 0.82rem; color: var(--green-600); margin-top: 8px; }
+    .msg-err { font-size: 0.82rem; color: #c0392b; margin-top: 8px; }
+
+    /*  MISSION  */
+    .mission-grid {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start;
+    }
+    @media (max-width: 860px) { .mission-grid { grid-template-columns: 1fr; gap: 48px; } }
+    .mission-text h2 { color: var(--green-900); margin-bottom: 18px; }
+    .mission-text p { color: var(--gray-500); font-size: 0.98rem; margin-bottom: 14px; line-height: 1.75; }
+    .mission-pull {
+      border-left: 3px solid var(--green-600);
+      padding-left: 18px; margin: 24px 0;
+      font-family: var(--ff-serif);
+      font-size: 1.15rem; font-style: italic;
+      color: var(--green-800); line-height: 1.55;
+    }
+
+    .programs { display: flex; flex-direction: column; }
+    .program {
+      display: grid; grid-template-columns: 44px 1fr;
+      gap: 14px; align-items: start;
+      padding: 20px 0;
+      border-bottom: var(--border);
+    }
+    .program:first-child { border-top: var(--border); }
+    .program-num {
+      font-family: var(--ff-serif);
+      font-size: 1.6rem; font-weight: 700;
+      color: var(--green-400); line-height: 1; padding-top: 2px;
+    }
+    .program h4 { color: var(--green-900); margin-bottom: 4px; }
+    .program p { font-size: 0.86rem; color: var(--gray-500); line-height: 1.65; }
+
+    /*  TESTIMONIAL  */
+    .testimonial-section { background: var(--green-900); padding: 80px 0; }
+    .testimonial-inner { max-width: 700px; margin: 0 auto; text-align: center; }
+    .t-mark { font-family: var(--ff-serif); font-size: 4rem; line-height: 0.6; color: var(--green-400); opacity: 0.5; margin-bottom: 16px; }
+    .t-text { font-family: var(--ff-serif); font-size: clamp(1.1rem, 2.4vw, 1.5rem); font-style: italic; color: var(--white); line-height: 1.6; margin-bottom: 24px; }
+    .t-attr { font-size: 0.78rem; color: rgba(255,255,255,0.4); letter-spacing: 0.08em; text-transform: uppercase; }
+    .t-attr strong { color: var(--green-400); font-weight: 500; }
+
+    /*  RESOURCES GRID  */
+    .resources-section { background: var(--gray-50); }
+    .resources-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; }
+    .resources-head h2 { color: var(--green-900); }
+
+    .resources-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      border: var(--border);
+    }
+    @media (max-width: 860px) { .resources-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 560px) { .resources-grid { grid-template-columns: 1fr; } }
+    .res-card {
+      padding: 20px 22px;
+      border-right: var(--border);
+      border-bottom: var(--border);
+      background: var(--white);
+      text-decoration: none; color: inherit;
+      display: flex; flex-direction: column;
+      transition: background 0.15s;
+    }
+    .res-card:hover { background: var(--green-50); }
+    /* remove right border on last column, bottom border on last row */
+    .res-card:nth-child(3n) { border-right: none; }
+    .res-card:nth-last-child(-n+3) { border-bottom: none; }
+    @media (max-width: 860px) {
+      .res-card:nth-child(3n) { border-right: var(--border); }
+      .res-card:nth-child(2n) { border-right: none; }
+      .res-card:nth-last-child(-n+3) { border-bottom: var(--border); }
+      .res-card:nth-last-child(-n+2) { border-bottom: none; }
+    }
+    .res-icon { display: none; }
+    .res-card h4 { color: var(--green-900); margin-bottom: 6px; font-size: 0.94rem; }
+    .res-card p { font-size: 0.83rem; color: var(--gray-500); flex: 1; margin-bottom: 12px; line-height: 1.55; }
+    .res-arrow { font-size: 0.78rem; font-weight: 500; color: var(--green-600); letter-spacing: 0.05em; transition: gap 0.15s; display: flex; align-items: center; gap: 6px; }
+    .res-card:hover .res-arrow { gap: 10px; }
+
+    /*  PORTAL  */
+    .portal-section { background: var(--white); }
+    .portal-head { text-align: center; margin-bottom: 44px; }
+    .portal-head h2 { color: var(--green-900); margin-bottom: 8px; }
+    .portal-head p { color: var(--gray-500); font-size: 0.97rem; max-width: 480px; margin: 0 auto; }
+    .portal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+    @media (max-width: 760px) { .portal-grid { grid-template-columns: 1fr; } }
+    .portal-card {
+      border: var(--border);
+      border-top: 3px solid var(--green-600);
+      padding: 32px;
+      background: var(--white);
+    }
+    .portal-tag {
+      display: inline-block;
+      font-size: 0.68rem; font-weight: 500; letter-spacing: 0.12em;
+      text-transform: uppercase; color: var(--green-600);
+      background: var(--green-50); padding: 3px 8px;
+      margin-bottom: 14px;
+    }
+    .portal-card h3 { color: var(--green-900); margin-bottom: 8px; }
+    .portal-card > p { font-size: 0.88rem; color: var(--gray-500); margin-bottom: 20px; line-height: 1.65; }
+    .perk-list { list-style: none; margin-bottom: 24px; }
+    .perk-list li {
+      font-size: 0.86rem; color: var(--gray-500);
+      padding: 7px 0; border-bottom: var(--border);
+      display: flex; align-items: flex-start; gap: 8px; line-height: 1.4;
+    }
+    .perk-list li:last-child { border-bottom: none; }
+    .perk-list li::before { content: ''; display: inline-block; width: 5px; height: 5px; background: var(--green-400); margin-top: 5px; flex-shrink: 0; }
+    .portal-form { display: flex; flex-direction: column; gap: 10px; }
+    .portal-msg { font-size: 0.82rem; margin-top: 4px; }
+
+    /*  GET INVOLVED  */
+    .involved-section { background: var(--gray-50); }
+    .involved-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 640px) { .involved-grid { grid-template-columns: 1fr; } }
+    .inv-card {
+      border: var(--border);
+      background: var(--white);
+      padding: 32px;
+      text-decoration: none; color: inherit;
+      display: flex; flex-direction: column;
+      transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .inv-card:hover { border-color: var(--green-500); box-shadow: var(--shadow-sm); }
+    .inv-card-tag { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--green-600); margin-bottom: 10px; }
+    .inv-card h3 { color: var(--green-900); margin-bottom: 10px; }
+    .inv-card p { font-size: 0.86rem; color: var(--gray-500); flex: 1; margin-bottom: 20px; line-height: 1.65; }
+    .inv-arrow { font-size: 1.2rem; color: var(--green-500); transition: transform 0.18s; }
+    .inv-card:hover .inv-arrow { transform: translateX(5px); }
+
+    /*  FOOTER  */
+    footer {
+      background: var(--green-900);
+      border-top: 3px solid var(--green-600);
+      padding: 60px 0 28px;
+    }
+    .footer-grid {
+      display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px;
+      margin-bottom: 44px;
+    }
+    @media (max-width: 860px) { .footer-grid { grid-template-columns: 1fr 1fr; gap: 32px; } }
+    @media (max-width: 480px) { .footer-grid { grid-template-columns: 1fr; } }
+    .f-brand-name { font-family: var(--ff-serif); font-size: 1.3rem; font-weight: 700; color: var(--white); margin-bottom: 10px; }
+    .f-brand-desc { font-size: 0.85rem; color: rgba(255,255,255,0.42); line-height: 1.7; max-width: 260px; margin-bottom: 18px; }
+    .f-social { display: flex; gap: 8px; }
+    .f-social a {
+      width: 32px; height: 32px;
+      border: 1px solid rgba(255,255,255,0.12);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.72rem; color: rgba(255,255,255,0.4);
+      transition: all 0.15s;
+    }
+    .f-social a:hover { border-color: var(--green-400); color: var(--green-400); }
+    .f-col h5 { font-family: var(--ff-sans); font-size: 0.68rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.28); margin-bottom: 14px; }
+    .f-col ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .f-col li a { font-size: 0.85rem; color: rgba(255,255,255,0.52); transition: color 0.15s; }
+    .f-col li a:hover { color: var(--white); }
+    .footer-bottom {
+      padding-top: 22px; border-top: 1px solid rgba(255,255,255,0.07);
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+    }
+    .footer-bottom p { font-size: 0.76rem; color: rgba(255,255,255,0.25); }
+    .footer-bottom a { font-size: 0.76rem; color: rgba(255,255,255,0.32); margin-left: 16px; }
+    .footer-bottom a:hover { color: var(--white); }
+
+    /*  REVEAL / ANIMATE  */
+    @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+    .anim { animation: fadeUp 0.55s ease both; }
+    .d1 { animation-delay: 0.08s; } .d2 { animation-delay: 0.18s; } .d3 { animation-delay: 0.28s; } .d4 { animation-delay: 0.38s; }
+    .reveal { opacity:0; transform:translateY(16px); transition: opacity 0.55s ease, transform 0.55s ease; }
+    .reveal.vis { opacity:1; transform:translateY(0); }
+
+    /*  MOBILE NAV  */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-hamburger { display: block; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV  -->
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo">
+      <img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'" />
+      FairGame
+    </a>
+    <button class="nav-hamburger" aria-label="Menu"></button>
+    <ul class="nav-links">
+      <li class="dropdown">
+        <a href="#">Resources </a>
+        <div class="dropdown-menu">
+          <a href="/starthere.html">Start Here</a>
+          <a href="/setupguide.html">Setup Guide</a>
+          <a href="/stateresources.html">State Resources</a>
+          <a href="/researchguide.html">Research Guide</a>
+          <a href="/teachers-professionals.html">For Teachers</a>
+        </div>
+      </li>
+      <li class="dropdown">
+        <a href="#">Get Involved </a>
+        <div class="dropdown-menu">
+          <a href="/volunteer.html">Volunteer / Judge</a>
+          <a href="/donate.html">Donate</a>
+          <a href="#portal">Ambassador Portal</a>
+          <a href="#portal">Teacher Portal</a>
+        </div>
+      </li>
+      <li><a href="/successstories.html">Stories</a></li>
+      <li><a href="/donate.html">Donate</a></li>
+      <li><a href="/starthere.html" class="nav-cta">Get Started</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO  -->
+<section class="hero" id="home">
+  <div class="hero-noise"></div>
+  <div class="container">
+    <div class="hero-inner">
+
+      <div class="hero-left">
+
+        <h1 class="anim d1">Science fairs<br><em>without barriers.</em></h1>
+        <p class="hero-sub anim d2">
+          Every student deserves a shot at ISEF. We give rural and low-income schools everything they need to compete — completely free.
+        </p>
+        <div class="hero-actions anim d3">
+          <a href="#quiz" class="btn btn-primary">Find Your Resources →</a>
+          <a href="#about" class="btn btn-outline" style="border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.8);">How It Works</a>
+        </div>
+        <div class="hero-stats anim d4">
+          <div class="hero-stat">
+            <div class="hero-stat-n"><span class="cu" data-t="12">0</span></div>
+            <div class="hero-stat-l">Schools Supported</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-n"><span class="cu" data-t="500">0</span><span class="g">+</span></div>
+            <div class="hero-stat-l">Students Reached</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-n"><span class="cu" data-t="47">0</span></div>
+            <div class="hero-stat-l">Free Resources</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-n"><span class="cu" data-t="100">0</span><span class="g">+</span></div>
+            <div class="hero-stat-l">Teacher Network</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mini quiz on hero -->
+      <div class="hero-card anim d2">
+        <h3>Who are you?</h3>
+        <p style="font-size:0.84rem;color:var(--gray-500);margin:-12px 0 18px;line-height:1.5;">Connect me with the resources I need.</p>
+        <div class="hero-mini-quiz">
+          <div class="hero-quiz-opts">
+            <button class="hero-quiz-opt" onclick="heroQuizPick(this,'student')">
+              I'm a student
+            </button>
+            <button class="hero-quiz-opt" onclick="heroQuizPick(this,'teacher')">
+              I'm a teacher
+            </button>
+            <button class="hero-quiz-opt" onclick="heroQuizPick(this,'admin')">
+              I'm a school administrator
+            </button>
+            <button class="hero-quiz-opt" onclick="heroQuizPick(this,'judge')">
+              I'm a STEM professional
+            </button>
+            <button class="hero-quiz-opt" onclick="heroQuizPick(this,'company')">
+              I represent a company
+            </button>
+          </div>
+          <div id="heroQuizCTA" style="margin-top:18px;display:none;">
+            <a id="heroQuizLink" href="#quiz" class="btn btn-primary" style="width:100%;justify-content:center;">See my personalized resources →</a>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+    <!-- Portal access strip — lives inside the hero dark section -->
+    <div class="hero-portal-strip">
+      <div class="container">
+        <div class="hero-portal-inner">
+          <span class="hero-portal-label">Member Access</span>
+          <span class="hero-portal-desc">Get exclusive resources, templates, and your school dashboard</span>
+          <div class="hero-portal-btns">
+            <a href="#portal" class="hero-portal-btn hero-portal-btn--solid">Teacher Portal</a>
+            <a href="#portal" class="hero-portal-btn hero-portal-btn--outline">Student Ambassador Portal</a>
+          </div>
+        </div>
+      </div>
+    </div>
+</section>
+
+<!-- MISSION  -->
+<section class="section" id="about">
+  <div class="container">
+    <div class="mission-grid">
+      <div class="mission-text reveal">
+        <span class="overline">Our Mission</span>
+        <h2>The opportunity gap is real — and fixable.</h2>
+        <p>Schools in rural Ohio and low-income districts don't lack smart students. They lack the infrastructure, knowledge, and connections to run competitive science programs.</p>
+        <div class="mission-pull">"I genuinely know that I wouldn't have made it to ISEF without Kyla."</div>
+        <p>FairGame provides everything a school needs to launch and sustain a science fair — from initial planning guides to competition preparation. Advised by Forbes 30 Under 30 founders and nationwide STEM education experts.</p>
+        <a href="/setupguide.html" class="btn btn-primary" style="margin-top:24px;">Read the Setup Guide →</a>
+      </div>
+      <div class="reveal">
+        <span class="overline">Three Programs</span>
+        <div class="programs">
+          <div class="program">
+            <div class="program-num">01</div>
+            <div>
+              <h4>Club Launch</h4>
+              <p>Schoolwide kickoff for schools with fewer than 10 interested students. We help create a student club and pair them with a local ambassador.</p>
+            </div>
+          </div>
+          <div class="program">
+            <div class="program-num">02</div>
+            <div>
+              <h4>Full Fair Program</h4>
+              <p>For schools ready to run a complete science fair. We supply resources, coordinate judges, handle OAS/ProjectBoard registration, and support the teacher throughout.</p>
+            </div>
+          </div>
+          <div class="program">
+            <div class="program-num">03</div>
+            <div>
+              <h4>Individual Mentorship</h4>
+              <p>For students at schools without fairs. We match them with an online mentor and shepherd them through competition registration and paperwork.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIAL  -->
+<section class="testimonial-section">
+  <div class="container">
+    <div class="testimonial-inner reveal">
+      <div class="t-mark">"</div>
+      <p class="t-text">I genuinely know that I wouldn't have made it to ISEF without Kyla — she read through everything and answered all my questions. I think one time we were on a Zoom call for two hours. But now I'm going to internationals!</p>
+      <div class="t-attr"><strong>Rishi Pampati</strong> — Walnut Hills High School</div>
+    </div>
+  </div>
+</section>
+
+<!-- RESOURCES  -->
+<section class="section resources-section" id="resources">
+  <div class="container">
+    <div class="resources-head reveal">
+      <div>
+        <span class="overline">Resource Library</span>
+        <h2>Everything you need, in one place.</h2>
+      </div>
+      <a href="/starthere.html" class="btn btn-outline">View All →</a>
+    </div>
+    <div class="resources-grid reveal">
+      <a href="/setupguide.html" class="res-card" onclick="trackDL('Setup Guide','nav')">
+        <h4>Complete Setup Guide</h4>
+        <p>Step-by-step instructions for organizing a science fair at any school — from administrator buy-in to awards day.</p>
+        <div class="res-arrow">Access Guide →</div>
+      </a>
+      <a href="/stateresources.html" class="res-card" onclick="trackDL('State Resources','nav')">
+        <h4>State Resources</h4>
+        <p>Competition pathways, OAS district contacts, registration links, and requirements for Ohio and all 50 states.</p>
+        <div class="res-arrow">Explore →</div>
+      </a>
+      <a href="/researchguide.html" class="res-card" onclick="trackDL('Research Guide','nav')">
+        <h4>Research Guide</h4>
+        <p>From choosing a project to building a display board — everything a student needs to develop a winning project.</p>
+        <div class="res-arrow">Start Learning →</div>
+      </a>
+      <a href="/teachers-professionals.html" class="res-card" onclick="trackDL('Teacher Resources','nav')">
+        <h4>Teacher Resources</h4>
+        <p>Curriculum guides, judging rubrics, lesson plan templates, parent letters, and professional development.</p>
+        <div class="res-arrow">Teacher Hub →</div>
+      </a>
+      <a href="/volunteer.html" class="res-card">
+        <h4>Judge &amp; Mentor</h4>
+        <p>Volunteer your STEM expertise. Judge at local fairs, mentor students through projects, or speak at events.</p>
+        <div class="res-arrow">Volunteer →</div>
+      </a>
+      <a href="/successstories.html" class="res-card">
+        <h4>Success Stories</h4>
+        <p>Students who went from no science fair program to ISEF, state science day, and national recognition.</p>
+        <div class="res-arrow">Read Stories →</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- PORTAL  -->
+<section class="section portal-section" id="portal">
+  <div class="container">
+    <div class="portal-head reveal">
+      <span class="overline">Member Access</span>
+      <h2>Ambassador &amp; Teacher Portal</h2>
+      <p>Sign up for exclusive resources, templates, judge tools, and your school or student dashboard.</p>
+    </div>
+    <div class="portal-grid reveal">
+      <div class="portal-card">
+        <div class="portal-tag">For Teachers</div>
+        <h3>Teacher Portal</h3>
+        <p>Access our full downloadable resource library — templates, rubrics, setup checklists, and judge recruitment tools.</p>
+        <ul class="perk-list">
+          <li>Science fair setup checklist &amp; planning timeline</li>
+          <li>Judge recruitment email templates</li>
+          <li>Student rubric &amp; assessment packs</li>
+          <li>Parent communication templates</li>
+          <li>OAS registration walkthrough guide</li>
+        </ul>
+        <div class="portal-form">
+          <input type="text"  id="tName"   placeholder="Full name" />
+          <input type="email" id="tEmail"  placeholder="School email address" />
+          <input type="text"  id="tSchool" placeholder="School name" />
+          <button class="btn btn-primary" onclick="regTeacher()">Request Access →</button>
+          <div id="tMsg" class="portal-msg"></div>
+        </div>
+      </div>
+      <div class="portal-card">
+        <div class="portal-tag">For Students</div>
+        <h3>Student Ambassador Portal</h3>
+        <p>Apply to become a FairGame ambassador at your school. Get matched with a mentor and track your school's journey.</p>
+        <ul class="perk-list">
+          <li>Personal mentor matching</li>
+          <li>Ambassador handbook &amp; training materials</li>
+          <li>Science fair promotion toolkit</li>
+          <li>Recognition &amp; recommendation letters</li>
+          <li>School progress dashboard</li>
+        </ul>
+        <div class="portal-form">
+          <input type="text"  id="aName"   placeholder="Full name" />
+          <input type="email" id="aEmail"  placeholder="Email address" />
+          <input type="text"  id="aSchool" placeholder="School name &amp; grade" />
+          <button class="btn btn-primary" onclick="regAmbassador()">Apply to Become Ambassador →</button>
+          <div id="aMsg" class="portal-msg"></div>
+        </div>
+      </div>
+    </div>
+    <p style="text-align:center;margin-top:18px;font-size:0.82rem;color:var(--gray-500);">
+      Already have access? <a href="#" style="color:var(--green-600);text-decoration:underline;" onclick="magicLink(event)">Sign in with magic link →</a>
+    </p>
+  </div>
+</section>
+
+<!-- GET INVOLVED  -->
+<section class="section involved-section" id="involved">
+  <div class="container">
+    <div style="margin-bottom:40px;" class="reveal">
+      <span class="overline">Join Us</span>
+      <h2>Make science accessible.</h2>
+    </div>
+    <div class="involved-grid reveal">
+      <a href="/volunteer.html" class="inv-card">
+        <div class="inv-card-tag">Volunteer</div>
+        <h3>Judge or Mentor</h3>
+        <p>Contribute 3–5 hours as a judge, or take on a student as a long-term mentor. Corporate volunteer hours apply. Any STEM background welcome.</p>
+        <div class="inv-arrow">→</div>
+      </a>
+      <a href="/donate.html" class="inv-card">
+        <div class="inv-card-tag">Donate</div>
+        <h3>Fund a School Program</h3>
+        <p>Help us cover printing, logistics, and competition registration fees for schools that can't afford them. 100% goes to programs.</p>
+        <div class="inv-arrow">→</div>
+      </a>
+      <a href="mailto:fairgameinitiative@outlook.com" class="inv-card">
+        <div class="inv-card-tag">Partner</div>
+        <h3>Corporate Partnership</h3>
+        <p>Sponsor a school program, provide industry mentors, fund our video series, or host a science fair showcase at your facility.</p>
+        <div class="inv-arrow">→</div>
+      </a>
+      <a href="#portal" class="inv-card">
+        <div class="inv-card-tag">Schools</div>
+        <h3>Partner Your School</h3>
+        <p>We're looking for up to 10 school partners for the 2026–27 year. Free program, full support, no commitment beyond interest.</p>
+        <div class="inv-arrow">→</div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER  -->
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="f-brand-name">FairGame Initiative</div>
+        <p class="f-brand-desc">Bringing competitive STEM opportunities to rural and low-income schools. Advised by Forbes 30 Under 30 founders and nationwide STEM education experts.</p>
+        <div class="f-social">
+          <a href="#" title="Instagram">IG</a>
+          <a href="#" title="Twitter / X">X</a>
+          <a href="#" title="LinkedIn">in</a>
+          <a href="#" title="TikTok">TK</a>
+        </div>
+      </div>
+      <div class="f-col">
+        <h5>Resources</h5>
+        <ul>
+          <li><a href="/starthere.html">Start Here</a></li>
+          <li><a href="/setupguide.html">Setup Guide</a></li>
+          <li><a href="/stateresources.html">State Resources</a></li>
+          <li><a href="/researchguide.html">Research Guide</a></li>
+          <li><a href="/teachers-professionals.html">For Teachers</a></li>
+        </ul>
+      </div>
+      <div class="f-col">
+        <h5>Get Involved</h5>
+        <ul>
+          <li><a href="/volunteer.html">Volunteer / Judge</a></li>
+          <li><a href="/donate.html">Donate</a></li>
+          <li><a href="#portal">Ambassador Portal</a></li>
+          <li><a href="mailto:fairgameinitiative@outlook.com">Partner With Us</a></li>
+        </ul>
+      </div>
+      <div class="f-col">
+        <h5>Organization</h5>
+        <ul>
+          <li><a href="/successstories.html">Success Stories</a></li>
+          <li><a href="mailto:fairgameinitiative@outlook.com">Contact Us</a></li>
+          <li><a href="https://fairgameinitiative.org">fairgameinitiative.org</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 FairGame Initiative · All rights reserved.</p>
+      <div><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></div>
+    </div>
+  </div>
+</footer>
+
+<!-- SCRIPTS  -->
+<script>
+/*  SUPABASE  */
+// Replace these two values with your Supabase project credentials
+// Dashboard → Settings → API
+const SB_URL = 'YOUR_SUPABASE_URL';
+const SB_KEY = 'YOUR_SUPABASE_ANON_KEY';
+let sb = null;
+try { sb = window.supabase.createClient(SB_URL, SB_KEY); } catch(e) {}
+
+/*  QUIZ DATA  */
+const QD = {
+  student: {
+    q: 'What do you need most right now?',
+    opts: [
+      { e:'', l:'Help choosing a project topic', k:'topic' },
+      { e:'', l:'Designing my experiment', k:'experiment' },
+      { e:'', l:'Building my display board', k:'display' },
+      { e:'', l:'Competition info — ISEF, state, local', k:'compete' },
+      { e:'', l:'A mentor to guide me', k:'mentor' },
+    ],
+    results: {
+      topic:      { role:'Student — Project Planning', title:"Let's find your project idea", links:[
+        { e:'', t:'Research Guide: Choosing a Topic', d:'Step-by-step topic selection', h:'/researchguide.html' },
+        { e:'', t:'Winning Project Examples', d:'What ISEF winners actually researched', h:'/researchguide.html#examples' },
+        { e:'', t:'Get a Mentor Match', d:'We\'ll connect you with a STEM professional', h:'#portal' },
+      ], cta:[{t:'Start Research Guide →', h:'/researchguide.html'},{t:'Get Mentor →', h:'#portal', o:true}]},
+      experiment: { role:'Student — Experimental Design', title:'Build a solid experiment', links:[
+        { e:'', t:'Experimental Design Guide', d:'Hypothesis, variables, controls explained', h:'/researchguide.html#design' },
+        { e:'', t:'Data Collection Templates', d:'Printable lab notebooks & data sheets', h:'/researchguide.html#data' },
+      ], cta:[{t:'Open Research Guide →', h:'/researchguide.html'}]},
+      display:    { role:'Student — Presentation', title:'Create a winning display', links:[
+        { e:'', t:'Display Board Template', d:'Downloadable layout with all sections', h:'/researchguide.html#display' },
+        { e:'', t:'Presentation Tips', d:'What judges actually look for', h:'/researchguide.html#present' },
+      ], cta:[{t:'Get Display Templates →', h:'/researchguide.html'}]},
+      compete:    { role:'Student — Competitions', title:'Navigate the competition path', links:[
+        { e:'', t:'Ohio Competition Pathway', d:'School → District → State → ISEF', h:'/stateresources.html' },
+        { e:'', t:'Key Deadlines 2025–26', d:'Registration dates & requirements', h:'/stateresources.html#ohio' },
+        { e:'', t:'National Competition List', d:'ISEF, Broadcom, and more', h:'/stateresources.html#national' },
+      ], cta:[{t:'Browse State Resources →', h:'/stateresources.html'},{t:'Start Here →', h:'/starthere.html', o:true}]},
+      mentor:     { role:'Student — Mentorship', title:'Get matched with a mentor', links:[
+        { e:'', t:'Ambassador Matching', d:'Apply for a personal student ambassador', h:'#portal' },
+        { e:'', t:'STEM Professional Network', d:'Scientists & engineers who can help', h:'/volunteer.html' },
+      ], cta:[{t:'Apply for Mentorship →', h:'#portal'}]},
+    }
+  },
+  teacher: {
+    q: 'Where are you in the process?',
+    opts: [
+      { e:'', l:'Starting a science fair from scratch', k:'setup' },
+      { e:'', l:'Improving an existing fair', k:'improve' },
+      { e:'', l:'Looking for curriculum materials', k:'curriculum' },
+      { e:'', l:'Recruiting judges', k:'judges' },
+      { e:'', l:'Finding funding & grants', k:'funding' },
+    ],
+    results: {
+      setup:      { role:'Teacher — Fair Setup', title:"Start your school's science fair", links:[
+        { e:'', t:'Complete Science Fair Setup Guide', d:'Month-by-month planning timeline', h:'/setupguide.html' },
+        { e:'', t:'Administrator Proposal Template', d:'Make the case to your principal', h:'#portal' },
+        { e:'', t:'12-Month Planning Checklist', d:'Printable step-by-step timeline', h:'#portal' },
+      ], cta:[{t:'Full Setup Guide →', h:'/setupguide.html'},{t:'Access Teacher Portal →', h:'#portal', o:true}]},
+      improve:    { role:'Teacher — Fair Improvement', title:'Level up your fair', links:[
+        { e:'', t:'Best Practices from Top Schools', d:'What high-participation fairs do differently', h:'/setupguide.html' },
+        { e:'', t:'OAS Partnership Guide', d:'Connect to district & state competitions', h:'/setupguide.html#oas' },
+      ], cta:[{t:'Teacher Resources →', h:'/teachers-professionals.html'}]},
+      curriculum: { role:'Teacher — Curriculum', title:'Classroom resources for you', links:[
+        { e:'', t:'Lesson Plan Templates', d:'Grades 6–12, Ohio Standards-aligned', h:'#portal' },
+        { e:'', t:'Student Worksheets', d:'Printable handouts for every phase', h:'#portal' },
+        { e:'', t:'Assessment Rubrics', d:'Proposal, progress, final, presentation', h:'#portal' },
+      ], cta:[{t:'Access Teacher Portal →', h:'#portal'}]},
+      judges:     { role:'Teacher — Judge Recruitment', title:'Build your judge roster', links:[
+        { e:'', t:'Judge Recruitment Email Template', d:'Tested cold email that gets responses', h:'#portal' },
+        { e:'', t:'Judge Training Materials', d:'OAS-approved orientation packet', h:'#portal' },
+        { e:'', t:'Where to Find Judges', d:'Universities, industry partners, alumni', h:'/setupguide.html#judges' },
+      ], cta:[{t:'Get Judge Templates →', h:'#portal'},{t:'Post a Judge Request →', h:'/volunteer.html', o:true}]},
+      funding:    { role:'Teacher — Funding', title:'Find money for your fair', links:[
+        { e:'', t:'Ohio Science Fair Grant List', d:'Ohio-specific & national opportunities', h:'/setupguide.html#funding' },
+        { e:'', t:'Sponsorship Outreach Letter', d:'Tested template for local businesses', h:'#portal' },
+        { e:'', t:'Budget Template', d:'Full cost breakdown for a $500–$5K fair', h:'#portal' },
+      ], cta:[{t:'Open Teacher Portal →', h:'#portal'}]},
+    }
+  },
+  admin: {
+    q: "What's your biggest concern?",
+    opts: [
+      { e:'', l:'Cost and budget requirements', k:'cost' },
+      { e:'⏱', l:'Time commitment from teachers', k:'time' },
+      { e:'', l:'Academic impact and standards alignment', k:'impact' },
+      { e:'', l:'Where to start / pilot program options', k:'start' },
+    ],
+    results: {
+      cost:   { role:'Administrator — Budget', title:'The numbers behind science fairs', links:[
+        { e:'', t:'Science Fair Cost Breakdown', d:'Real numbers: $500–$5K by scale', h:'/setupguide.html#cost' },
+        { e:'', t:'Funding Sources Guide', d:'Grants, sponsors, PTA, in-kind', h:'/setupguide.html#funding' },
+      ], cta:[{t:'Full Setup Guide →', h:'/setupguide.html'}]},
+      time:   { role:'Administrator — Planning', title:'Realistic time investment', links:[
+        { e:'', t:'12-Month Timeline', d:'Teacher hours by phase — avg 5 hrs/month', h:'/setupguide.html' },
+        { e:'', t:'Committee Structure Guide', d:'Distribute the load across teachers', h:'/setupguide.html#committee' },
+      ], cta:[{t:'Contact Us →', h:'mailto:fairgameinitiative@outlook.com'}]},
+      impact: { role:'Administrator — Outcomes', title:'Academic impact evidence', links:[
+        { e:'', t:'Research on Science Fair Benefits', d:'College prep, critical thinking, STEM identity', h:'/setupguide.html' },
+        { e:'', t:'Student Success Stories', d:'Outcomes from FairGame-supported schools', h:'/successstories.html' },
+      ], cta:[{t:'Read Success Stories →', h:'/successstories.html'}]},
+      start:  { role:'Administrator — Getting Started', title:'Pilot program options', links:[
+        { e:'', t:'One-Grade Pilot Guide', d:'Start with 8th grade, expand from there', h:'/setupguide.html' },
+        { e:'', t:'Schedule a Consultation', d:'30-min call with our team — free', h:'mailto:fairgameinitiative@outlook.com' },
+      ], cta:[{t:'Schedule Consultation →', h:'mailto:fairgameinitiative@outlook.com'}]},
+    }
+  },
+  judge: {
+    q: 'How would you like to contribute?',
+    opts: [
+      { e:'', l:'Judge at a local or district fair', k:'judge' },
+      { e:'', l:'Mentor a student long-term', k:'mentor' },
+      { e:'', l:'Guest speak or give facility tours', k:'speak' },
+    ],
+    results: {
+      judge:  { role:'STEM Professional — Judging', title:'Sign up to judge', links:[
+        { e:'', t:'Judge Application Form', d:'Register your expertise & availability', h:'/volunteer.html' },
+        { e:'', t:'What to Expect', d:'3–5 hour commitment, rubric provided', h:'/volunteer.html' },
+      ], cta:[{t:'Sign Up to Judge →', h:'/volunteer.html'}]},
+      mentor: { role:'STEM Professional — Mentorship', title:'Become a student mentor', links:[
+        { e:'', t:'Mentor Program Overview', d:'What the commitment looks like', h:'/volunteer.html' },
+        { e:'', t:'Mentor Training Materials', d:'How to guide without doing the work', h:'/volunteer.html' },
+      ], cta:[{t:'Apply to Mentor →', h:'/volunteer.html'}]},
+      speak:  { role:'STEM Professional — Outreach', title:'Share your expertise', links:[
+        { e:'', t:'Speaking Request Form', d:'Tell us your topic and availability', h:'mailto:fairgameinitiative@outlook.com' },
+      ], cta:[{t:'Get in Touch →', h:'mailto:fairgameinitiative@outlook.com'}]},
+    }
+  },
+  company: {
+    q: 'How would your organization like to engage?',
+    opts: [
+      { e:'', l:'Sponsor a school or program', k:'sponsor' },
+      { e:'', l:'Provide employee volunteers / judges', k:'volunteers' },
+      { e:'', l:'Formal partnership / MOU', k:'partner' },
+    ],
+    results: {
+      sponsor:    { role:'Corporate — Sponsorship', title:'Sponsor a school program', links:[
+        { e:'', t:'Sponsorship Tiers Overview', d:'What your contribution funds', h:'mailto:fairgameinitiative@outlook.com' },
+        { e:'', t:'Adopt a School', d:'Name-sponsor a specific school\'s fair', h:'mailto:fairgameinitiative@outlook.com' },
+      ], cta:[{t:'Contact Us →', h:'mailto:fairgameinitiative@outlook.com'}]},
+      volunteers: { role:'Corporate — Volunteers', title:'Employee volunteer program', links:[
+        { e:'', t:'Corporate Judge Program', d:'Counts toward employee volunteer hours', h:'/volunteer.html' },
+        { e:'', t:'Mentorship Program', d:'Employees mentor students 1-on-1', h:'/volunteer.html' },
+      ], cta:[{t:'Explore Volunteer Program →', h:'/volunteer.html'}]},
+      partner:    { role:'Corporate — Partnership', title:'Formal organizational partnership', links:[
+        { e:'', t:'Partnership Overview Deck', d:'Full overview of FairGame and impact', h:'mailto:fairgameinitiative@outlook.com' },
+      ], cta:[{t:'Reach Out →', h:'mailto:fairgameinitiative@outlook.com'}]},
+    }
+  }
+};
+
+/*  QUIZ STATE  */
+let qRole = null, qNeed = null;
+
+function qPick(el, val) {
+  el.closest('.quiz-opts').querySelectorAll('.quiz-opt').forEach(o => o.classList.remove('sel'));
+  el.classList.add('sel');
+  if (el.closest('#qs1')) { qRole = val; enable('qNext1'); }
+  else                    { qNeed = val; enable('qNext2'); }
+}
+function enable(id) { const b = document.getElementById(id); b.removeAttribute('disabled'); b.style.opacity='1'; }
+function disable(id){ const b = document.getElementById(id); b.setAttribute('disabled',''); b.style.opacity='0.4'; }
+
+function qStep2() {
+  if (!qRole) return;
+  const d = QD[qRole];
+  document.getElementById('qs2Q').textContent = d.q;
+  document.getElementById('qs2Opts').innerHTML = d.opts.map(o =>
+    `<button class="quiz-opt" onclick="qPick(this,'${o.k}')"><span class="quiz-opt-em">${o.e}</span><span>${o.l}</span></button>`
+  ).join('');
+  qNeed = null; disable('qNext2');
+  document.getElementById('qs1').classList.remove('active');
+  document.getElementById('qs2').classList.add('active');
+  document.getElementById('qProgress').style.width = '50%';
+  logEvent('quiz_step2', { role: qRole });
+}
+function qBack() {
+  document.getElementById('qs2').classList.remove('active');
+  document.getElementById('qs1').classList.add('active');
+  document.getElementById('qProgress').style.width = '0%';
+}
+function qResult() {
+  if (!qRole || !qNeed) return;
+  const res = QD[qRole].results[qNeed];
+  document.getElementById('rRole').textContent  = res.role;
+  document.getElementById('rTitle').textContent = res.title;
+  document.getElementById('rLinks').innerHTML = res.links.map(l =>
+    `<a href="${l.h}" class="result-link" onclick="trackDL('${l.t}','${qRole}')">
+      <div class="result-link-icon">${l.e}</div>
+      <div><strong>${l.t}</strong><span>${l.d}</span></div>
+      <span class="result-link-arrow">→</span>
+    </a>`
+  ).join('');
+  document.getElementById('rCTA').innerHTML = res.cta.map(c =>
+    `<a href="${c.h}" class="btn ${c.o ? 'btn-outline':'btn-primary'}">${c.t}</a>`
+  ).join('');
+  document.getElementById('qs2').classList.remove('active');
+  document.getElementById('qResult').classList.add('active');
+  document.getElementById('qProgress').style.width = '100%';
+  logEvent('quiz_complete', { role: qRole, need: qNeed });
+}
+function qReset() {
+  qRole = null; qNeed = null;
+  document.getElementById('qResult').classList.remove('active');
+  document.getElementById('qs1').classList.add('active');
+  document.getElementById('qProgress').style.width = '0%';
+  document.querySelectorAll('.quiz-opt').forEach(o => o.classList.remove('sel'));
+  disable('qNext1');
+}
+
+/* Hero mini quiz */
+let heroRole = null;
+function heroQuizPick(el, role) {
+  heroRole = role;
+  el.closest('.hero-quiz-opts').querySelectorAll('.hero-quiz-opt').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('heroQuizCTA').style.display = 'block';
+  document.getElementById('heroQuizLink').href = '#quiz';
+  // Pre-select in main quiz
+  qRole = role;
+}
+
+/*  EMAIL SUBSCRIBE  */
+async function doSubscribe() {
+  const email = document.getElementById('subEmail').value.trim();
+  const msg   = document.getElementById('subMsg');
+  if (!email || !email.includes('@')) { msg.textContent='Please enter a valid email.'; msg.className='msg-err'; return; }
+  msg.textContent = 'Subscribing...'; msg.className = '';
+  if (sb) {
+    const { error } = await sb.from('email_subscribers').insert([{ email, role: qRole, source: 'quiz' }]);
+    if (error && error.code !== '23505') { msg.textContent='Something went wrong. Please try again.'; msg.className='msg-err'; return; }
+  }
+  msg.textContent = ' Subscribed! Check your inbox for a welcome message.';
+  msg.className = 'msg-ok';
+}
+
+/*  PORTAL FORMS  */
+async function regTeacher() {
+  const name = document.getElementById('tName').value.trim();
+  const email = document.getElementById('tEmail').value.trim();
+  const school = document.getElementById('tSchool').value.trim();
+  const msg = document.getElementById('tMsg');
+  if (!name||!email||!school) { msg.textContent='Please fill out all fields.'; msg.className='portal-msg msg-err'; return; }
+  msg.textContent = 'Submitting...'; msg.className = 'portal-msg';
+  if (sb) {
+    const { error } = await sb.from('portal_requests').insert([{ name, email, school, type:'teacher' }]);
+    if (error) { msg.textContent='Error — please email fairgameinitiative@outlook.com'; msg.className='portal-msg msg-err'; return; }
+  }
+  msg.textContent = ' Request received! We\'ll send your access link within 24 hours.';
+  msg.className = 'portal-msg msg-ok';
+  logEvent('portal_request', { type:'teacher' });
+}
+async function regAmbassador() {
+  const name = document.getElementById('aName').value.trim();
+  const email = document.getElementById('aEmail').value.trim();
+  const school = document.getElementById('aSchool').value.trim();
+  const msg = document.getElementById('aMsg');
+  if (!name||!email||!school) { msg.textContent='Please fill out all fields.'; msg.className='portal-msg msg-err'; return; }
+  msg.textContent = 'Submitting...'; msg.className = 'portal-msg';
+  if (sb) {
+    const { error } = await sb.from('portal_requests').insert([{ name, email, school, type:'ambassador' }]);
+    if (error) { msg.textContent='Error — please email fairgameinitiative@outlook.com'; msg.className='portal-msg msg-err'; return; }
+  }
+  msg.textContent = ' Application received! We\'ll be in touch within 48 hours.';
+  msg.className = 'portal-msg msg-ok';
+  logEvent('portal_request', { type:'ambassador' });
+}
+async function magicLink(e) {
+  e.preventDefault();
+  const email = prompt('Enter your registered email:');
+  if (!email) return;
+  if (sb) {
+    const { error } = await sb.auth.signInWithOtp({ email });
+    alert(error ? 'Error: '+error.message : 'Magic link sent to '+email+'! Check your inbox.');
+  } else {
+    alert('Portal coming soon! Email fairgameinitiative@outlook.com for early access.');
+  }
+}
+
+/*  ANALYTICS  */
+async function logEvent(event, data={}) {
+  if (!sb) return;
+  await sb.from('events').insert([{ event, data, page:'home', ts: new Date().toISOString() }]);
+}
+async function trackDL(resource, userType) {
+  if (!sb) return;
+  await sb.from('resource_downloads').insert([{ resource, user_type: userType||'guest', page:'home', ts: new Date().toISOString() }]);
+}
+
+/*  LIVE STATS  */
+async function loadStats() {
+  if (!sb) return;
+  const { count: dlCount } = await sb.from('resource_downloads').select('id', { count:'exact', head:true });
+  const { count: jCount }  = await sb.from('portal_requests').select('id', { count:'exact', head:true }).eq('type','judge');
+  const { data: schools }  = await sb.from('stats').select('value').eq('key','schools_supported').single();
+}
+loadStats();
+
+/*  COUNT UP  */
+function countUp(el, target, ms=1200) {
+  const start = performance.now();
+  const tick = now => {
+    const p = Math.min((now-start)/ms, 1);
+    const e = 1 - Math.pow(1-p, 3);
+    el.textContent = Math.round(e * target);
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+const heroObs = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) {
+    document.querySelectorAll('.cu').forEach(el => countUp(el, +el.dataset.t));
+    heroObs.disconnect();
+  }
+}, { threshold: 0.3 });
+heroObs.observe(document.querySelector('.hero-stats'));
+
+/*  SCROLL REVEAL  */
+const revObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('vis'); revObs.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => revObs.observe(el));
+
+/*  MOBILE NAV  */
+document.querySelector('.nav-hamburger').addEventListener('click', () => {
+  const nl = document.querySelector('.nav-links');
+  const open = nl.style.display === 'flex';
+  Object.assign(nl.style, {
+    display: open ? 'none' : 'flex',
+    flexDirection: 'column', position: 'fixed',
+    top: '68px', left: '0', right: '0',
+    background: 'var(--white)', padding: '8px 0 16px',
+    borderBottom: 'var(--border)',
+    boxShadow: 'var(--shadow-md)'
+  });
+});
+
+
+/* ─── NAV SCROLL BEHAVIOUR ─────────────────────────────────── */
+(function() {
+  const nav = document.querySelector('nav');
+  function updateNav() { nav.classList.toggle('scrolled', window.scrollY > 60); }
+  window.addEventListener('scroll', updateNav, { passive: true });
+  updateNav();
+})();
+
+/*  PAGE VIEW  */
+logEvent('page_view', { page:'home' });
+</script>
+</body>
+</html>

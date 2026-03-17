@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>State Resources — FairGame Initiative</title>
+  <meta name="description" content="Ohio competition pathways, OAS district contacts, registration links, key deadlines, and national competition information." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    .pathway-flow { display: flex; align-items: stretch; gap: 0; margin: 28px 0; }
+    @media (max-width: 640px) { .pathway-flow { flex-direction: column; } }
+    .pathway-step { flex: 1; padding: 20px 18px; border: var(--border); background: var(--white); position: relative; }
+    .pathway-step + .pathway-step { border-left: none; }
+    @media (max-width: 640px) { .pathway-step + .pathway-step { border-left: var(--border); border-top: none; } }
+    .pathway-num { font-family: var(--ff-serif); font-size: 1.6rem; font-weight: 700; color: var(--green-400); line-height: 1; margin-bottom: 6px; }
+    .pathway-step h4 { color: var(--green-900); margin-bottom: 6px; font-size: 0.9rem; }
+    .pathway-step p { font-size: 0.8rem; color: var(--gray-500); line-height: 1.6; }
+    .pathway-arrow { display: flex; align-items: center; padding: 0 4px; color: var(--green-400); font-size: 1.2rem; flex-shrink: 0; }
+    @media (max-width: 640px) { .pathway-arrow { display: none; } }
+
+    .district-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: var(--border); }
+    @media (max-width: 860px) { .district-grid { grid-template-columns: 1fr 1fr; } }
+    @media (max-width: 480px) { .district-grid { grid-template-columns: 1fr; } }
+    .district-card { padding: 20px 18px; border-right: var(--border); border-bottom: var(--border); }
+    .district-card:nth-child(3n) { border-right: none; }
+    .district-name { font-weight: 500; font-size: 0.9rem; color: var(--green-900); margin-bottom: 4px; }
+    .district-detail { font-size: 0.78rem; color: var(--gray-500); line-height: 1.55; }
+    .district-contact { font-size: 0.76rem; color: var(--green-600); margin-top: 8px; }
+
+    .deadline-list { display: flex; flex-direction: column; gap: 0; }
+    .deadline-row { display: grid; grid-template-columns: 100px 1fr 120px; gap: 16px; align-items: center; padding: 14px 0; border-bottom: var(--border); }
+    @media (max-width: 640px) { .deadline-row { grid-template-columns: 80px 1fr; } }
+    .deadline-date { font-family: var(--ff-serif); font-size: 0.92rem; font-weight: 600; color: var(--green-600); }
+    .deadline-name { font-size: 0.88rem; font-weight: 500; color: var(--gray-900); }
+    .deadline-type { font-size: 0.76rem; color: var(--gray-500); margin-top: 2px; }
+    .deadline-tag { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; background: var(--green-50); color: var(--green-700); white-space: nowrap; }
+    @media (max-width: 640px) { .deadline-tag { display: none; } }
+
+    .nat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 640px) { .nat-grid { grid-template-columns: 1fr; } }
+    .nat-card { border: var(--border); padding: 22px; background: var(--white); }
+    .nat-card h4 { color: var(--green-900); margin-bottom: 6px; }
+    .nat-card p { font-size: 0.84rem; color: var(--gray-500); margin-bottom: 10px; line-height: 1.6; }
+    .nat-card a { font-size: 0.78rem; color: var(--green-600); font-weight: 500; }
+  </style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo"><img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'" />FairGame</a>
+    <button class="nav-hamburger">☰</button>
+    <ul class="nav-links">
+      <li class="dropdown"><a href="#">Resources ▾</a><div class="dropdown-menu"><a href="/starthere.html">Start Here</a><a href="/setupguide.html">Setup Guide</a><a href="/stateresources.html">State Resources</a><a href="/researchguide.html">Research Guide</a><a href="/teachers-professionals.html">For Teachers</a></div></li>
+      <li class="dropdown"><a href="#">Get Involved ▾</a><div class="dropdown-menu"><a href="/volunteer.html">Volunteer / Judge</a><a href="/donate.html">Donate</a><a href="/#portal">Ambassador Portal</a><a href="/#portal">Teacher Portal</a></div></li>
+      <li><a href="/successstories.html">Stories</a></li>
+      <li><a href="/donate.html">Donate</a></li>
+      <li><a href="/starthere.html" class="nav-cta">Get Started</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="/">Home</a><span>/</span><a href="/starthere.html">Resources</a><span>/</span>State Resources</div>
+    <span class="overline">Ohio &amp; National</span>
+    <h1>State Resources</h1>
+    <p>Ohio competition pathways, OAS district contacts, key deadlines, and national competition information — all in one place.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+
+    <!-- Ohio Pathway -->
+    <div style="margin-bottom:48px;" class="reveal" id="ohio">
+      <span class="overline">Ohio Competition Pathway</span>
+      <h2 style="margin-bottom:20px;">From your school to ISEF</h2>
+      <div class="pathway-flow">
+        <div class="pathway-step"><div class="pathway-num">1</div><h4>School Fair</h4><p>Your school's internal fair. Top projects advance to the OAS district.</p></div>
+        <div class="pathway-arrow">&rarr;</div>
+        <div class="pathway-step"><div class="pathway-num">2</div><h4>OAS District Science Day</h4><p>Regional competition. Top projects advance to state.</p></div>
+        <div class="pathway-arrow">&rarr;</div>
+        <div class="pathway-step"><div class="pathway-num">3</div><h4>OAS State Science Day</h4><p>Held each May at Ohio State. Top projects advance to ISEF.</p></div>
+        <div class="pathway-arrow">&rarr;</div>
+        <div class="pathway-step"><div class="pathway-num">4</div><h4>Regeneron ISEF</h4><p>The world's largest pre-college science fair — top prizes over $1M.</p></div>
+      </div>
+      <p style="font-size:0.88rem;color:var(--gray-500);">Registration for all OAS competitions goes through <strong>ProjectBoard</strong>. Students and teachers register at <a href="https://projectboard.world" style="color:var(--green-600);" target="_blank">projectboard.world</a>. Contact us if you need a walkthrough.</p>
+    </div>
+
+    <!-- Key Deadlines -->
+    <div style="margin-bottom:64px;" class="reveal">
+      <span class="overline">2025&ndash;26 School Year</span>
+      <h2 style="margin-bottom:24px;">Key deadlines</h2>
+      <p style="color:var(--gray-500);font-size:0.9rem;margin-bottom:20px;">Dates vary by OAS district. These are approximate ranges — confirm exact dates with your district contact below.</p>
+      <div class="deadline-list">
+        <div class="deadline-row"><div class="deadline-date">Oct&ndash;Nov<br>2025</div><div><div class="deadline-name">School fair registration opens</div><div class="deadline-type">Notify OAS of intent, set up ProjectBoard account</div></div><div class="deadline-tag">Planning</div></div>
+        <div class="deadline-row"><div class="deadline-date">Jan&ndash;Feb<br>2026</div><div><div class="deadline-name">Student project registration deadline</div><div class="deadline-type">Students submit project proposals on ProjectBoard</div></div><div class="deadline-tag">Registration</div></div>
+        <div class="deadline-row"><div class="deadline-date">Feb&ndash;Mar<br>2026</div><div><div class="deadline-name">School science fairs held</div><div class="deadline-type">Winning projects advance to district</div></div><div class="deadline-tag">Competition</div></div>
+        <div class="deadline-row"><div class="deadline-date">Mar&ndash;Apr<br>2026</div><div><div class="deadline-name">OAS District Science Days</div><div class="deadline-type">Regional fairs — winning projects advance to state</div></div><div class="deadline-tag">Competition</div></div>
+        <div class="deadline-row"><div class="deadline-date">May 2026</div><div><div class="deadline-name">OAS State Science Day</div><div class="deadline-type">Ohio State University — top projects qualify for ISEF</div></div><div class="deadline-tag">State</div></div>
+        <div class="deadline-row"><div class="deadline-date">May 2026</div><div><div class="deadline-name">Regeneron ISEF</div><div class="deadline-type">International competition — location announced annually</div></div><div class="deadline-tag">International</div></div>
+      </div>
+    </div>
+
+    <!-- OAS Districts -->
+    <div style="margin-bottom:64px;" class="reveal">
+      <span class="overline">Ohio Academy of Science</span>
+      <h2 style="margin-bottom:8px;">OAS District contacts</h2>
+      <p style="color:var(--gray-500);font-size:0.9rem;margin-bottom:20px;">Contact your district coordinator to register your school fair and get district-specific deadlines. FairGame maintains relationships with all Ohio districts and can facilitate introductions.</p>
+      <div class="district-grid">
+        <div class="district-card"><div class="district-name">District 1 &mdash; Northwest Ohio</div><div class="district-detail">Lucas, Wood, Sandusky, Ottawa, Erie, Huron counties and surrounding area</div><div class="district-contact"><a href="https://www.ohiosci.org" target="_blank" style="color:var(--green-600);">ohiosci.org &rarr;</a></div></div>
+        <div class="district-card"><div class="district-name">District 2 &mdash; Northeast Ohio</div><div class="district-detail">Cuyahoga, Lake, Geauga, Ashtabula, Trumbull, Mahoning counties</div><div class="district-contact"><a href="https://www.ohiosci.org" target="_blank" style="color:var(--green-600);">ohiosci.org &rarr;</a></div></div>
+        <div class="district-card"><div class="district-name">District 3 &mdash; North Central Ohio</div><div class="district-detail">Richland, Ashland, Wayne, Medina, Lorain, Seneca counties</div><div class="district-contact"><a href="https://www.ohiosci.org" target="_blank" style="color:var(--green-600);">ohiosci.org &rarr;</a></div></div>
+        <div class="district-card"><div class="district-name">District 4 &mdash; Central Ohio</div><div class="district-detail">Franklin, Delaware, Licking, Fairfield, Pickaway, Madison counties</div><div class="district-contact"><a href="https://www.ohiosci.org" target="_blank" style="color:var(--green-600);">ohiosci.org &rarr;</a></div></div>
+        <div class="district-card"><div class="district-name">District 5 &mdash; East Central Ohio</div><div class="district-detail">Stark, Summit, Portage, Carroll, Tuscarawas, Coshocton counties</div><div class="district-contact"><a href="https://www.ohiosci.org" target="_blank" style="color:var(--green-600);">ohiosci.org &rarr;</a></div></div>
+        <div class="district-card"><div class="district-name">District 6 &mdash; Southeast Ohio</div><div class="district-detail">Muskingum, Morgan, Perry, Hocking, Athens, Meigs, Vinton counties</div><div class="district-contact"><a href="https://www.ohiosci.org" target="_blank" style="color:var(--green-600);">ohiosci.org &rarr;</a></div></div>
+        <div class="district-card"><div class="district-name">District 7 &mdash; Southwest Ohio</div><div class="district-detail">Hamilton, Butler, Warren, Clermont, Montgomery, Greene counties</div><div class="district-contact"><a href="https://www.ohiosci.org" target="_blank" style="color:var(--green-600);">ohiosci.org &rarr;</a></div></div>
+        <div class="district-card"><div class="district-name">District 8 &mdash; West Central Ohio</div><div class="district-detail">Allen, Auglaize, Mercer, Van Wert, Hardin, Logan, Shelby, Miami counties</div><div class="district-contact"><a href="https://www.ohiosci.org" target="_blank" style="color:var(--green-600);">ohiosci.org &rarr;</a></div></div>
+        <div class="district-card"><div class="district-name">District 9 &mdash; South Central Ohio</div><div class="district-detail">Ross, Pike, Scioto, Lawrence, Gallia, Jackson, Highland, Fayette counties</div><div class="district-contact"><a href="https://www.ohiosci.org" target="_blank" style="color:var(--green-600);">ohiosci.org &rarr;</a></div></div>
+      </div>
+      <p style="margin-top:14px;font-size:0.82rem;color:var(--gray-500);">Can't find your county? <a href="mailto:fairgameinitiative@outlook.com" style="color:var(--green-600);">Email us</a> and we'll connect you with your district coordinator directly.</p>
+    </div>
+
+    <!-- National competitions -->
+    <div class="reveal" id="national">
+      <span class="overline">Beyond Ohio</span>
+      <h2 style="margin-bottom:24px;">National competition opportunities</h2>
+      <div class="nat-grid">
+        <div class="nat-card"><h4>Regeneron ISEF</h4><p>The world's largest pre-college science competition. Qualifiers from OAS State Science Day. Awards exceed $8 million annually including Grand Award of $75,000.</p><a href="https://www.societyforscience.org/isef/" target="_blank">societyforscience.org &rarr;</a></div>
+        <div class="nat-card"><h4>Broadcom MASTERS</h4><p>Top 30 middle school STEM fair participants nationwide. Nomination through affiliated fairs. $25,000 top prize.</p><a href="https://www.societyforscience.org/broadcom-masters/" target="_blank">societyforscience.org &rarr;</a></div>
+        <div class="nat-card"><h4>Junior Science &amp; Humanities Symposium</h4><p>Research paper competition for grades 9&ndash;12. Ohio regional symposium advances winners to national. Significant scholarship awards.</p><a href="https://www.jshs.org" target="_blank">jshs.org &rarr;</a></div>
+        <div class="nat-card"><h4>Regeneron Science Talent Search</h4><p>The nation's oldest and most prestigious science competition for high school seniors. 40 finalists, top award $250,000.</p><a href="https://www.societyforscience.org/regeneron-sts/" target="_blank">societyforscience.org &rarr;</a></div>
+        <div class="nat-card"><h4>American Junior Academy of Science</h4><p>AJAS fellows are selected from state STEM competitions. Attend the AAAS annual meeting and present research to professional scientists.</p><a href="https://www.ajas.info" target="_blank">ajas.info &rarr;</a></div>
+        <div class="nat-card"><h4>National Youth Science Camp</h4><p>Delegate program for top graduating seniors. Two Ohio delegates selected each year based on science competition achievement and STEM leadership.</p><a href="https://www.nysc.org" target="_blank">nysc.org &rarr;</a></div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<script>
+const ro = new IntersectionObserver(e => e.forEach(x => { if(x.isIntersecting){x.target.classList.add('vis');ro.unobserve(x.target);}}),{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+document.querySelector('.nav-hamburger').addEventListener('click',()=>{const nl=document.querySelector('.nav-links');const o=nl.style.display==='flex';Object.assign(nl.style,{display:o?'none':'flex',flexDirection:'column',position:'fixed',top:'68px',left:'0',right:'0',background:'var(--white)',padding:'8px 0 16px',borderBottom:'var(--border)',boxShadow:'var(--shadow-md)'});});
+</script>
+</body>
+</html>

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Volunteer &amp; Judge — FairGame Initiative</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    .vol-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 48px; }
+    @media (max-width: 640px) { .vol-grid { grid-template-columns: 1fr; } }
+    .vol-card { border: var(--border); border-top: 3px solid var(--green-600); padding: 32px; }
+    .vol-tag { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--green-600); margin-bottom: 10px; }
+    .vol-card h3 { color: var(--green-900); margin-bottom: 10px; }
+    .vol-card p { font-size: 0.88rem; color: var(--gray-500); margin-bottom: 18px; line-height: 1.65; }
+    .vol-detail { font-size: 0.82rem; color: var(--gray-700); margin-bottom: 6px; display: flex; gap: 8px; align-items: flex-start; }
+    .vol-detail::before { content: '—'; color: var(--green-400); flex-shrink: 0; }
+
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }
+    .form-box { background: var(--white); border: var(--border); border-top: 3px solid var(--green-600); padding: 36px; }
+    .form-box h3 { color: var(--green-900); margin-bottom: 6px; }
+    .form-box p { font-size: 0.86rem; color: var(--gray-500); margin-bottom: 24px; }
+    .form-row { margin-bottom: 14px; }
+    .form-label { font-size: 0.78rem; font-weight: 500; color: var(--gray-700); display: block; margin-bottom: 5px; letter-spacing: 0.03em; }
+    select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b756b' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 36px; }
+    .checkbox-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+    .checkbox-row input[type=checkbox] { width: auto; margin-top: 2px; flex-shrink: 0; }
+    .checkbox-row label { font-size: 0.86rem; color: var(--gray-700); line-height: 1.5; }
+    .msg-ok  { font-size: 0.82rem; color: var(--green-600); margin-top: 10px; }
+    .msg-err { font-size: 0.82rem; color: #c0392b; margin-top: 10px; }
+  </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo"><img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'" />FairGame</a>
+    <button class="nav-hamburger">☰</button>
+    <ul class="nav-links">
+      <li class="dropdown"><a href="#">Resources ▾</a><div class="dropdown-menu"><a href="/starthere.html">Start Here</a><a href="/setupguide.html">Setup Guide</a><a href="/stateresources.html">State Resources</a><a href="/researchguide.html">Research Guide</a><a href="/teachers-professionals.html">For Teachers</a></div></li>
+      <li class="dropdown"><a href="#">Get Involved ▾</a><div class="dropdown-menu"><a href="/volunteer.html">Volunteer / Judge</a><a href="/donate.html">Donate</a><a href="/#portal">Ambassador Portal</a><a href="/#portal">Teacher Portal</a></div></li>
+      <li><a href="/successstories.html">Stories</a></li>
+      <li><a href="/donate.html">Donate</a></li>
+      <li><a href="/starthere.html" class="nav-cta">Get Started</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="/">Home</a><span>/</span>Volunteer</div>
+    <span class="overline">Give Back</span>
+    <h1>Volunteer &amp; Judge</h1>
+    <p>Contribute your STEM expertise. A few hours from you can change a student's trajectory.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+
+    <div class="vol-grid reveal">
+      <div class="vol-card">
+        <div class="vol-tag">Judging</div>
+        <h3>Science Fair Judge</h3>
+        <p>Evaluate student projects at a school, district, or state fair. Scoring rubric and training materials provided. No prior judging experience needed — just genuine STEM expertise.</p>
+        <div class="vol-detail">3&ndash;5 hours on fair day</div>
+        <div class="vol-detail">Evaluate 5&ndash;10 projects in your area of expertise</div>
+        <div class="vol-detail">In-person or virtual options available</div>
+        <div class="vol-detail">Counts toward corporate volunteer hour requirements</div>
+        <div class="vol-detail">School, district, or state level openings</div>
+      </div>
+      <div class="vol-card">
+        <div class="vol-tag">Mentoring</div>
+        <h3>Student Mentor</h3>
+        <p>Work one-on-one with a student throughout their science fair project. Help them develop their research question, experimental design, and analysis — without doing the work for them.</p>
+        <div class="vol-detail">1&ndash;2 hours per month for 4&ndash;6 months</div>
+        <div class="vol-detail">Virtual mentoring available — no geographic constraints</div>
+        <div class="vol-detail">Matched based on your expertise and student interest</div>
+        <div class="vol-detail">Mentor handbook and training provided</div>
+        <div class="vol-detail">Optional: attend your mentee's fair as a spectator</div>
+      </div>
+    </div>
+
+    <div class="form-grid reveal">
+
+      <div class="form-box">
+        <h3>Judge Application</h3>
+        <p>Fill out this form to join our judge network. We'll reach out when a fair near you needs judges in your expertise area.</p>
+        <div class="form-row"><label class="form-label">Full name *</label><input type="text" id="jName" placeholder="Dr. Jane Smith" /></div>
+        <div class="form-row"><label class="form-label">Email address *</label><input type="email" id="jEmail" placeholder="jsmith@company.com" /></div>
+        <div class="form-row"><label class="form-label">Organization / Employer</label><input type="text" id="jOrg" placeholder="Ohio State University" /></div>
+        <div class="form-row"><label class="form-label">Area(s) of expertise *</label>
+          <div class="checkbox-row"><input type="checkbox" id="je1"><label for="je1">Biology / Life Sciences</label></div>
+          <div class="checkbox-row"><input type="checkbox" id="je2"><label for="je2">Chemistry / Biochemistry</label></div>
+          <div class="checkbox-row"><input type="checkbox" id="je3"><label for="je3">Physics / Engineering</label></div>
+          <div class="checkbox-row"><input type="checkbox" id="je4"><label for="je4">Environmental Science</label></div>
+          <div class="checkbox-row"><input type="checkbox" id="je5"><label for="je5">Computer Science / Math</label></div>
+          <div class="checkbox-row"><input type="checkbox" id="je6"><label for="je6">Medicine / Health Sciences</label></div>
+        </div>
+        <div class="form-row"><label class="form-label">Preferred level</label>
+          <select id="jLevel"><option value="">Select...</option><option>School fair</option><option>District fair</option><option>State fair</option><option>Any level</option></select>
+        </div>
+        <div class="form-row"><label class="form-label">Notes (availability, travel constraints, etc.)</label><textarea id="jNotes" rows="3" placeholder="e.g. Available weekdays only, or can travel within Franklin County"></textarea></div>
+        <button class="btn btn-primary" onclick="submitJudge()" style="width:100%;justify-content:center;">Submit Judge Application &rarr;</button>
+        <div id="judgeMsg"></div>
+      </div>
+
+      <div class="form-box">
+        <h3>Mentor Application</h3>
+        <p>Apply to be matched with a student for the current science fair cycle. Mentorship runs from project proposal through competition day.</p>
+        <div class="form-row"><label class="form-label">Full name *</label><input type="text" id="mName" placeholder="Dr. Jane Smith" /></div>
+        <div class="form-row"><label class="form-label">Email address *</label><input type="email" id="mEmail" placeholder="jsmith@company.com" /></div>
+        <div class="form-row"><label class="form-label">Current role / title</label><input type="text" id="mRole" placeholder="Research Scientist, Environmental Engineer, etc." /></div>
+        <div class="form-row"><label class="form-label">STEM field *</label><input type="text" id="mField" placeholder="e.g. Environmental Engineering, Molecular Biology" /></div>
+        <div class="form-row"><label class="form-label">Hours available per month</label>
+          <select id="mHours"><option value="">Select...</option><option>1&ndash;2 hours</option><option>3&ndash;4 hours</option><option>5+ hours</option></select>
+        </div>
+        <div class="form-row"><label class="form-label">Format preference</label>
+          <select id="mFormat"><option value="">Select...</option><option>Virtual only</option><option>In-person (Ohio)</option><option>Either works</option></select>
+        </div>
+        <div class="form-row"><label class="form-label">Brief bio / relevant background</label><textarea id="mBio" rows="4" placeholder="Tell us a bit about your background and why you want to mentor a student..."></textarea></div>
+        <button class="btn btn-primary" onclick="submitMentor()" style="width:100%;justify-content:center;">Submit Mentor Application &rarr;</button>
+        <div id="mentorMsg"></div>
+      </div>
+
+    </div>
+
+  </div>
+</section>
+
+<script>
+const SB_URL = 'YOUR_SUPABASE_URL';
+const SB_KEY = 'YOUR_SUPABASE_ANON_KEY';
+let sb = null;
+try { sb = window.supabase.createClient(SB_URL, SB_KEY); } catch(e) {}
+
+function getExpertise() {
+  const boxes = ['je1','je2','je3','je4','je5','je6'];
+  const labels = ['Biology/Life Sciences','Chemistry/Biochemistry','Physics/Engineering','Environmental Science','Computer Science/Math','Medicine/Health'];
+  return boxes.map((id,i) => document.getElementById(id).checked ? labels[i] : null).filter(Boolean);
+}
+
+async function submitJudge() {
+  const name = document.getElementById('jName').value.trim();
+  const email = document.getElementById('jEmail').value.trim();
+  const org = document.getElementById('jOrg').value.trim();
+  const expertise = getExpertise();
+  const level = document.getElementById('jLevel').value;
+  const notes = document.getElementById('jNotes').value.trim();
+  const msg = document.getElementById('judgeMsg');
+  if (!name||!email) { msg.textContent='Please fill out required fields.'; msg.className='msg-err'; return; }
+  msg.textContent='Submitting...'; msg.className='';
+  if (sb) {
+    const { error } = await sb.from('portal_requests').insert([{ name, email, school: org, type:'judge', data: { expertise, level, notes } }]);
+    if (error) { msg.textContent='Error — please email fairgameinitiative@outlook.com'; msg.className='msg-err'; return; }
+  }
+  msg.textContent='Application received! We\'ll be in touch within 48 hours.'; msg.className='msg-ok';
+}
+
+async function submitMentor() {
+  const name = document.getElementById('mName').value.trim();
+  const email = document.getElementById('mEmail').value.trim();
+  const role = document.getElementById('mRole').value.trim();
+  const field = document.getElementById('mField').value.trim();
+  const hours = document.getElementById('mHours').value;
+  const format = document.getElementById('mFormat').value;
+  const bio = document.getElementById('mBio').value.trim();
+  const msg = document.getElementById('mentorMsg');
+  if (!name||!email||!field) { msg.textContent='Please fill out required fields.'; msg.className='msg-err'; return; }
+  msg.textContent='Submitting...'; msg.className='';
+  if (sb) {
+    const { error } = await sb.from('portal_requests').insert([{ name, email, school: role, type:'mentor', data: { field, hours, format, bio } }]);
+    if (error) { msg.textContent='Error — please email fairgameinitiative@outlook.com'; msg.className='msg-err'; return; }
+  }
+  msg.textContent='Application received! We\'ll match you with a student and reach out within a week.'; msg.className='msg-ok';
+}
+
+const ro = new IntersectionObserver(e => e.forEach(x => { if(x.isIntersecting){x.target.classList.add('vis');ro.unobserve(x.target);}}),{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
+document.querySelector('.nav-hamburger').addEventListener('click',()=>{const nl=document.querySelector('.nav-links');const o=nl.style.display==='flex';Object.assign(nl.style,{display:o?'none':'flex',flexDirection:'column',position:'fixed',top:'68px',left:'0',right:'0',background:'var(--white)',padding:'8px 0 16px',borderBottom:'var(--border)',boxShadow:'var(--shadow-md)'});});
+</script>
+</body>
+</html>
