@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Judge Network — FairGame Initiative</title>
+  <meta name="description" content="Find and connect with science fair judges across Ohio." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+  <!-- Leaflet for map -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <style>
+    .map-layout { display: grid; grid-template-columns: 320px 1fr; gap: 0; min-height: calc(100vh - var(--nav-h) - 180px); border: var(--border); }
+    @media (max-width: 860px) { .map-layout { grid-template-columns: 1fr; } }
+
+    .map-sidebar { border-right: var(--border); display: flex; flex-direction: column; background: var(--white); }
+    .sidebar-header { padding: 20px 20px 16px; border-bottom: var(--border); }
+    .sidebar-header h3 { color: var(--green-900); margin-bottom: 4px; font-size: 1.1rem; }
+    .sidebar-header p { font-size: 0.78rem; color: var(--gray-500); }
+    .sidebar-filters { padding: 14px 20px; border-bottom: var(--border); display: flex; flex-direction: column; gap: 8px; }
+    .filter-label { font-size: 0.7rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-500); margin-bottom: 2px; }
+    .filter-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip {
+      padding: 4px 10px; border: 1.5px solid var(--gray-200);
+      font-size: 0.75rem; font-family: var(--ff-sans); cursor: pointer;
+      transition: all 0.14s; background: var(--white); color: var(--gray-700);
+    }
+    .chip:hover { border-color: var(--green-500); color: var(--green-700); }
+    .chip.active { border-color: var(--green-600); background: var(--green-50); color: var(--green-800); font-weight: 500; }
+
+    .judge-list { flex: 1; overflow-y: auto; }
+    .judge-item {
+      padding: 14px 20px; border-bottom: var(--border);
+      cursor: pointer; transition: background 0.12s;
+    }
+    .judge-item:hover, .judge-item.highlighted { background: var(--green-50); }
+    .judge-item-name { font-size: 0.9rem; font-weight: 500; color: var(--green-900); margin-bottom: 2px; }
+    .judge-item-org  { font-size: 0.78rem; color: var(--gray-500); margin-bottom: 6px; }
+    .judge-item-tags { display: flex; flex-wrap: wrap; gap: 4px; }
+    .judge-tag { font-size: 0.65rem; padding: 2px 6px; background: var(--green-100); color: var(--green-800); font-weight: 500; letter-spacing: 0.04em; }
+    .judge-item-level { font-size: 0.72rem; color: var(--gray-300); margin-top: 6px; }
+    .empty-state { padding: 40px 20px; text-align: center; color: var(--gray-300); font-size: 0.88rem; }
+
+    .map-container { position: relative; }
+    #judgeMap { width: 100%; height: 100%; min-height: 500px; }
+
+    /* Map popup */
+    .judge-popup { font-family: var(--ff-sans); min-width: 200px; }
+    .judge-popup-name { font-family: var(--ff-serif); font-size: 1rem; font-weight: 600; color: var(--green-900); margin-bottom: 3px; }
+    .judge-popup-org  { font-size: 0.78rem; color: var(--gray-500); margin-bottom: 8px; }
+    .judge-popup-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 10px; }
+    .judge-popup-tag  { font-size: 0.65rem; padding: 2px 6px; background: var(--green-100); color: var(--green-800); }
+    .judge-popup-btn  { display: block; width: 100%; padding: 8px; background: var(--green-600); color: white; border: none; font-family: var(--ff-sans); font-size: 0.8rem; font-weight: 500; cursor: pointer; text-align: center; }
+    .judge-popup-btn:hover { background: var(--green-700); }
+
+    /* Register panel */
+    .register-toggle { position: absolute; top: 16px; right: 16px; z-index: 999; }
+    .register-panel {
+      position: absolute; top: 56px; right: 16px; z-index: 999;
+      width: 320px; background: var(--white); border: var(--border);
+      border-top: 3px solid var(--green-600); padding: 20px;
+      box-shadow: var(--shadow-md); display: none;
+    }
+    .register-panel.open { display: block; }
+    .register-panel h4 { color: var(--green-900); margin-bottom: 4px; }
+    .register-panel p  { font-size: 0.8rem; color: var(--gray-500); margin-bottom: 14px; }
+    .reg-row { margin-bottom: 10px; }
+    .reg-label { font-size: 0.72rem; font-weight: 500; color: var(--gray-700); display: block; margin-bottom: 3px; letter-spacing: 0.03em; }
+    .expertise-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 4px; }
+    .exp-check { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--gray-700); }
+    .exp-check input { width: auto; flex-shrink: 0; }
+
+    /* Request modal */
+    .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
+    .modal-overlay.open { display: flex; }
+    .modal-box { background: var(--white); border-top: 3px solid var(--green-600); padding: 32px; max-width: 440px; width: 90%; box-shadow: var(--shadow-md); }
+    .modal-box h3 { color: var(--green-900); margin-bottom: 6px; }
+    .modal-box p  { font-size: 0.86rem; color: var(--gray-500); margin-bottom: 18px; }
+    .modal-row { margin-bottom: 12px; }
+    .modal-label { font-size: 0.76rem; font-weight: 500; color: var(--gray-700); display: block; margin-bottom: 4px; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
+    .modal-cancel { background: none; border: 1.5px solid var(--gray-200); padding: 10px 18px; font-size: 0.82rem; font-family: var(--ff-sans); cursor: pointer; color: var(--gray-500); }
+    .modal-cancel:hover { border-color: var(--gray-300); color: var(--gray-700); }
+
+    /* Stats bar */
+    .map-stats { display: grid; grid-template-columns: repeat(4, 1fr); border-bottom: var(--border); }
+    .map-stat { padding: 14px 20px; border-right: var(--border); text-align: center; }
+    .map-stat:last-child { border-right: none; }
+    .map-stat-n { font-family: var(--ff-serif); font-size: 1.5rem; font-weight: 700; color: var(--green-700); line-height: 1; }
+    .map-stat-l { font-size: 0.68rem; color: var(--gray-500); margin-top: 2px; letter-spacing: 0.05em; text-transform: uppercase; }
+
+    /* Leaflet overrides for sharp markers */
+    .custom-marker { width: 28px; height: 28px; background: var(--green-600); border: 2px solid var(--green-800); display: flex; align-items: center; justify-content: center; }
+    .custom-marker-inner { width: 10px; height: 10px; background: white; border-radius: 50%; }
+    .leaflet-popup-content-wrapper { border-radius: 0 !important; border-top: 3px solid #357a38; }
+    .leaflet-popup-tip { background: white !important; }
+  </style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo"><img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'" />FairGame</a>
+    <button class="nav-hamburger">☰</button>
+    <ul class="nav-links">
+      <li class="dropdown"><a href="#">Resources ▾</a><div class="dropdown-menu"><a href="/starthere.html">Start Here</a><a href="/setupguide.html">Setup Guide</a><a href="/stateresources.html">State Resources</a><a href="/researchguide.html">Research Guide</a><a href="/teachers-professionals.html">For Teachers</a></div></li>
+      <li class="dropdown"><a href="#">Get Involved ▾</a><div class="dropdown-menu"><a href="/volunteer.html">Volunteer / Judge</a><a href="/donate.html">Donate</a><a href="/#portal">Ambassador Portal</a><a href="/#portal">Teacher Portal</a></div></li>
+      <li><a href="/successstories.html">Stories</a></li>
+      <li><a href="/donate.html">Donate</a></li>
+      <li><a href="/starthere.html" class="nav-cta">Get Started</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="/">Home</a><span>/</span>Judge Network</div>
+    <span class="overline">Volunteer Map</span>
+    <h1>Find a Judge</h1>
+    <p>Science fair judges across Ohio, searchable by expertise and location. Teachers: register your fair below and we'll send match requests automatically.</p>
+    <div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;">
+      <a href="/volunteer.html" class="btn btn-white">Register as a Judge →</a>
+      <a href="/fairregister.html" class="btn btn-outline" style="border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.8);">Register Your Fair →</a>
+    </div>
+  </div>
+</div>
+
+<section style="padding: 0;">
+  <div class="container" style="padding-top:24px;padding-bottom:12px;">
+    <div class="map-stats" id="mapStats">
+      <div class="map-stat"><div class="map-stat-n" id="statTotal">—</div><div class="map-stat-l">Judges Registered</div></div>
+      <div class="map-stat"><div class="map-stat-n" id="statActive">—</div><div class="map-stat-l">Available Now</div></div>
+      <div class="map-stat"><div class="map-stat-n" id="statFields">—</div><div class="map-stat-l">STEM Fields</div></div>
+      <div class="map-stat"><div class="map-stat-n" id="statDistricts">—</div><div class="map-stat-l">OAS Districts</div></div>
+    </div>
+  </div>
+
+  <div class="container" style="padding-bottom:48px;">
+    <div class="map-layout">
+      <!-- Sidebar -->
+      <div class="map-sidebar">
+        <div class="sidebar-header">
+          <h3>Judge Network</h3>
+          <p id="judgeCount">Loading judges...</p>
+        </div>
+        <div class="sidebar-filters">
+          <div class="filter-label">Filter by expertise</div>
+          <div class="filter-chips" id="filterChips">
+            <button class="chip active" onclick="filterJudges('all', this)">All Fields</button>
+            <button class="chip" onclick="filterJudges('Biology', this)">Biology</button>
+            <button class="chip" onclick="filterJudges('Chemistry', this)">Chemistry</button>
+            <button class="chip" onclick="filterJudges('Physics', this)">Physics</button>
+            <button class="chip" onclick="filterJudges('Environmental', this)">Environmental</button>
+            <button class="chip" onclick="filterJudges('Computer', this)">CS / Math</button>
+            <button class="chip" onclick="filterJudges('Medicine', this)">Medicine</button>
+          </div>
+          <div style="margin-top:6px;">
+            <div class="filter-label">Filter by level</div>
+            <div class="filter-chips">
+              <button class="chip active" onclick="filterLevel('all', this)">Any Level</button>
+              <button class="chip" onclick="filterLevel('School fair', this)">School</button>
+              <button class="chip" onclick="filterLevel('District fair', this)">District</button>
+              <button class="chip" onclick="filterLevel('State fair', this)">State</button>
+            </div>
+          </div>
+        </div>
+        <div class="judge-list" id="judgeList">
+          <div class="empty-state">Loading judge network...</div>
+        </div>
+      </div>
+
+      <!-- Map -->
+      <div class="map-container">
+        <div id="judgeMap"></div>
+        <!-- Register as judge toggle -->
+        <div class="register-toggle">
+          <button class="btn btn-primary" onclick="toggleRegister()" style="font-size:0.78rem;padding:9px 16px;">+ Add Me to Map</button>
+        </div>
+        <div class="register-panel" id="registerPanel">
+          <h4>Add yourself to the map</h4>
+          <p>Takes 60 seconds. You'll appear as a pin on the map and receive match requests from nearby schools.</p>
+          <div class="reg-row"><label class="reg-label">Full name *</label><input type="text" id="rjName" placeholder="Dr. Jane Smith" /></div>
+          <div class="reg-row"><label class="reg-label">Email *</label><input type="email" id="rjEmail" placeholder="jsmith@osu.edu" /></div>
+          <div class="reg-row"><label class="reg-label">Organization</label><input type="text" id="rjOrg" placeholder="Ohio State University" /></div>
+          <div class="reg-row"><label class="reg-label">City / County *</label><input type="text" id="rjCity" placeholder="Columbus, Franklin County" /></div>
+          <div class="reg-row">
+            <label class="reg-label">STEM expertise (check all that apply)</label>
+            <div class="expertise-grid">
+              <label class="exp-check"><input type="checkbox" id="rje1"> Biology</label>
+              <label class="exp-check"><input type="checkbox" id="rje2"> Chemistry</label>
+              <label class="exp-check"><input type="checkbox" id="rje3"> Physics / Eng.</label>
+              <label class="exp-check"><input type="checkbox" id="rje4"> Environmental</label>
+              <label class="exp-check"><input type="checkbox" id="rje5"> CS / Math</label>
+              <label class="exp-check"><input type="checkbox" id="rje6"> Medicine</label>
+            </div>
+          </div>
+          <div class="reg-row"><label class="reg-label">Available for</label>
+            <select id="rjLevel"><option value="">Select...</option><option>School fair</option><option>District fair</option><option>State fair</option><option>Any level</option></select>
+          </div>
+          <button class="btn btn-primary" onclick="registerJudgeMap()" style="width:100%;justify-content:center;margin-top:6px;">Add to Map →</button>
+          <div id="rjMsg" style="font-size:0.78rem;margin-top:8px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Match Request Modal -->
+<div class="modal-overlay" id="matchModal">
+  <div class="modal-box">
+    <h3>Send a Judge Request</h3>
+    <p>This sends an email to the judge with your fair details and a link to accept or decline.</p>
+    <input type="hidden" id="targetJudgeId" />
+    <input type="hidden" id="targetJudgeName" />
+    <input type="hidden" id="targetJudgeEmail" />
+    <div class="modal-row"><label class="modal-label">Your name *</label><input type="text" id="reqTeacher" placeholder="Ms. Williams" /></div>
+    <div class="modal-row"><label class="modal-label">Your email *</label><input type="email" id="reqTeacherEmail" placeholder="mwilliams@school.edu" /></div>
+    <div class="modal-row"><label class="modal-label">School name *</label><input type="text" id="reqSchool" placeholder="Bath High School" /></div>
+    <div class="modal-row"><label class="modal-label">Fair date *</label><input type="date" id="reqDate" /></div>
+    <div class="modal-row"><label class="modal-label">Message to judge</label><textarea id="reqMessage" rows="3" placeholder="We have 35 student projects in biology and environmental science..."></textarea></div>
+    <div id="reqMsg" style="font-size:0.78rem;margin-top:4px;"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="sendMatchRequest()">Send Match Request →</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/script.js"></script>
+<script>
+/* ── JUDGE MAP PAGE LOGIC ────────────────────────────────── */
+let map, allJudges = [], markers = {}, activeFilter = 'all', activeLevelFilter = 'all';
+
+// Ohio center
+const OHIO_CENTER = [40.4173, -82.9071];
+const OHIO_ZOOM   = 7;
+
+/* Ohio county → approx lat/lng lookup (subset — expand as needed) */
+const COUNTY_COORDS = {
+  'franklin':    [39.97,  -82.99], 'cuyahoga': [41.48,  -81.68], 'hamilton': [39.10,  -84.51],
+  'summit':      [41.10,  -81.52], 'montgomery':[39.76, -84.19], 'lucas':    [41.66,  -83.56],
+  'stark':       [40.80,  -81.35], 'lorain':   [41.28,  -82.22], 'butler':   [39.44,  -84.56],
+  'lake':        [41.70,  -81.24], 'mahoning': [41.01,  -80.77], 'warren':   [39.43,  -84.17],
+  'medina':      [41.14,  -81.86], 'clermont': [39.06,  -84.15], 'licking':  [40.09,  -82.47],
+  'allen':       [40.77,  -84.10], 'richland': [40.78,  -82.53], 'wayne':    [40.83,  -81.89],
+  'delaware':    [40.28,  -83.07], 'portage':  [41.17,  -81.21], 'geauga':   [41.50,  -81.16],
+  'greene':      [39.69,  -83.88], 'fairfield':[39.74,  -82.62], 'ashtabula':[41.73,  -80.79],
+  'trumbull':    [41.31,  -80.77], 'muskingum':[39.97,  -82.01], 'pickaway': [39.64,  -83.06],
+  'ross':        [39.35,  -83.00], 'tuscarawas':[40.44, -81.48], 'athens':   [39.33,  -82.10],
+  'scioto':      [38.84,  -82.97], 'wood':     [41.37,  -83.62],
+  // City fallbacks
+  'columbus':    [39.96,  -82.99], 'cleveland':[41.49,  -81.69], 'cincinnati':[39.10, -84.51],
+  'toledo':      [41.66,  -83.55], 'akron':    [41.08,  -81.52], 'dayton':   [39.76,  -84.19],
+  'lima':        [40.74,  -84.10], 'youngstown':[41.10, -80.65], 'canton':   [40.80,  -81.37],
+  'lorain city': [41.45,  -82.18], 'elyria':   [41.37,  -82.10], 'springfield':[39.92,-83.81],
+};
+
+function coordsFromLocation(city) {
+  if (!city) return [...OHIO_CENTER];
+  const lower = city.toLowerCase();
+  for (const [key, coords] of Object.entries(COUNTY_COORDS)) {
+    if (lower.includes(key)) return [...coords];
+  }
+  // Add small random jitter to avoid exact overlap for unknown cities
+  return [OHIO_CENTER[0] + (Math.random() - 0.5) * 3, OHIO_CENTER[1] + (Math.random() - 0.5) * 4];
+}
+
+function initMap() {
+  map = L.map('judgeMap').setView(OHIO_CENTER, OHIO_ZOOM);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap contributors © CARTO',
+    maxZoom: 18
+  }).addTo(map);
+}
+
+function makeMarkerIcon(color = '#357a38') {
+  return L.divIcon({
+    className: '',
+    html: `<div style="width:22px;height:22px;background:${color};border:2px solid #1c3a1c;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 6px rgba(0,0,0,0.25);">
+             <div style="width:8px;height:8px;background:white;border-radius:50%;"></div>
+           </div>`,
+    iconSize: [22, 22],
+    iconAnchor: [11, 11],
+    popupAnchor: [0, -14],
+  });
+}
+
+function renderJudges(judges) {
+  const list = document.getElementById('judgeList');
+  // Clear existing markers
+  Object.values(markers).forEach(m => map.removeLayer(m));
+  markers = {};
+
+  const filtered = judges.filter(j => {
+    const fieldMatch  = activeFilter === 'all' || (j.expertise || []).some(e => e.includes(activeFilter));
+    const levelMatch  = activeLevelFilter === 'all' || j.available_level === activeLevelFilter || j.available_level === 'Any level';
+    return fieldMatch && levelMatch;
+  });
+
+  document.getElementById('judgeCount').textContent = `${filtered.length} judge${filtered.length !== 1 ? 's' : ''} shown`;
+
+  if (!filtered.length) {
+    list.innerHTML = '<div class="empty-state">No judges match the current filter.</div>';
+    return;
+  }
+
+  list.innerHTML = '';
+  filtered.forEach(judge => {
+    const coords = coordsFromLocation(judge.city);
+    // Sidebar item
+    const item = document.createElement('div');
+    item.className = 'judge-item';
+    item.dataset.id = judge.id;
+    item.innerHTML = `
+      <div class="judge-item-name">${judge.name}</div>
+      <div class="judge-item-org">${judge.org || 'Independent'}</div>
+      <div class="judge-item-tags">${(judge.expertise || []).map(e => `<span class="judge-tag">${e.split('/')[0].trim()}</span>`).join('')}</div>
+      <div class="judge-item-level">${judge.available_level || 'Any level'} · ${judge.city || 'Ohio'}</div>`;
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.judge-item').forEach(i => i.classList.remove('highlighted'));
+      item.classList.add('highlighted');
+      if (markers[judge.id]) {
+        map.setView(coords, 10, { animate: true });
+        markers[judge.id].openPopup();
+      }
+    });
+    list.appendChild(item);
+
+    // Map marker
+    const marker = L.marker(coords, { icon: makeMarkerIcon() }).addTo(map);
+    markers[judge.id] = marker;
+    marker.bindPopup(`
+      <div class="judge-popup">
+        <div class="judge-popup-name">${judge.name}</div>
+        <div class="judge-popup-org">${judge.org || 'Independent'} · ${judge.city || 'Ohio'}</div>
+        <div class="judge-popup-tags">${(judge.expertise || []).map(e => `<span class="judge-popup-tag">${e.split('/')[0].trim()}</span>`).join('')}</div>
+        <div style="font-size:0.75rem;color:#6b756b;margin-bottom:8px;">Available for: ${judge.available_level || 'Any level'}</div>
+        <button class="judge-popup-btn" onclick="openMatchModal('${judge.id}','${escHtml(judge.name)}','${escHtml(judge.email || '')}')">Send Match Request →</button>
+      </div>`);
+    marker.on('click', () => {
+      document.querySelectorAll('.judge-item').forEach(i => i.classList.remove('highlighted'));
+      const sidebarItem = list.querySelector(`[data-id="${judge.id}"]`);
+      if (sidebarItem) { sidebarItem.classList.add('highlighted'); sidebarItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }
+    });
+  });
+
+  // Update stats
+  const districts = new Set(filtered.map(j => j.city?.split(',')[0]?.trim()).filter(Boolean)).size;
+  const fields    = new Set(filtered.flatMap(j => j.expertise || [])).size;
+  document.getElementById('statTotal').textContent    = judges.length;
+  document.getElementById('statActive').textContent   = filtered.length;
+  document.getElementById('statFields').textContent   = fields;
+  document.getElementById('statDistricts').textContent = districts;
+}
+
+function escHtml(s) { return s.replace(/'/g, "\\'").replace(/"/g, '&quot;'); }
+
+function filterJudges(field, btn) {
+  document.querySelectorAll('#filterChips .chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  activeFilter = field;
+  renderJudges(allJudges);
+}
+function filterLevel(level, btn) {
+  btn.closest('.filter-chips').querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  activeLevelFilter = level;
+  renderJudges(allJudges);
+}
+window.filterJudges = filterJudges;
+window.filterLevel  = filterLevel;
+
+async function loadJudges() {
+  if (!sb) {
+    // Demo data when Supabase isn't connected
+    allJudges = [
+      { id:'demo1', name:'Dr. Sarah Mitchell', org:'Ohio State University', city:'Columbus, Franklin County', expertise:['Biology / Life Sciences','Environmental Science'], available_level:'Any level', email:'' },
+      { id:'demo2', name:'Prof. James Chen',   org:'Case Western Reserve',  city:'Cleveland, Cuyahoga County', expertise:['Physics / Engineering','Computer Science / Math'], available_level:'District fair', email:'' },
+      { id:'demo3', name:'Dr. Maria Santos',   org:'University of Cincinnati', city:'Cincinnati, Hamilton County', expertise:['Chemistry / Biochemistry','Medicine / Health Sciences'], available_level:'School fair', email:'' },
+      { id:'demo4', name:'Mark Thompson',      org:'Procter & Gamble',       city:'Cincinnati, Hamilton County', expertise:['Chemistry / Biochemistry'], available_level:'School fair', email:'' },
+      { id:'demo5', name:'Dr. Linda Park',     org:'Cleveland Clinic',       city:'Cleveland, Cuyahoga County', expertise:['Medicine / Health Sciences','Biology / Life Sciences'], available_level:'Any level', email:'' },
+      { id:'demo6', name:'Prof. Robert Davis',  org:'Toledo University',     city:'Toledo, Lucas County', expertise:['Environmental Science','Physics / Engineering'], available_level:'District fair', email:'' },
+    ];
+    renderJudges(allJudges);
+    return;
+  }
+  const { data, error } = await sb.from('judges').select('*').eq('status','active').order('created_at', { ascending: false });
+  if (error) { console.error('Failed to load judges:', error); return; }
+  allJudges = data || [];
+  renderJudges(allJudges);
+}
+
+function toggleRegister() {
+  document.getElementById('registerPanel').classList.toggle('open');
+}
+window.toggleRegister = toggleRegister;
+
+async function registerJudgeMap() {
+  const name  = document.getElementById('rjName').value.trim();
+  const email = document.getElementById('rjEmail').value.trim();
+  const org   = document.getElementById('rjOrg').value.trim();
+  const city  = document.getElementById('rjCity').value.trim();
+  const level = document.getElementById('rjLevel').value;
+  const expertise = ['rje1','rje2','rje3','rje4','rje5','rje6'].map((id, i) => {
+    const labels = ['Biology / Life Sciences','Chemistry / Biochemistry','Physics / Engineering','Environmental Science','Computer Science / Math','Medicine / Health Sciences'];
+    return document.getElementById(id).checked ? labels[i] : null;
+  }).filter(Boolean);
+  const msg = document.getElementById('rjMsg');
+
+  if (!name || !email || !city) { msg.textContent = 'Please fill in name, email, and city.'; msg.style.color = '#c0392b'; return; }
+  msg.textContent = 'Adding you to the map...'; msg.style.color = 'var(--gray-500)';
+
+  if (sb) {
+    const { error } = await sb.from('judges').insert([{ name, email, org, city, expertise, available_level: level, status: 'active' }]);
+    if (error) { msg.textContent = 'Error — please try again or email us.'; msg.style.color = '#c0392b'; return; }
+  }
+
+  msg.textContent = 'You\'re on the map! Refresh to see your pin.'; msg.style.color = 'var(--green-600)';
+  logEvent('judge_registered', { city, expertise });
+  await loadJudges();
+}
+window.registerJudgeMap = registerJudgeMap;
+
+/* ── MATCH REQUEST ─────────────────────────────────────── */
+function openMatchModal(judgeId, judgeName, judgeEmail) {
+  document.getElementById('targetJudgeId').value    = judgeId;
+  document.getElementById('targetJudgeName').value  = judgeName;
+  document.getElementById('targetJudgeEmail').value = judgeEmail;
+  document.getElementById('matchModal').classList.add('open');
+  // Set min date to today
+  document.getElementById('reqDate').min = new Date().toISOString().split('T')[0];
+}
+function closeModal() { document.getElementById('matchModal').classList.remove('open'); }
+window.openMatchModal = openMatchModal;
+window.closeModal     = closeModal;
+
+async function sendMatchRequest() {
+  const judgeId    = document.getElementById('targetJudgeId').value;
+  const judgeName  = document.getElementById('targetJudgeName').value;
+  const judgeEmail = document.getElementById('targetJudgeEmail').value;
+  const teacher    = document.getElementById('reqTeacher').value.trim();
+  const teacherEmail = document.getElementById('reqTeacherEmail').value.trim();
+  const school     = document.getElementById('reqSchool').value.trim();
+  const date       = document.getElementById('reqDate').value;
+  const message    = document.getElementById('reqMessage').value.trim();
+  const msgEl      = document.getElementById('reqMsg');
+
+  if (!teacher || !teacherEmail || !school || !date) {
+    msgEl.textContent = 'Please fill in all required fields.'; msgEl.style.color = '#c0392b'; return;
+  }
+
+  msgEl.textContent = 'Sending request...'; msgEl.style.color = 'var(--gray-500)';
+
+  if (sb) {
+    // Log the match request in Supabase
+    const { error } = await sb.from('judge_requests').insert([{
+      judge_id: judgeId, judge_email: judgeEmail, judge_name: judgeName,
+      teacher_name: teacher, teacher_email: teacherEmail,
+      school, fair_date: date, message,
+      status: 'pending'
+    }]);
+    if (error) { msgEl.textContent = 'Error saving request. Please email us directly.'; msgEl.style.color = '#c0392b'; return; }
+  }
+
+  // Trigger email via mailto as fallback (replace with Supabase Edge Function when ready)
+  const subject = encodeURIComponent(`Science Fair Judge Request — ${school}`);
+  const body    = encodeURIComponent(
+    `Hi ${judgeName},\n\nMy name is ${teacher} and I'm coordinating the science fair at ${school}.\n\n` +
+    `Fair date: ${date}\n\n${message ? message + '\n\n' : ''}` +
+    `We'd love to have you join us as a judge. Please reply to this email or contact me at ${teacherEmail} to confirm.\n\n` +
+    `Thank you!\n${teacher}`
+  );
+
+  if (judgeEmail) {
+    window.open(`mailto:${judgeEmail}?subject=${subject}&body=${body}`);
+  }
+
+  msgEl.textContent = `Request sent to ${judgeName}!`; msgEl.style.color = 'var(--green-600)';
+  logEvent('judge_request_sent', { judge_id: judgeId, school });
+
+  setTimeout(() => { closeModal(); document.getElementById('reqMsg').textContent = ''; }, 2000);
+}
+window.sendMatchRequest = sendMatchRequest;
+
+/* ── BOOT ──────────────────────────────────────────────── */
+document.addEventListener('DOMContentLoaded', () => {
+  initMap();
+  loadJudges();
+});
+</script>
+</body>
+</html>

@@ -15,7 +15,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
 
   <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     /*  TOKENS  */
@@ -163,6 +162,8 @@
       border-top: 1px solid rgba(106,184,110,0.2);
       padding: 16px 0;
       background: rgba(0,0,0,0.15);
+      position: relative;
+      z-index: 2;
     }
     .hero-portal-inner {
       display: flex; align-items: center; gap: 16px; flex-wrap: wrap;
@@ -272,7 +273,7 @@
       background-size: cover;
       background-position: center 30%;
       position: relative;
-      overflow: hidden;
+      overflow: visible;
     }
     /* Dark green overlay so text stays readable */
     .hero::before {
@@ -292,12 +293,8 @@
     }
     .hero-inner {
       position: relative; z-index: 1;
-      display: grid; grid-template-columns: 1fr 420px; gap: 80px;
-      align-items: center;
-      padding: calc(var(--nav-h) + 72px) 0 96px;
-    }
-    @media (max-width: 960px) {
-      .hero-inner { grid-template-columns: 1fr; gap: 48px; }
+      max-width: 700px;
+      padding: calc(var(--nav-h) + 80px) 0 100px;
     }
     .hero-left { }
     .hero-tag {
@@ -347,35 +344,6 @@
     .hero-stat-n .g { color: var(--green-400); }
     .hero-stat-l { font-size: 0.75rem; color: rgba(255,255,255,0.45); letter-spacing: 0.04em; }
 
-    /* Hero card (right side) */
-    .hero-card {
-      background: var(--white);
-      padding: 32px;
-      border-top: 3px solid var(--green-600);
-    }
-    .hero-card-label {
-      font-size: 0.7rem; font-weight: 500; letter-spacing: 0.15em;
-      text-transform: uppercase; color: var(--green-600); margin-bottom: 10px;
-    }
-    .hero-card h3 {
-      font-family: var(--ff-serif);
-      font-size: 1.25rem; color: var(--gray-900); margin-bottom: 20px;
-    }
-    .hero-mini-quiz { }
-    .hero-quiz-q { font-size: 0.88rem; font-weight: 500; color: var(--gray-700); margin-bottom: 10px; }
-    .hero-quiz-options { display: flex; flex-direction: column; gap: 6px; }
-    .hero-quiz-opt {
-      display: block;
-      padding: 9px 14px;
-      border: 1.5px solid var(--gray-200);
-      background: var(--white);
-      font-size: 0.84rem; color: var(--gray-700);
-      cursor: pointer; transition: all 0.14s;
-      text-align: left; width: 100%;
-    }
-    .hero-quiz-opt:hover { border-color: var(--green-500); background: var(--green-50); color: var(--green-800); }
-    .hero-quiz-opt.active { border-color: var(--green-600); background: var(--green-50); color: var(--green-800); font-weight: 500; }
-    .hero-quiz-icon { display: none; }
 
     /*  IMPACT BAND  */
 
@@ -536,7 +504,7 @@
       .res-card:nth-last-child(-n+2) { border-bottom: none; }
     }
     .res-icon { display: none; }
-    .res-card h4 { color: var(--green-900); margin-bottom: 6px; font-size: 0.94rem; }
+    .res-card h4 { color: var(--green-900); margin-bottom: 6px; font-size: 1rem; font-family: var(--ff-serif); font-weight: 600; }
     .res-card p { font-size: 0.83rem; color: var(--gray-500); flex: 1; margin-bottom: 12px; line-height: 1.55; }
     .res-arrow { font-size: 0.78rem; font-weight: 500; color: var(--green-600); letter-spacing: 0.05em; transition: gap 0.15s; display: flex; align-items: center; gap: 6px; }
     .res-card:hover .res-arrow { gap: 10px; }
@@ -715,34 +683,6 @@
         </div>
       </div>
 
-      <!-- Mini quiz on hero -->
-      <div class="hero-card anim d2">
-        <h3>Who are you?</h3>
-        <p style="font-size:0.84rem;color:var(--gray-500);margin:-12px 0 18px;line-height:1.5;">Connect me with the resources I need.</p>
-        <div class="hero-mini-quiz">
-          <div class="hero-quiz-opts">
-            <button class="hero-quiz-opt" onclick="heroQuizPick(this,'student')">
-              I'm a student
-            </button>
-            <button class="hero-quiz-opt" onclick="heroQuizPick(this,'teacher')">
-              I'm a teacher
-            </button>
-            <button class="hero-quiz-opt" onclick="heroQuizPick(this,'admin')">
-              I'm a school administrator
-            </button>
-            <button class="hero-quiz-opt" onclick="heroQuizPick(this,'judge')">
-              I'm a STEM professional
-            </button>
-            <button class="hero-quiz-opt" onclick="heroQuizPick(this,'company')">
-              I represent a company
-            </button>
-          </div>
-          <div id="heroQuizCTA" style="margin-top:18px;display:none;">
-            <a id="heroQuizLink" href="#quiz" class="btn btn-primary" style="width:100%;justify-content:center;">See my personalized resources →</a>
-          </div>
-        </div>
-      </div>
-
     </div>
   </div>
 
@@ -759,6 +699,73 @@
         </div>
       </div>
     </div>
+</section>
+
+
+<!-- QUIZ ─────────────────────────────────────────────────────── -->
+<section class="quiz-section section-sm" id="quiz">
+  <div class="container">
+    <div class="quiz-header reveal">
+      <span class="overline">Find Your Path</span>
+      <h2>Who are you?</h2>
+      <p>Connect me with the resources I need — two questions, instant results.</p>
+    </div>
+    <div class="quiz-box reveal">
+      <div class="quiz-track"><div class="quiz-track-fill" id="qProgress" style="width:0%"></div></div>
+      <div class="quiz-body" id="qBody">
+
+        <!-- Step 1: role -->
+        <div class="quiz-step active" id="qs1">
+          <div class="quiz-step-lbl">Step 1 of 2</div>
+          <div class="quiz-q">Who are you?</div>
+          <div class="quiz-opts">
+            <button class="quiz-opt" onclick="qPick(this,'student')">I'm a student who wants to do science fair</button>
+            <button class="quiz-opt" onclick="qPick(this,'teacher')">I'm a teacher starting or running a science fair</button>
+            <button class="quiz-opt" onclick="qPick(this,'admin')">I'm a school administrator evaluating programs</button>
+            <button class="quiz-opt" onclick="qPick(this,'judge')">I'm a STEM professional who wants to judge or mentor</button>
+            <button class="quiz-opt" onclick="qPick(this,'company')">I represent a company interested in partnering</button>
+          </div>
+          <div class="quiz-nav">
+            <span></span>
+            <button class="btn btn-primary" id="qNext1" onclick="qStep2()" disabled style="opacity:.4">Continue →</button>
+          </div>
+        </div>
+
+        <!-- Step 2: need (populated by JS) -->
+        <div class="quiz-step" id="qs2">
+          <div class="quiz-step-lbl">Step 2 of 2</div>
+          <div class="quiz-q" id="qs2Q"></div>
+          <div class="quiz-opts" id="qs2Opts"></div>
+          <div class="quiz-nav">
+            <button class="btn btn-ghost" onclick="qBack()">← Back</button>
+            <button class="btn btn-primary" id="qNext2" onclick="qResult()" disabled style="opacity:.4">See My Resources →</button>
+          </div>
+        </div>
+
+        <!-- Result -->
+        <div class="quiz-result" id="qResult">
+          <div class="result-banner">
+            <div class="result-role" id="rRole"></div>
+            <div class="result-title" id="rTitle"></div>
+          </div>
+          <div class="result-links" id="rLinks"></div>
+          <div class="result-cta" id="rCTA"></div>
+          <div style="margin-top:20px;">
+            <p class="email-caption">Get monthly science fair tips and resources:</p>
+            <div class="email-row">
+              <input type="email" id="subEmail" placeholder="your@email.com" />
+              <button onclick="doSubscribe()">Subscribe</button>
+            </div>
+            <div id="subMsg"></div>
+          </div>
+          <div class="quiz-nav" style="margin-top:18px;">
+            <button class="btn btn-ghost" onclick="qReset()">← Start over</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
 </section>
 
 <!-- MISSION  -->
@@ -863,15 +870,15 @@
 <section class="section portal-section" id="portal">
   <div class="container">
     <div class="portal-head reveal">
-      <span class="overline">Member Access</span>
+      <span class="overline">Free Member Access</span>
       <h2>Ambassador &amp; Teacher Portal</h2>
-      <p>Sign up for exclusive resources, templates, judge tools, and your school or student dashboard.</p>
+      <p>Creating an account is completely free — for both teachers and students. Get exclusive resources, templates, judge tools, and your school or student dashboard.</p>
     </div>
     <div class="portal-grid reveal">
       <div class="portal-card">
-        <div class="portal-tag">For Teachers</div>
+        <div class="portal-tag">For Teachers — Free</div>
         <h3>Teacher Portal</h3>
-        <p>Access our full downloadable resource library — templates, rubrics, setup checklists, and judge recruitment tools.</p>
+        <p>Free to join. Access our full downloadable resource library — templates, rubrics, setup checklists, and judge recruitment tools.</p>
         <ul class="perk-list">
           <li>Science fair setup checklist &amp; planning timeline</li>
           <li>Judge recruitment email templates</li>
@@ -883,14 +890,14 @@
           <input type="text"  id="tName"   placeholder="Full name" />
           <input type="email" id="tEmail"  placeholder="School email address" />
           <input type="text"  id="tSchool" placeholder="School name" />
-          <button class="btn btn-primary" onclick="regTeacher()">Request Access →</button>
+          <button class="btn btn-primary" onclick="regTeacher()">Create Free Teacher Account →</button>
           <div id="tMsg" class="portal-msg"></div>
         </div>
       </div>
       <div class="portal-card">
-        <div class="portal-tag">For Students</div>
+        <div class="portal-tag">For Students — Free</div>
         <h3>Student Ambassador Portal</h3>
-        <p>Apply to become a FairGame ambassador at your school. Get matched with a mentor and track your school's journey.</p>
+        <p>Free to join. Apply to become a FairGame ambassador at your school. Get matched with a mentor and track your school's journey.</p>
         <ul class="perk-list">
           <li>Personal mentor matching</li>
           <li>Ambassador handbook &amp; training materials</li>
@@ -902,7 +909,7 @@
           <input type="text"  id="aName"   placeholder="Full name" />
           <input type="email" id="aEmail"  placeholder="Email address" />
           <input type="text"  id="aSchool" placeholder="School name &amp; grade" />
-          <button class="btn btn-primary" onclick="regAmbassador()">Apply to Become Ambassador →</button>
+          <button class="btn btn-primary" onclick="regAmbassador()">Create Free Student Account →</button>
           <div id="aMsg" class="portal-msg"></div>
         </div>
       </div>
@@ -999,355 +1006,9 @@
 </footer>
 
 <!-- SCRIPTS  -->
-<script>
-/*  SUPABASE  */
-// Replace these two values with your Supabase project credentials
-// Dashboard → Settings → API
-const SB_URL = 'YOUR_SUPABASE_URL';
-const SB_KEY = 'YOUR_SUPABASE_ANON_KEY';
-let sb = null;
-try { sb = window.supabase.createClient(SB_URL, SB_KEY); } catch(e) {}
-
-/*  QUIZ DATA  */
-const QD = {
-  student: {
-    q: 'What do you need most right now?',
-    opts: [
-      { e:'', l:'Help choosing a project topic', k:'topic' },
-      { e:'', l:'Designing my experiment', k:'experiment' },
-      { e:'', l:'Building my display board', k:'display' },
-      { e:'', l:'Competition info — ISEF, state, local', k:'compete' },
-      { e:'', l:'A mentor to guide me', k:'mentor' },
-    ],
-    results: {
-      topic:      { role:'Student — Project Planning', title:"Let's find your project idea", links:[
-        { e:'', t:'Research Guide: Choosing a Topic', d:'Step-by-step topic selection', h:'/researchguide.html' },
-        { e:'', t:'Winning Project Examples', d:'What ISEF winners actually researched', h:'/researchguide.html#examples' },
-        { e:'', t:'Get a Mentor Match', d:'We\'ll connect you with a STEM professional', h:'#portal' },
-      ], cta:[{t:'Start Research Guide →', h:'/researchguide.html'},{t:'Get Mentor →', h:'#portal', o:true}]},
-      experiment: { role:'Student — Experimental Design', title:'Build a solid experiment', links:[
-        { e:'', t:'Experimental Design Guide', d:'Hypothesis, variables, controls explained', h:'/researchguide.html#design' },
-        { e:'', t:'Data Collection Templates', d:'Printable lab notebooks & data sheets', h:'/researchguide.html#data' },
-      ], cta:[{t:'Open Research Guide →', h:'/researchguide.html'}]},
-      display:    { role:'Student — Presentation', title:'Create a winning display', links:[
-        { e:'', t:'Display Board Template', d:'Downloadable layout with all sections', h:'/researchguide.html#display' },
-        { e:'', t:'Presentation Tips', d:'What judges actually look for', h:'/researchguide.html#present' },
-      ], cta:[{t:'Get Display Templates →', h:'/researchguide.html'}]},
-      compete:    { role:'Student — Competitions', title:'Navigate the competition path', links:[
-        { e:'', t:'Ohio Competition Pathway', d:'School → District → State → ISEF', h:'/stateresources.html' },
-        { e:'', t:'Key Deadlines 2025–26', d:'Registration dates & requirements', h:'/stateresources.html#ohio' },
-        { e:'', t:'National Competition List', d:'ISEF, Broadcom, and more', h:'/stateresources.html#national' },
-      ], cta:[{t:'Browse State Resources →', h:'/stateresources.html'},{t:'Start Here →', h:'/starthere.html', o:true}]},
-      mentor:     { role:'Student — Mentorship', title:'Get matched with a mentor', links:[
-        { e:'', t:'Ambassador Matching', d:'Apply for a personal student ambassador', h:'#portal' },
-        { e:'', t:'STEM Professional Network', d:'Scientists & engineers who can help', h:'/volunteer.html' },
-      ], cta:[{t:'Apply for Mentorship →', h:'#portal'}]},
-    }
-  },
-  teacher: {
-    q: 'Where are you in the process?',
-    opts: [
-      { e:'', l:'Starting a science fair from scratch', k:'setup' },
-      { e:'', l:'Improving an existing fair', k:'improve' },
-      { e:'', l:'Looking for curriculum materials', k:'curriculum' },
-      { e:'', l:'Recruiting judges', k:'judges' },
-      { e:'', l:'Finding funding & grants', k:'funding' },
-    ],
-    results: {
-      setup:      { role:'Teacher — Fair Setup', title:"Start your school's science fair", links:[
-        { e:'', t:'Complete Science Fair Setup Guide', d:'Month-by-month planning timeline', h:'/setupguide.html' },
-        { e:'', t:'Administrator Proposal Template', d:'Make the case to your principal', h:'#portal' },
-        { e:'', t:'12-Month Planning Checklist', d:'Printable step-by-step timeline', h:'#portal' },
-      ], cta:[{t:'Full Setup Guide →', h:'/setupguide.html'},{t:'Access Teacher Portal →', h:'#portal', o:true}]},
-      improve:    { role:'Teacher — Fair Improvement', title:'Level up your fair', links:[
-        { e:'', t:'Best Practices from Top Schools', d:'What high-participation fairs do differently', h:'/setupguide.html' },
-        { e:'', t:'OAS Partnership Guide', d:'Connect to district & state competitions', h:'/setupguide.html#oas' },
-      ], cta:[{t:'Teacher Resources →', h:'/teachers-professionals.html'}]},
-      curriculum: { role:'Teacher — Curriculum', title:'Classroom resources for you', links:[
-        { e:'', t:'Lesson Plan Templates', d:'Grades 6–12, Ohio Standards-aligned', h:'#portal' },
-        { e:'', t:'Student Worksheets', d:'Printable handouts for every phase', h:'#portal' },
-        { e:'', t:'Assessment Rubrics', d:'Proposal, progress, final, presentation', h:'#portal' },
-      ], cta:[{t:'Access Teacher Portal →', h:'#portal'}]},
-      judges:     { role:'Teacher — Judge Recruitment', title:'Build your judge roster', links:[
-        { e:'', t:'Judge Recruitment Email Template', d:'Tested cold email that gets responses', h:'#portal' },
-        { e:'', t:'Judge Training Materials', d:'OAS-approved orientation packet', h:'#portal' },
-        { e:'', t:'Where to Find Judges', d:'Universities, industry partners, alumni', h:'/setupguide.html#judges' },
-      ], cta:[{t:'Get Judge Templates →', h:'#portal'},{t:'Post a Judge Request →', h:'/volunteer.html', o:true}]},
-      funding:    { role:'Teacher — Funding', title:'Find money for your fair', links:[
-        { e:'', t:'Ohio Science Fair Grant List', d:'Ohio-specific & national opportunities', h:'/setupguide.html#funding' },
-        { e:'', t:'Sponsorship Outreach Letter', d:'Tested template for local businesses', h:'#portal' },
-        { e:'', t:'Budget Template', d:'Full cost breakdown for a $500–$5K fair', h:'#portal' },
-      ], cta:[{t:'Open Teacher Portal →', h:'#portal'}]},
-    }
-  },
-  admin: {
-    q: "What's your biggest concern?",
-    opts: [
-      { e:'', l:'Cost and budget requirements', k:'cost' },
-      { e:'⏱', l:'Time commitment from teachers', k:'time' },
-      { e:'', l:'Academic impact and standards alignment', k:'impact' },
-      { e:'', l:'Where to start / pilot program options', k:'start' },
-    ],
-    results: {
-      cost:   { role:'Administrator — Budget', title:'The numbers behind science fairs', links:[
-        { e:'', t:'Science Fair Cost Breakdown', d:'Real numbers: $500–$5K by scale', h:'/setupguide.html#cost' },
-        { e:'', t:'Funding Sources Guide', d:'Grants, sponsors, PTA, in-kind', h:'/setupguide.html#funding' },
-      ], cta:[{t:'Full Setup Guide →', h:'/setupguide.html'}]},
-      time:   { role:'Administrator — Planning', title:'Realistic time investment', links:[
-        { e:'', t:'12-Month Timeline', d:'Teacher hours by phase — avg 5 hrs/month', h:'/setupguide.html' },
-        { e:'', t:'Committee Structure Guide', d:'Distribute the load across teachers', h:'/setupguide.html#committee' },
-      ], cta:[{t:'Contact Us →', h:'mailto:fairgameinitiative@outlook.com'}]},
-      impact: { role:'Administrator — Outcomes', title:'Academic impact evidence', links:[
-        { e:'', t:'Research on Science Fair Benefits', d:'College prep, critical thinking, STEM identity', h:'/setupguide.html' },
-        { e:'', t:'Student Success Stories', d:'Outcomes from FairGame-supported schools', h:'/successstories.html' },
-      ], cta:[{t:'Read Success Stories →', h:'/successstories.html'}]},
-      start:  { role:'Administrator — Getting Started', title:'Pilot program options', links:[
-        { e:'', t:'One-Grade Pilot Guide', d:'Start with 8th grade, expand from there', h:'/setupguide.html' },
-        { e:'', t:'Schedule a Consultation', d:'30-min call with our team — free', h:'mailto:fairgameinitiative@outlook.com' },
-      ], cta:[{t:'Schedule Consultation →', h:'mailto:fairgameinitiative@outlook.com'}]},
-    }
-  },
-  judge: {
-    q: 'How would you like to contribute?',
-    opts: [
-      { e:'', l:'Judge at a local or district fair', k:'judge' },
-      { e:'', l:'Mentor a student long-term', k:'mentor' },
-      { e:'', l:'Guest speak or give facility tours', k:'speak' },
-    ],
-    results: {
-      judge:  { role:'STEM Professional — Judging', title:'Sign up to judge', links:[
-        { e:'', t:'Judge Application Form', d:'Register your expertise & availability', h:'/volunteer.html' },
-        { e:'', t:'What to Expect', d:'3–5 hour commitment, rubric provided', h:'/volunteer.html' },
-      ], cta:[{t:'Sign Up to Judge →', h:'/volunteer.html'}]},
-      mentor: { role:'STEM Professional — Mentorship', title:'Become a student mentor', links:[
-        { e:'', t:'Mentor Program Overview', d:'What the commitment looks like', h:'/volunteer.html' },
-        { e:'', t:'Mentor Training Materials', d:'How to guide without doing the work', h:'/volunteer.html' },
-      ], cta:[{t:'Apply to Mentor →', h:'/volunteer.html'}]},
-      speak:  { role:'STEM Professional — Outreach', title:'Share your expertise', links:[
-        { e:'', t:'Speaking Request Form', d:'Tell us your topic and availability', h:'mailto:fairgameinitiative@outlook.com' },
-      ], cta:[{t:'Get in Touch →', h:'mailto:fairgameinitiative@outlook.com'}]},
-    }
-  },
-  company: {
-    q: 'How would your organization like to engage?',
-    opts: [
-      { e:'', l:'Sponsor a school or program', k:'sponsor' },
-      { e:'', l:'Provide employee volunteers / judges', k:'volunteers' },
-      { e:'', l:'Formal partnership / MOU', k:'partner' },
-    ],
-    results: {
-      sponsor:    { role:'Corporate — Sponsorship', title:'Sponsor a school program', links:[
-        { e:'', t:'Sponsorship Tiers Overview', d:'What your contribution funds', h:'mailto:fairgameinitiative@outlook.com' },
-        { e:'', t:'Adopt a School', d:'Name-sponsor a specific school\'s fair', h:'mailto:fairgameinitiative@outlook.com' },
-      ], cta:[{t:'Contact Us →', h:'mailto:fairgameinitiative@outlook.com'}]},
-      volunteers: { role:'Corporate — Volunteers', title:'Employee volunteer program', links:[
-        { e:'', t:'Corporate Judge Program', d:'Counts toward employee volunteer hours', h:'/volunteer.html' },
-        { e:'', t:'Mentorship Program', d:'Employees mentor students 1-on-1', h:'/volunteer.html' },
-      ], cta:[{t:'Explore Volunteer Program →', h:'/volunteer.html'}]},
-      partner:    { role:'Corporate — Partnership', title:'Formal organizational partnership', links:[
-        { e:'', t:'Partnership Overview Deck', d:'Full overview of FairGame and impact', h:'mailto:fairgameinitiative@outlook.com' },
-      ], cta:[{t:'Reach Out →', h:'mailto:fairgameinitiative@outlook.com'}]},
-    }
-  }
-};
-
-/*  QUIZ STATE  */
-let qRole = null, qNeed = null;
-
-function qPick(el, val) {
-  el.closest('.quiz-opts').querySelectorAll('.quiz-opt').forEach(o => o.classList.remove('sel'));
-  el.classList.add('sel');
-  if (el.closest('#qs1')) { qRole = val; enable('qNext1'); }
-  else                    { qNeed = val; enable('qNext2'); }
-}
-function enable(id) { const b = document.getElementById(id); b.removeAttribute('disabled'); b.style.opacity='1'; }
-function disable(id){ const b = document.getElementById(id); b.setAttribute('disabled',''); b.style.opacity='0.4'; }
-
-function qStep2() {
-  if (!qRole) return;
-  const d = QD[qRole];
-  document.getElementById('qs2Q').textContent = d.q;
-  document.getElementById('qs2Opts').innerHTML = d.opts.map(o =>
-    `<button class="quiz-opt" onclick="qPick(this,'${o.k}')"><span class="quiz-opt-em">${o.e}</span><span>${o.l}</span></button>`
-  ).join('');
-  qNeed = null; disable('qNext2');
-  document.getElementById('qs1').classList.remove('active');
-  document.getElementById('qs2').classList.add('active');
-  document.getElementById('qProgress').style.width = '50%';
-  logEvent('quiz_step2', { role: qRole });
-}
-function qBack() {
-  document.getElementById('qs2').classList.remove('active');
-  document.getElementById('qs1').classList.add('active');
-  document.getElementById('qProgress').style.width = '0%';
-}
-function qResult() {
-  if (!qRole || !qNeed) return;
-  const res = QD[qRole].results[qNeed];
-  document.getElementById('rRole').textContent  = res.role;
-  document.getElementById('rTitle').textContent = res.title;
-  document.getElementById('rLinks').innerHTML = res.links.map(l =>
-    `<a href="${l.h}" class="result-link" onclick="trackDL('${l.t}','${qRole}')">
-      <div class="result-link-icon">${l.e}</div>
-      <div><strong>${l.t}</strong><span>${l.d}</span></div>
-      <span class="result-link-arrow">→</span>
-    </a>`
-  ).join('');
-  document.getElementById('rCTA').innerHTML = res.cta.map(c =>
-    `<a href="${c.h}" class="btn ${c.o ? 'btn-outline':'btn-primary'}">${c.t}</a>`
-  ).join('');
-  document.getElementById('qs2').classList.remove('active');
-  document.getElementById('qResult').classList.add('active');
-  document.getElementById('qProgress').style.width = '100%';
-  logEvent('quiz_complete', { role: qRole, need: qNeed });
-}
-function qReset() {
-  qRole = null; qNeed = null;
-  document.getElementById('qResult').classList.remove('active');
-  document.getElementById('qs1').classList.add('active');
-  document.getElementById('qProgress').style.width = '0%';
-  document.querySelectorAll('.quiz-opt').forEach(o => o.classList.remove('sel'));
-  disable('qNext1');
-}
-
-/* Hero mini quiz */
-let heroRole = null;
-function heroQuizPick(el, role) {
-  heroRole = role;
-  el.closest('.hero-quiz-opts').querySelectorAll('.hero-quiz-opt').forEach(o => o.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('heroQuizCTA').style.display = 'block';
-  document.getElementById('heroQuizLink').href = '#quiz';
-  // Pre-select in main quiz
-  qRole = role;
-}
-
-/*  EMAIL SUBSCRIBE  */
-async function doSubscribe() {
-  const email = document.getElementById('subEmail').value.trim();
-  const msg   = document.getElementById('subMsg');
-  if (!email || !email.includes('@')) { msg.textContent='Please enter a valid email.'; msg.className='msg-err'; return; }
-  msg.textContent = 'Subscribing...'; msg.className = '';
-  if (sb) {
-    const { error } = await sb.from('email_subscribers').insert([{ email, role: qRole, source: 'quiz' }]);
-    if (error && error.code !== '23505') { msg.textContent='Something went wrong. Please try again.'; msg.className='msg-err'; return; }
-  }
-  msg.textContent = ' Subscribed! Check your inbox for a welcome message.';
-  msg.className = 'msg-ok';
-}
-
-/*  PORTAL FORMS  */
-async function regTeacher() {
-  const name = document.getElementById('tName').value.trim();
-  const email = document.getElementById('tEmail').value.trim();
-  const school = document.getElementById('tSchool').value.trim();
-  const msg = document.getElementById('tMsg');
-  if (!name||!email||!school) { msg.textContent='Please fill out all fields.'; msg.className='portal-msg msg-err'; return; }
-  msg.textContent = 'Submitting...'; msg.className = 'portal-msg';
-  if (sb) {
-    const { error } = await sb.from('portal_requests').insert([{ name, email, school, type:'teacher' }]);
-    if (error) { msg.textContent='Error — please email fairgameinitiative@outlook.com'; msg.className='portal-msg msg-err'; return; }
-  }
-  msg.textContent = ' Request received! We\'ll send your access link within 24 hours.';
-  msg.className = 'portal-msg msg-ok';
-  logEvent('portal_request', { type:'teacher' });
-}
-async function regAmbassador() {
-  const name = document.getElementById('aName').value.trim();
-  const email = document.getElementById('aEmail').value.trim();
-  const school = document.getElementById('aSchool').value.trim();
-  const msg = document.getElementById('aMsg');
-  if (!name||!email||!school) { msg.textContent='Please fill out all fields.'; msg.className='portal-msg msg-err'; return; }
-  msg.textContent = 'Submitting...'; msg.className = 'portal-msg';
-  if (sb) {
-    const { error } = await sb.from('portal_requests').insert([{ name, email, school, type:'ambassador' }]);
-    if (error) { msg.textContent='Error — please email fairgameinitiative@outlook.com'; msg.className='portal-msg msg-err'; return; }
-  }
-  msg.textContent = ' Application received! We\'ll be in touch within 48 hours.';
-  msg.className = 'portal-msg msg-ok';
-  logEvent('portal_request', { type:'ambassador' });
-}
-async function magicLink(e) {
-  e.preventDefault();
-  const email = prompt('Enter your registered email:');
-  if (!email) return;
-  if (sb) {
-    const { error } = await sb.auth.signInWithOtp({ email });
-    alert(error ? 'Error: '+error.message : 'Magic link sent to '+email+'! Check your inbox.');
-  } else {
-    alert('Portal coming soon! Email fairgameinitiative@outlook.com for early access.');
-  }
-}
-
-/*  ANALYTICS  */
-async function logEvent(event, data={}) {
-  if (!sb) return;
-  await sb.from('events').insert([{ event, data, page:'home', ts: new Date().toISOString() }]);
-}
-async function trackDL(resource, userType) {
-  if (!sb) return;
-  await sb.from('resource_downloads').insert([{ resource, user_type: userType||'guest', page:'home', ts: new Date().toISOString() }]);
-}
-
-/*  LIVE STATS  */
-async function loadStats() {
-  if (!sb) return;
-  const { count: dlCount } = await sb.from('resource_downloads').select('id', { count:'exact', head:true });
-  const { count: jCount }  = await sb.from('portal_requests').select('id', { count:'exact', head:true }).eq('type','judge');
-  const { data: schools }  = await sb.from('stats').select('value').eq('key','schools_supported').single();
-}
-loadStats();
-
-/*  COUNT UP  */
-function countUp(el, target, ms=1200) {
-  const start = performance.now();
-  const tick = now => {
-    const p = Math.min((now-start)/ms, 1);
-    const e = 1 - Math.pow(1-p, 3);
-    el.textContent = Math.round(e * target);
-    if (p < 1) requestAnimationFrame(tick);
-  };
-  requestAnimationFrame(tick);
-}
-const heroObs = new IntersectionObserver(entries => {
-  if (entries[0].isIntersecting) {
-    document.querySelectorAll('.cu').forEach(el => countUp(el, +el.dataset.t));
-    heroObs.disconnect();
-  }
-}, { threshold: 0.3 });
-heroObs.observe(document.querySelector('.hero-stats'));
-
-/*  SCROLL REVEAL  */
-const revObs = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('vis'); revObs.unobserve(e.target); } });
-}, { threshold: 0.1 });
-document.querySelectorAll('.reveal').forEach(el => revObs.observe(el));
-
-/*  MOBILE NAV  */
-document.querySelector('.nav-hamburger').addEventListener('click', () => {
-  const nl = document.querySelector('.nav-links');
-  const open = nl.style.display === 'flex';
-  Object.assign(nl.style, {
-    display: open ? 'none' : 'flex',
-    flexDirection: 'column', position: 'fixed',
-    top: '68px', left: '0', right: '0',
-    background: 'var(--white)', padding: '8px 0 16px',
-    borderBottom: 'var(--border)',
-    boxShadow: 'var(--shadow-md)'
-  });
-});
-
-
-/* ─── NAV SCROLL BEHAVIOUR ─────────────────────────────────── */
-(function() {
-  const nav = document.querySelector('nav');
-  function updateNav() { nav.classList.toggle('scrolled', window.scrollY > 60); }
-  window.addEventListener('scroll', updateNav, { passive: true });
-  updateNav();
-})();
-
-/*  PAGE VIEW  */
-logEvent('page_view', { page:'home' });
-</script>
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- FairGame site scripts -->
+  <script src="/script.js"></script>
 </body>
 </html>

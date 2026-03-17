@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mentorship Log — FairGame Initiative</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    .log-layout { display: grid; grid-template-columns: 280px 1fr; gap: 0; border: var(--border); min-height: 600px; }
+    @media (max-width: 800px) { .log-layout { grid-template-columns: 1fr; } }
+    .log-sidebar { border-right: var(--border); background: var(--white); display: flex; flex-direction: column; }
+    .log-sidebar-header { padding: 18px 18px 14px; border-bottom: var(--border); display: flex; align-items: center; justify-content: space-between; }
+    .log-sidebar-header h4 { color: var(--green-900); }
+    .pair-list { flex: 1; overflow-y: auto; }
+    .pair-item { padding: 14px 18px; border-bottom: var(--border); cursor: pointer; transition: background 0.12s; }
+    .pair-item:hover, .pair-item.active { background: var(--green-50); }
+    .pair-names { font-size: 0.88rem; font-weight: 500; color: var(--green-900); margin-bottom: 2px; }
+    .pair-school { font-size: 0.76rem; color: var(--gray-500); margin-bottom: 4px; }
+    .pair-meta  { display: flex; gap: 8px; align-items: center; }
+    .pair-status { font-size: 0.65rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; padding: 2px 6px; }
+    .pair-status.active   { background: var(--green-100); color: var(--green-700); }
+    .pair-status.complete { background: var(--gray-100);  color: var(--gray-500); }
+    .pair-hours { font-size: 0.72rem; color: var(--gray-500); }
+
+    .log-main { background: var(--gray-50); display: flex; flex-direction: column; }
+    .log-empty { flex: 1; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; color: var(--gray-300); }
+    .log-empty p { font-size: 0.88rem; }
+
+    .log-detail { flex: 1; display: flex; flex-direction: column; display: none; }
+    .log-detail.active { display: flex; }
+    .log-detail-header { background: var(--green-900); padding: 24px 28px; }
+    .log-detail-header h3 { color: var(--white); margin-bottom: 4px; }
+    .log-detail-header p  { color: rgba(255,255,255,0.55); font-size: 0.84rem; }
+    .log-detail-meta { display: flex; gap: 20px; margin-top: 12px; }
+    .log-meta-item { font-size: 0.75rem; color: rgba(255,255,255,0.5); }
+    .log-meta-item strong { color: var(--green-400); display: block; font-size: 1rem; font-family: var(--ff-serif); }
+
+    .log-detail-body { flex: 1; padding: 24px 28px; overflow-y: auto; }
+
+    .milestone-track { display: flex; gap: 0; margin-bottom: 28px; }
+    .milestone-step { flex: 1; padding: 10px 8px; border: var(--border); border-right: none; background: var(--white); text-align: center; cursor: pointer; transition: all 0.14s; }
+    .milestone-step:last-child { border-right: var(--border); }
+    .milestone-step.done { background: var(--green-600); border-color: var(--green-600); }
+    .milestone-step.done .ms-label { color: var(--white); }
+    .milestone-step.done .ms-icon { color: var(--white); }
+    .milestone-step:hover:not(.done) { background: var(--green-50); }
+    .ms-icon  { font-size: 0.85rem; margin-bottom: 2px; color: var(--gray-300); }
+    .ms-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gray-500); }
+
+    .sessions-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+    .sessions-header h4 { color: var(--green-900); }
+    .session-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+    .session-item { background: var(--white); border: var(--border); padding: 14px 16px; display: grid; grid-template-columns: 90px 1fr 60px; gap: 12px; align-items: start; }
+    .session-date { font-size: 0.78rem; font-weight: 500; color: var(--green-700); }
+    .session-notes { font-size: 0.84rem; color: var(--gray-700); line-height: 1.6; }
+    .session-hours { font-size: 0.78rem; font-weight: 500; color: var(--gray-500); text-align: right; }
+
+    .log-form { background: var(--white); border: var(--border); border-top: 3px solid var(--green-600); padding: 20px; margin-top: 8px; }
+    .log-form h5 { color: var(--green-900); margin-bottom: 14px; font-size: 0.9rem; }
+    .log-form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    @media (max-width: 600px) { .log-form-row { grid-template-columns: 1fr; } }
+    .log-form-label { font-size: 0.72rem; font-weight: 500; color: var(--gray-700); display: block; margin-bottom: 3px; }
+
+    /* Add pair modal */
+    .add-pair-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; }
+    .add-pair-modal.open { display: flex; }
+    .add-pair-box { background: var(--white); border-top: 3px solid var(--green-600); padding: 28px; max-width: 460px; width: 90%; }
+    .add-pair-box h3 { color: var(--green-900); margin-bottom: 6px; }
+    .add-pair-box p  { font-size: 0.84rem; color: var(--gray-500); margin-bottom: 18px; }
+    .pair-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    @media (max-width: 500px) { .pair-form-grid { grid-template-columns: 1fr; } }
+    .pair-form-label { font-size: 0.72rem; font-weight: 500; color: var(--gray-700); display: block; margin-bottom: 3px; }
+    .pair-form-row { margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+<nav>
+  <div class="nav-inner">
+    <a href="/" class="nav-logo"><img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'" />FairGame</a>
+    <button class="nav-hamburger">☰</button>
+    <ul class="nav-links">
+      <li class="dropdown"><a href="#">Resources ▾</a><div class="dropdown-menu"><a href="/starthere.html">Start Here</a><a href="/setupguide.html">Setup Guide</a><a href="/stateresources.html">State Resources</a><a href="/researchguide.html">Research Guide</a><a href="/teachers-professionals.html">For Teachers</a></div></li>
+      <li class="dropdown"><a href="#">Get Involved ▾</a><div class="dropdown-menu"><a href="/volunteer.html">Volunteer / Judge</a><a href="/donate.html">Donate</a><a href="/#portal">Ambassador Portal</a><a href="/#portal">Teacher Portal</a></div></li>
+      <li><a href="/successstories.html">Stories</a></li>
+      <li><a href="/impactreport.html">Impact</a></li>
+      <li><a href="/starthere.html" class="nav-cta">Get Started</a></li>
+    </ul>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="container">
+    <div class="breadcrumb"><a href="/">Home</a><span>/</span>Mentorship Log</div>
+    <span class="overline">Student Mentorship Program</span>
+    <h1>Mentorship Log</h1>
+    <p>Track session notes, hours, and milestones for every student-mentor pair. Used for program evaluation and annual reporting.</p>
+  </div>
+</div>
+
+<section class="section">
+  <div class="container">
+    <div class="log-layout reveal">
+      <!-- Pair list -->
+      <div class="log-sidebar">
+        <div class="log-sidebar-header">
+          <h4>Active Pairs</h4>
+          <button class="btn btn-primary" onclick="openAddPair()" style="font-size:0.76rem;padding:7px 14px;">+ New Pair</button>
+        </div>
+        <div class="pair-list" id="pairList">
+          <div style="padding:24px 18px;text-align:center;color:var(--gray-300);font-size:0.84rem;">Loading pairs...</div>
+        </div>
+      </div>
+
+      <!-- Detail -->
+      <div class="log-main">
+        <div class="log-empty" id="logEmpty">
+          <div style="font-size:2rem;color:var(--gray-200);">—</div>
+          <p>Select a mentor-student pair to view their log</p>
+        </div>
+        <div class="log-detail" id="logDetail">
+          <div class="log-detail-header">
+            <h3 id="detailTitle">—</h3>
+            <p id="detailSubtitle">—</p>
+            <div class="log-detail-meta">
+              <div class="log-meta-item"><strong id="metaHours">0</strong>total hours</div>
+              <div class="log-meta-item"><strong id="metaSessions">0</strong>sessions</div>
+              <div class="log-meta-item"><strong id="metaStarted">—</strong>started</div>
+            </div>
+          </div>
+          <div class="log-detail-body">
+            <!-- Milestone tracker -->
+            <div style="margin-bottom:20px;">
+              <div style="font-size:0.72rem;font-weight:500;letter-spacing:0.12em;text-transform:uppercase;color:var(--gray-500);margin-bottom:10px;">Project Milestones</div>
+              <div class="milestone-track" id="milestones">
+                <div class="milestone-step" data-milestone="topic"    onclick="toggleMilestone(this)"><div class="ms-icon">1</div><div class="ms-label">Topic</div></div>
+                <div class="milestone-step" data-milestone="proposal" onclick="toggleMilestone(this)"><div class="ms-icon">2</div><div class="ms-label">Proposal</div></div>
+                <div class="milestone-step" data-milestone="design"   onclick="toggleMilestone(this)"><div class="ms-icon">3</div><div class="ms-label">Design</div></div>
+                <div class="milestone-step" data-milestone="data"     onclick="toggleMilestone(this)"><div class="ms-icon">4</div><div class="ms-label">Data</div></div>
+                <div class="milestone-step" data-milestone="board"    onclick="toggleMilestone(this)"><div class="ms-icon">5</div><div class="ms-label">Board</div></div>
+                <div class="milestone-step" data-milestone="competed" onclick="toggleMilestone(this)"><div class="ms-icon">6</div><div class="ms-label">Competed</div></div>
+              </div>
+            </div>
+
+            <!-- Session log -->
+            <div class="sessions-header">
+              <h4>Session Notes</h4>
+            </div>
+            <div class="session-list" id="sessionList"></div>
+
+            <!-- Add session form -->
+            <div class="log-form">
+              <h5>Log a Session</h5>
+              <div class="log-form-row">
+                <div><label class="log-form-label">Date</label><input type="date" id="newSessionDate" /></div>
+                <div><label class="log-form-label">Hours</label><input type="number" id="newSessionHours" placeholder="1.5" min="0.5" max="10" step="0.5" /></div>
+              </div>
+              <div style="margin-bottom:10px;"><label class="log-form-label">Session notes</label><textarea id="newSessionNotes" rows="3" placeholder="What did you cover? What's the student's next step?"></textarea></div>
+              <button class="btn btn-primary" onclick="logSession()" style="font-size:0.82rem;padding:10px 20px;">Save Session →</button>
+              <span id="sessionMsg" style="font-size:0.78rem;margin-left:12px;"></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Add pair modal -->
+<div class="add-pair-modal" id="addPairModal">
+  <div class="add-pair-box">
+    <h3>New Mentor-Student Pair</h3>
+    <p>Create a new mentorship pair. Both the student and mentor will be tracked here throughout the year.</p>
+    <div class="pair-form-grid">
+      <div class="pair-form-row"><label class="pair-form-label">Student name *</label><input type="text" id="pStudentName" placeholder="Rishi Pampati" /></div>
+      <div class="pair-form-row"><label class="pair-form-label">Student email</label><input type="email" id="pStudentEmail" placeholder="student@school.edu" /></div>
+      <div class="pair-form-row"><label class="pair-form-label">Mentor name *</label><input type="text" id="pMentorName" placeholder="Dr. Jane Smith" /></div>
+      <div class="pair-form-row"><label class="pair-form-label">Mentor email</label><input type="email" id="pMentorEmail" placeholder="mentor@org.com" /></div>
+    </div>
+    <div class="pair-form-row"><label class="pair-form-label">School</label><input type="text" id="pSchool" placeholder="Walnut Hills High School" /></div>
+    <div class="pair-form-row"><label class="pair-form-label">Project topic / description</label><input type="text" id="pTopic" placeholder="e.g. Effect of microplastics on aquatic invertebrates" /></div>
+    <div style="display:flex;gap:10px;margin-top:16px;">
+      <button class="modal-cancel" onclick="closeAddPair()" style="background:none;border:1.5px solid var(--gray-200);padding:10px 18px;font-size:0.82rem;font-family:var(--ff-sans);cursor:pointer;color:var(--gray-500);">Cancel</button>
+      <button class="btn btn-primary" onclick="createPair()">Create Pair →</button>
+    </div>
+    <div id="pairMsg" style="font-size:0.78rem;margin-top:8px;"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/script.js"></script>
+<script>
+let allPairs = [], currentPairId = null, currentMilestones = {};
+
+const DEMO_PAIRS = [
+  { id:'p1', student_name:'Rishi Pampati', mentor_name:'Kyla Fallis', school:'Walnut Hills HS', topic:'Environmental monitoring using biosensors', status:'active',  total_hours:6.5,  session_count:4, started_at:'2025-11-01', milestones:{ topic:true, proposal:true, design:true, data:false, board:false, competed:false } },
+  { id:'p2', student_name:'Aisha Williams', mentor_name:'Dr. Chen', school:'Linden-McKinley STEM', topic:'ML classification of water quality samples', status:'active', total_hours:3.0, session_count:2, started_at:'2025-12-10', milestones:{ topic:true, proposal:true, design:false, data:false, board:false, competed:false } },
+  { id:'p3', student_name:'Marcus Johnson',  mentor_name:'Dr. Santos', school:'Bath High School', topic:'Effect of soil pH on soybean yield', status:'active', total_hours:4.0, session_count:3, started_at:'2025-11-15', milestones:{ topic:true, proposal:false, design:false, data:false, board:false, competed:false } },
+];
+const DEMO_SESSIONS = {
+  p1: [
+    { date:'2025-11-08', hours:2.0, notes:'Introduced the scientific method. Helped Rishi narrow topic from general water quality to biosensor detection. Assigned: write hypothesis and list three variables.' },
+    { date:'2025-11-22', hours:1.5, notes:'Reviewed hypothesis — good! Discussed experimental design. Controls need work. Identified local creek as test site. Assigned: write full procedure.' },
+    { date:'2025-12-06', hours:1.5, notes:'Procedure looks solid. Talked about data collection tables and statistical analysis. Rishi starting field collection next week. Looking strong for district.' },
+    { date:'2026-01-10', hours:1.5, notes:'Data collection going well, unexpected pH reading on sample 3 — discussed how to handle outliers honestly. Displaying raw data correctly. On track.' },
+  ],
+};
+
+async function loadPairs() {
+  if (!sb) { allPairs = DEMO_PAIRS; renderPairList(); return; }
+  const { data } = await sb.from('mentorships').select('*').order('created_at', { ascending: false });
+  allPairs = data || [];
+  renderPairList();
+}
+
+function renderPairList() {
+  const list = document.getElementById('pairList');
+  if (!allPairs.length) { list.innerHTML = '<div style="padding:24px 18px;text-align:center;color:var(--gray-300);font-size:0.84rem;">No pairs yet. Add the first one.</div>'; return; }
+  list.innerHTML = allPairs.map(p => `
+    <div class="pair-item ${p.id === currentPairId ? 'active' : ''}" onclick="selectPair('${p.id}')">
+      <div class="pair-names">${p.student_name} + ${p.mentor_name}</div>
+      <div class="pair-school">${p.school || '—'}</div>
+      <div class="pair-meta">
+        <span class="pair-status ${p.status}">${p.status}</span>
+        <span class="pair-hours">${p.total_hours || 0} hrs · ${p.session_count || 0} sessions</span>
+      </div>
+    </div>`).join('');
+}
+
+async function selectPair(id) {
+  currentPairId = id;
+  const pair = allPairs.find(p => p.id === id);
+  if (!pair) return;
+  renderPairList();
+  document.getElementById('logEmpty').style.display  = 'none';
+  document.getElementById('logDetail').style.display = 'flex';
+  document.getElementById('logDetail').classList.add('active');
+  document.getElementById('detailTitle').textContent    = `${pair.student_name} + ${pair.mentor_name}`;
+  document.getElementById('detailSubtitle').textContent = `${pair.school || 'School not listed'} · ${pair.topic || 'No topic set'}`;
+  document.getElementById('metaHours').textContent    = (pair.total_hours || 0).toFixed(1);
+  document.getElementById('metaSessions').textContent = pair.session_count || 0;
+  document.getElementById('metaStarted').textContent  = pair.started_at ? new Date(pair.started_at).toLocaleDateString('en-US', { month:'short', year:'numeric' }) : '—';
+
+  // Milestones
+  currentMilestones = pair.milestones || {};
+  document.querySelectorAll('.milestone-step').forEach(el => {
+    el.classList.toggle('done', !!currentMilestones[el.dataset.milestone]);
+  });
+
+  // Sessions
+  await loadSessions(id);
+}
+window.selectPair = selectPair;
+
+async function loadSessions(pairId) {
+  let sessions;
+  if (!sb) { sessions = DEMO_SESSIONS[pairId] || []; }
+  else {
+    const { data } = await sb.from('mentorship_sessions').select('*').eq('pair_id', pairId).order('date', { ascending: false });
+    sessions = data || [];
+  }
+  renderSessions(sessions);
+}
+
+function renderSessions(sessions) {
+  const list = document.getElementById('sessionList');
+  if (!sessions.length) { list.innerHTML = '<div style="padding:16px;color:var(--gray-300);font-size:0.84rem;text-align:center;">No sessions logged yet.</div>'; return; }
+  list.innerHTML = sessions.map(s => `
+    <div class="session-item">
+      <div class="session-date">${new Date(s.date + 'T00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })}</div>
+      <div class="session-notes">${s.notes || '—'}</div>
+      <div class="session-hours">${s.hours}h</div>
+    </div>`).join('');
+}
+
+async function toggleMilestone(el) {
+  const key = el.dataset.milestone;
+  currentMilestones[key] = !currentMilestones[key];
+  el.classList.toggle('done', currentMilestones[key]);
+  if (sb && currentPairId) {
+    await sb.from('mentorships').update({ milestones: currentMilestones }).eq('id', currentPairId);
+  }
+}
+window.toggleMilestone = toggleMilestone;
+
+async function logSession() {
+  const date  = document.getElementById('newSessionDate').value;
+  const hours = parseFloat(document.getElementById('newSessionHours').value);
+  const notes = document.getElementById('newSessionNotes').value.trim();
+  const msg   = document.getElementById('sessionMsg');
+  if (!date || !hours || !notes) { msg.textContent = 'Please fill in date, hours, and notes.'; msg.style.color = '#c0392b'; return; }
+
+  msg.textContent = 'Saving...'; msg.style.color = 'var(--gray-500)';
+
+  if (sb && currentPairId) {
+    const { error: sErr } = await sb.from('mentorship_sessions').insert([{ pair_id: currentPairId, date, hours, notes }]);
+    if (sErr) { msg.textContent = 'Error — try again.'; msg.style.color = '#c0392b'; return; }
+    // Update totals
+    const pair = allPairs.find(p => p.id === currentPairId);
+    await sb.from('mentorships').update({
+      total_hours:   (pair?.total_hours || 0) + hours,
+      session_count: (pair?.session_count || 0) + 1,
+      last_session:  date
+    }).eq('id', currentPairId);
+  }
+
+  msg.textContent = 'Session saved!'; msg.style.color = 'var(--green-600)';
+  document.getElementById('newSessionDate').value  = '';
+  document.getElementById('newSessionHours').value = '';
+  document.getElementById('newSessionNotes').value = '';
+  await loadPairs();
+  await selectPair(currentPairId);
+  setTimeout(() => { msg.textContent = ''; }, 3000);
+}
+window.logSession = logSession;
+
+function openAddPair()  { document.getElementById('addPairModal').classList.add('open'); }
+function closeAddPair() { document.getElementById('addPairModal').classList.remove('open'); }
+window.openAddPair  = openAddPair;
+window.closeAddPair = closeAddPair;
+
+async function createPair() {
+  const studentName  = document.getElementById('pStudentName').value.trim();
+  const studentEmail = document.getElementById('pStudentEmail').value.trim();
+  const mentorName   = document.getElementById('pMentorName').value.trim();
+  const mentorEmail  = document.getElementById('pMentorEmail').value.trim();
+  const school       = document.getElementById('pSchool').value.trim();
+  const topic        = document.getElementById('pTopic').value.trim();
+  const msg          = document.getElementById('pairMsg');
+
+  if (!studentName || !mentorName) { msg.textContent = 'Student and mentor names required.'; msg.style.color = '#c0392b'; return; }
+  msg.textContent = 'Creating...'; msg.style.color = 'var(--gray-500)';
+
+  const newPair = {
+    student_name: studentName, student_email: studentEmail,
+    mentor_name: mentorName,   mentor_email: mentorEmail,
+    school, topic, status: 'active',
+    total_hours: 0, session_count: 0,
+    started_at: new Date().toISOString().split('T')[0],
+    milestones: {}
+  };
+
+  if (sb) {
+    const { error } = await sb.from('mentorships').insert([newPair]);
+    if (error) { msg.textContent = 'Error — try again.'; msg.style.color = '#c0392b'; return; }
+  } else {
+    newPair.id = 'local_' + Date.now();
+    allPairs.unshift(newPair);
+  }
+
+  msg.textContent = 'Pair created!'; msg.style.color = 'var(--green-600)';
+  logEvent('mentorship_created', { school });
+  setTimeout(() => { closeAddPair(); msg.textContent = ''; }, 1500);
+  await loadPairs();
+}
+window.createPair = createPair;
+
+document.addEventListener('DOMContentLoaded', loadPairs);
+</script>
+</body>
+</html>
