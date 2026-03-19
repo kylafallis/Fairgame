@@ -692,6 +692,37 @@
       .nav-hamburger { display: block; }
     }
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    (function() {
+  const SB_URL = 'https://buzcxrbjutexiofetgvn.supabase.co';
+  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1emN4cmJqdXRleGlvZmV0Z3ZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Nzc1NTEsImV4cCI6MjA4OTM1MzU1MX0.ifMup4fCcfHaf7Q4TYfi1X1V-J8tQpu2JwaqvjBcsBQ';
+  const ROUTES = {
+    teacher: '/portal-teacher.html',
+    ambassador: '/portal-ambassador.html',
+    student: '/portal-student.html',
+    judge: '/portal-judge.html',
+    admin: '/portal-admin.html'
+  };
+  try {
+    const sb = window.supabase
+      ? window.supabase.createClient(SB_URL, SB_KEY)
+      : null;
+    if (sb) {
+      sb.auth.getSession().then(({ data: { session } }) => {
+        const btn = document.getElementById('navUserBtn');
+        if (session?.user && btn) {
+          const role = session.user.user_metadata?.role || 'ambassador';
+          btn.href = ROUTES[role] || '/portal-ambassador.html';
+          btn.title = 'Go to my portal';
+          btn.classList.add('logged-in');
+        }
+      });
+    }
+  } catch(e) {}
+})();
+</script>
+  </script>
 </head>
 <body>
 
@@ -730,7 +761,8 @@
     </ul>
     <!-- User account icon — shows login or portal link based on auth state -->
     <a href="/login.html" class="nav-user-icon" id="navUserBtn" title="Sign in">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
         <circle cx="12" cy="7" r="4"/>
       </svg>

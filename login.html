@@ -243,7 +243,32 @@ try { if (SB_URL !== 'YOUR_SUPABASE_URL') sb = window.supabase.createClient(SB_U
 
 const ROUTES = { teacher:'/portal-teacher.html', ambassador:'/portal-ambassador.html', judge:'/portal-judge.html', admin:'/portal-admin.html' };
 
-if (sb) sb.auth.getSession().then(({ data: { session } }) => { if (session?.user) go(session.user); });
+if (sb) sb.auth.getSession().then(({ data: { session } }) => {
+  if (session?.user) {
+    const role = session.user.user_metadata?.role || 'ambassador';
+    // Show a "you're already signed in" notice with options
+    const card = document.querySelector('.login-card');
+    card.innerHTML = `
+      <h2>You're signed in</h2>
+      <p class="login-sub" style="margin-bottom:20px;">
+        Signed in as <strong>${session.user.email}</strong> (${role})
+      </p>
+      <a href="${ROUTES[role] || '/portal-ambassador.html'}"
+         class="btn-main" style="display:block;text-align:center;padding:12px;
+         background:#357a38;color:#fff;font-family:'Playfair Display',serif;
+         font-style:italic;font-size:.96rem;text-decoration:none;">
+        Go to my portal →
+      </a>
+      <div style="margin-top:14px;text-align:center;">
+        <button onclick="doSignOut()" style="background:none;border:none;
+          font-size:.78rem;color:#a0a8a0;cursor:pointer;text-decoration:underline;">
+          Sign out and switch accounts
+        </button>
+      </div>
+    `;
+  }
+}
+
 if (sb) sb.auth.onAuthStateChange((event, session) => {
   if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) go(session.user);
 });

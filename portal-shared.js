@@ -27,7 +27,10 @@ const ROLE_ROUTES = {
   judge:      '/portal-judge.html',
   admin:      '/portal-admin.html',
 };
-
+async function doSignOut() {
+  if (sb) await sb.auth.signOut();
+  window.location.reload();
+}
 /* ── Auth guard ──────────────────────────────────────────────── */
 function requireAuth(expectedRole, onReady) {
   if (!sb) {
