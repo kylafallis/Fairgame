@@ -10,8 +10,8 @@
    Replace SB_URL and SB_KEY with your project credentials.
    Dashboard → Settings → API
    ───────────────────────────────────────────────────────────── */
-const SB_URL = 'YOUR_SUPABASE_URL';
-const SB_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SB_URL = 'https://buzcxrbjutexiofetgvn.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1emN4cmJqdXRleGlvZmV0Z3ZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Nzc1NTEsImV4cCI6MjA4OTM1MzU1MX0.ifMup4fCcfHaf7Q4TYfi1X1V-J8tQpu2JwaqvjBcsBQ';
 
 let sb = null;
 try {
