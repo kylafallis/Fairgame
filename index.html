@@ -8,6 +8,7 @@
   <meta property="og:title" content="FairGame Initiative" />
   <meta property="og:description" content="Science Fairs Without Barriers — free resources, mentorship, and support for every school." />
   <meta name="twitter:card" content="summary_large_image" />
+  <link rel="icon" href="/Images/logo.png" type="image/png" />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -202,6 +203,19 @@
       .hero-portal-desc { display: none; }
     }
 
+
+    /* ── NAV USER ICON ───────────────────────────────────────── */
+    .nav-user-icon {
+      display: flex; align-items: center; justify-content: center;
+      width: 36px; height: 36px; margin-left: 8px;
+      border: 1.5px solid rgba(255,255,255,0.25);
+      color: rgba(255,255,255,0.8);
+      transition: all 0.18s; flex-shrink: 0;
+      text-decoration: none;
+    }
+    .nav-user-icon:hover { border-color: rgba(255,255,255,0.7); color: var(--white); background: rgba(255,255,255,0.08); }
+    .nav-user-icon.logged-in { border-color: var(--green-400); color: var(--green-400); }
+
     /*  NAV  */
     nav {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
@@ -217,15 +231,18 @@
     }
     .nav-inner {
       width: 100%; max-width: 1160px; margin: 0 auto; padding: 0 40px;
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex; align-items: center;
+      gap: 0;
     }
+    .nav-spacer { flex: 1; }
     .nav-logo {
       font-family: var(--ff-serif);
       font-size: 1.25rem; font-weight: 700;
       color: var(--white);
-      display: flex; align-items: center; gap: 9px;
+      display: flex; align-items: center; gap: 10px;
+      letter-spacing: -0.01em;
     }
-    .nav-logo img { height: 32px; width: auto; }
+    .nav-logo img { height: 34px; width: auto; }
     .nav-links { display: flex; align-items: center; list-style: none; gap: 0; }
     .nav-links > li > a {
       display: block; padding: 0 15px; height: var(--nav-h);
@@ -256,14 +273,17 @@
     .nav-cta {
       background: var(--green-600) !important;
       color: var(--white) !important;
-      padding: 10px 20px !important;
+      padding: 10px 22px !important;
       height: auto !important; line-height: 1 !important;
-      font-size: 0.84rem !important; font-weight: 500 !important;
+      font-family: var(--ff-serif) !important;
+      font-size: 0.92rem !important; font-weight: 600 !important;
+      font-style: italic;
       margin-left: 10px;
       border-radius: 0 !important;
+      letter-spacing: 0.01em;
     }
-    .nav-cta:hover { background: var(--green-700) !important; }
-    .nav-hamburger { display: none; background: none; border: none; font-size: 1.4rem; color: var(--gray-700); }
+    .nav-cta:hover { background: var(--green-500) !important; }
+    .nav-hamburger { display: none; background: none; border: none; font-size: 1.4rem; color: rgba(255,255,255,0.85); }
 
     /*  HERO  */
     .hero {
@@ -349,17 +369,74 @@
 
     /*  QUIZ SECTION  */
     .quiz-section { background: var(--gray-50); border-top: var(--border); }
-    .quiz-header { text-align: center; margin-bottom: 44px; }
-    .quiz-header h2 { color: var(--green-900); margin-bottom: 8px; }
-    .quiz-header p { color: var(--gray-500); font-size: 0.98rem; }
-
-    .quiz-box {
-      max-width: 640px; margin: 0 auto;
-      background: var(--white);
-      border: var(--border);
-      box-shadow: var(--shadow-sm);
-      overflow: hidden;
+    .quiz-layout {
+      display: grid; grid-template-columns: 1fr 580px; gap: 0; align-items: stretch;
     }
+    @media (max-width: 960px) { .quiz-layout { grid-template-columns: 1fr; } }
+
+    /* Left decorative panel */
+    .quiz-panel {
+      background: var(--green-900);
+      padding: 56px 52px;
+      display: flex; flex-direction: column; justify-content: center;
+      position: relative; overflow: hidden;
+    }
+    .quiz-panel::before {
+      content: '';
+      position: absolute; top: -80px; right: -80px;
+      width: 320px; height: 320px;
+      border: 60px solid rgba(106,184,110,0.12);
+      border-radius: 50%;
+    }
+    .quiz-panel::after {
+      content: '';
+      position: absolute; bottom: -60px; left: -60px;
+      width: 220px; height: 220px;
+      border: 40px solid rgba(106,184,110,0.08);
+      border-radius: 50%;
+    }
+    .quiz-panel-eyebrow {
+      font-size: 0.65rem; font-weight: 500; letter-spacing: 0.2em;
+      text-transform: uppercase; color: var(--green-400);
+      margin-bottom: 14px; position: relative; z-index: 1;
+    }
+    .quiz-panel h2 {
+      font-family: var(--ff-serif); font-size: clamp(1.8rem, 3vw, 2.4rem);
+      font-weight: 700; color: var(--white); line-height: 1.2;
+      margin-bottom: 18px; position: relative; z-index: 1;
+    }
+    .quiz-panel h2 em { color: var(--green-400); font-style: italic; }
+    .quiz-panel p {
+      font-size: 0.9rem; color: rgba(255,255,255,0.55);
+      line-height: 1.75; max-width: 340px;
+      position: relative; z-index: 1;
+    }
+    .quiz-panel-steps {
+      margin-top: 32px; display: flex; flex-direction: column; gap: 0;
+      position: relative; z-index: 1;
+    }
+    .quiz-panel-step {
+      display: flex; gap: 14px; align-items: flex-start;
+      padding: 14px 0; border-bottom: 1px solid rgba(255,255,255,0.07);
+    }
+    .quiz-panel-step:last-child { border-bottom: none; }
+    .qps-num {
+      font-family: var(--ff-serif); font-size: 1.3rem; font-weight: 700;
+      color: var(--green-400); line-height: 1; min-width: 24px; margin-top: 1px;
+    }
+    .qps-text strong { display: block; font-size: 0.84rem; font-weight: 500; color: var(--white); margin-bottom: 2px; }
+    .qps-text span { font-size: 0.76rem; color: rgba(255,255,255,0.4); }
+    @media (max-width: 960px) { .quiz-panel { display: none; } }
+
+    .quiz-right { background: var(--white); }
+    .quiz-header { padding: 32px 40px 0; }
+    .quiz-header h3 {
+      font-family: var(--ff-serif); font-size: 1.25rem; font-weight: 600;
+      color: var(--green-900); margin-bottom: 4px;
+    }
+    .quiz-header p { color: var(--gray-500); font-size: 0.88rem; margin-bottom: 0; }
+
+    .quiz-box { background: var(--white); overflow: hidden; }
     .quiz-track { height: 3px; background: var(--gray-100); }
     .quiz-track-fill { height: 100%; background: var(--green-600); transition: width 0.35s ease; }
     .quiz-body { padding: 36px 40px 40px; }
@@ -433,6 +510,12 @@
     .email-caption { font-size: 0.8rem; color: var(--gray-500); margin-bottom: 8px; }
     .msg-ok  { font-size: 0.82rem; color: var(--green-600); margin-top: 8px; }
     .msg-err { font-size: 0.82rem; color: #c0392b; margin-top: 8px; }
+
+
+    /* ── CONTACT SECTION ─────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .contact-grid { grid-template-columns: 1fr !important; gap: 32px !important; }
+    }
 
     /*  MISSION  */
     .mission-grid {
@@ -619,7 +702,8 @@
       <img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'" />
       FairGame
     </a>
-    <button class="nav-hamburger" aria-label="Menu"></button>
+    <div class="nav-spacer"></div>
+    <button class="nav-hamburger" aria-label="Menu">☰</button>
     <ul class="nav-links">
       <li class="dropdown">
         <a href="#">Resources </a>
@@ -644,6 +728,13 @@
       <li><a href="/donate.html">Donate</a></li>
       <li><a href="/starthere.html" class="nav-cta">Get Started</a></li>
     </ul>
+    <!-- User account icon — shows login or portal link based on auth state -->
+    <a href="/login.html" class="nav-user-icon" id="navUserBtn" title="Sign in">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+    </a>
   </div>
 </nav>
 
@@ -686,15 +777,15 @@
     </div>
   </div>
 
-    <!-- Portal access strip — lives inside the hero dark section -->
+    <!-- Info strip — directs people to reach out before making accounts -->
     <div class="hero-portal-strip">
       <div class="container">
         <div class="hero-portal-inner">
-          <span class="hero-portal-label">Member Access</span>
-          <span class="hero-portal-desc">Get exclusive resources, templates, and your school dashboard</span>
+          <span class="hero-portal-label">Work with us</span>
+          <span class="hero-portal-desc">Interested in bringing FairGame to your school? We'd love to connect before getting started.</span>
           <div class="hero-portal-btns">
-            <a href="#portal" class="hero-portal-btn hero-portal-btn--solid">Teacher Portal</a>
-            <a href="#portal" class="hero-portal-btn hero-portal-btn--outline">Student Ambassador Portal</a>
+            <a href="#contact" class="hero-portal-btn hero-portal-btn--solid">Schools — Reach Out</a>
+            <a href="/volunteer.html" class="hero-portal-btn hero-portal-btn--outline">Register as a Judge</a>
           </div>
         </div>
       </div>
@@ -703,14 +794,38 @@
 
 
 <!-- QUIZ ─────────────────────────────────────────────────────── -->
-<section class="quiz-section section-sm" id="quiz">
-  <div class="container">
-    <div class="quiz-header reveal">
-      <span class="overline">Find Your Path</span>
-      <h2>Who are you?</h2>
-      <p>Connect me with the resources I need — two questions, instant results.</p>
-    </div>
-    <div class="quiz-box reveal">
+<section class="quiz-section" id="quiz" style="padding:0;">
+  <div class="container" style="padding:0;max-width:100%;">
+    <div class="quiz-layout">
+
+      <!-- Left green panel -->
+      <div class="quiz-panel">
+        <div class="quiz-panel-eyebrow">Personalized in 30 seconds</div>
+        <h2>Find your<br><em>exact resources.</em></h2>
+        <p>Tell us who you are and what you need. We'll point you straight to the right guides, templates, and next steps.</p>
+        <div class="quiz-panel-steps">
+          <div class="quiz-panel-step">
+            <div class="qps-num">1</div>
+            <div class="qps-text"><strong>Pick your role</strong><span>Student, teacher, admin, judge, or company</span></div>
+          </div>
+          <div class="quiz-panel-step">
+            <div class="qps-num">2</div>
+            <div class="qps-text"><strong>Tell us your need</strong><span>What stage are you at? What's your biggest question?</span></div>
+          </div>
+          <div class="quiz-panel-step">
+            <div class="qps-num">3</div>
+            <div class="qps-text"><strong>Get your resources</strong><span>Tailored links, downloads, and next steps — instantly</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right quiz box -->
+      <div class="quiz-right">
+        <div class="quiz-header" style="padding:36px 40px 0;">
+          <h3>Who are you?</h3>
+          <p style="margin-bottom:0;margin-top:4px;">Connect me with the resources I need.</p>
+        </div>
+        <div class="quiz-box">
       <div class="quiz-track"><div class="quiz-track-fill" id="qProgress" style="width:0%"></div></div>
       <div class="quiz-body" id="qBody">
 
@@ -763,8 +878,10 @@
           </div>
         </div>
 
-      </div>
-    </div>
+          </div>
+        </div>
+      </div><!-- end quiz-right -->
+    </div><!-- end quiz-layout -->
   </div>
 </section>
 
@@ -866,57 +983,61 @@
   </div>
 </section>
 
-<!-- PORTAL  -->
-<section class="section portal-section" id="portal">
+<!-- CONTACT / GET IN TOUCH  -->
+<section class="section contact-section" id="contact" style="background:var(--green-900);">
   <div class="container">
-    <div class="portal-head reveal">
-      <span class="overline">Free Member Access</span>
-      <h2>Ambassador &amp; Teacher Portal</h2>
-      <p>Creating an account is completely free — for both teachers and students. Get exclusive resources, templates, judge tools, and your school or student dashboard.</p>
-    </div>
-    <div class="portal-grid reveal">
-      <div class="portal-card">
-        <div class="portal-tag">For Teachers — Free</div>
-        <h3>Teacher Portal</h3>
-        <p>Free to join. Access our full downloadable resource library — templates, rubrics, setup checklists, and judge recruitment tools.</p>
-        <ul class="perk-list">
-          <li>Science fair setup checklist &amp; planning timeline</li>
-          <li>Judge recruitment email templates</li>
-          <li>Student rubric &amp; assessment packs</li>
-          <li>Parent communication templates</li>
-          <li>OAS registration walkthrough guide</li>
-        </ul>
-        <div class="portal-form">
-          <input type="text"  id="tName"   placeholder="Full name" />
-          <input type="email" id="tEmail"  placeholder="School email address" />
-          <input type="text"  id="tSchool" placeholder="School name" />
-          <button class="btn btn-primary" onclick="regTeacher()">Create Free Teacher Account →</button>
-          <div id="tMsg" class="portal-msg"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:start;" class="reveal contact-grid">
+
+      <div>
+        <span class="overline" style="color:var(--green-400);">Let's Work Together</span>
+        <h2 style="color:var(--white);margin-bottom:16px;">Interested in bringing FairGame to your school?</h2>
+        <p style="color:rgba(255,255,255,0.58);font-size:0.96rem;line-height:1.75;margin-bottom:20px;">We work closely with every school we partner with. Reach out first and we'll talk through your school's situation, meet with your principal or team if needed, and get everything set up together — all free.</p>
+        <div style="display:flex;flex-direction:column;gap:0;margin-top:28px;">
+          <div style="padding:16px 0;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;gap:14px;align-items:flex-start;">
+            <div style="width:6px;height:6px;background:var(--green-400);margin-top:6px;flex-shrink:0;"></div>
+            <div><strong style="font-size:0.9rem;color:var(--white);display:block;margin-bottom:2px;">For teachers &amp; schools</strong><span style="font-size:0.82rem;color:rgba(255,255,255,0.45);">Tell us about your school and we'll reach out within 48 hours to get started</span></div>
+          </div>
+          <div style="padding:16px 0;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;gap:14px;align-items:flex-start;">
+            <div style="width:6px;height:6px;background:var(--green-400);margin-top:6px;flex-shrink:0;"></div>
+            <div><strong style="font-size:0.9rem;color:var(--white);display:block;margin-bottom:2px;">For individual students</strong><span style="font-size:0.82rem;color:rgba(255,255,255,0.45);">No school fair at your school? We match you with a mentor directly</span></div>
+          </div>
+          <div style="padding:16px 0;display:flex;gap:14px;align-items:flex-start;">
+            <div style="width:6px;height:6px;background:var(--green-400);margin-top:6px;flex-shrink:0;"></div>
+            <div><strong style="font-size:0.9rem;color:var(--white);display:block;margin-bottom:2px;">For judges &amp; mentors</strong><span style="font-size:0.82rem;color:rgba(255,255,255,0.45);">Register directly on the judge map — no intro call needed</span></div>
+          </div>
         </div>
       </div>
-      <div class="portal-card">
-        <div class="portal-tag">For Students — Free</div>
-        <h3>Student Ambassador Portal</h3>
-        <p>Free to join. Apply to become a FairGame ambassador at your school. Get matched with a mentor and track your school's journey.</p>
-        <ul class="perk-list">
-          <li>Personal mentor matching</li>
-          <li>Ambassador handbook &amp; training materials</li>
-          <li>Science fair promotion toolkit</li>
-          <li>Recognition &amp; recommendation letters</li>
-          <li>School progress dashboard</li>
-        </ul>
-        <div class="portal-form">
-          <input type="text"  id="aName"   placeholder="Full name" />
-          <input type="email" id="aEmail"  placeholder="Email address" />
-          <input type="text"  id="aSchool" placeholder="School name &amp; grade" />
-          <button class="btn btn-primary" onclick="regAmbassador()">Create Free Student Account →</button>
-          <div id="aMsg" class="portal-msg"></div>
+
+      <div>
+        <!-- Interest form — two variants toggled by role tabs -->
+        <div style="background:var(--white);border-top:3px solid var(--green-600);padding:32px;">
+          <div style="display:flex;gap:0;margin-bottom:24px;border-bottom:var(--border);">
+            <button class="contact-tab active" onclick="switchContactTab(this,'school')" style="flex:1;padding:10px 8px;background:none;border:none;font-family:var(--ff-sans);font-size:0.82rem;font-weight:500;cursor:pointer;color:var(--green-700);border-bottom:2px solid var(--green-600);margin-bottom:-1px;">School / Teacher</button>
+            <button class="contact-tab" onclick="switchContactTab(this,'student')" style="flex:1;padding:10px 8px;background:none;border:none;font-family:var(--ff-sans);font-size:0.82rem;font-weight:500;cursor:pointer;color:var(--gray-500);border-bottom:2px solid transparent;margin-bottom:-1px;">Individual Student</button>
+          </div>
+
+          <div id="contactSchool">
+            <div style="margin-bottom:12px;"><label style="font-size:0.72rem;font-weight:500;color:var(--gray-700);display:block;margin-bottom:3px;">Your name *</label><input type="text" id="csName" placeholder="Ms. Williams" /></div>
+            <div style="margin-bottom:12px;"><label style="font-size:0.72rem;font-weight:500;color:var(--gray-700);display:block;margin-bottom:3px;">Email address *</label><input type="email" id="csEmail" placeholder="mwilliams@school.edu" /></div>
+            <div style="margin-bottom:12px;"><label style="font-size:0.72rem;font-weight:500;color:var(--gray-700);display:block;margin-bottom:3px;">School name *</label><input type="text" id="csSchool" placeholder="Bath High School" /></div>
+            <div style="margin-bottom:16px;"><label style="font-size:0.72rem;font-weight:500;color:var(--gray-700);display:block;margin-bottom:3px;">Tell us about your school</label><textarea id="csMsg" rows="3" placeholder="School size, current science fair situation, what you're hoping to do..."></textarea></div>
+            <button class="btn btn-primary" onclick="submitContactForm('school')" style="width:100%;justify-content:center;">Get in Touch →</button>
+          </div>
+
+          <div id="contactStudent" style="display:none;">
+            <div style="margin-bottom:12px;"><label style="font-size:0.72rem;font-weight:500;color:var(--gray-700);display:block;margin-bottom:3px;">Your name *</label><input type="text" id="ctName" placeholder="Rishi Pampati" /></div>
+            <div style="margin-bottom:12px;"><label style="font-size:0.72rem;font-weight:500;color:var(--gray-700);display:block;margin-bottom:3px;">Email address *</label><input type="email" id="ctEmail" placeholder="your@email.com" /></div>
+            <div style="margin-bottom:12px;"><label style="font-size:0.72rem;font-weight:500;color:var(--gray-700);display:block;margin-bottom:3px;">Your school</label><input type="text" id="ctSchool" placeholder="School name (or 'no school fair')" /></div>
+            <div style="margin-bottom:16px;"><label style="font-size:0.72rem;font-weight:500;color:var(--gray-700);display:block;margin-bottom:3px;">What's your project idea or question?</label><textarea id="ctMsg" rows="3" placeholder="Brief description of what you're interested in studying or what help you need..."></textarea></div>
+            <button class="btn btn-primary" onclick="submitContactForm('student')" style="width:100%;justify-content:center;">Get in Touch →</button>
+          </div>
+
+          <div id="contactFormMsg" style="font-size:0.8rem;margin-top:10px;"></div>
+          <p style="font-size:0.74rem;color:var(--gray-300);margin-top:14px;text-align:center;">We respond within 48 hours. Already working with us? <a href="/login.html" style="color:var(--green-600);">Sign in →</a></p>
         </div>
       </div>
+
     </div>
-    <p style="text-align:center;margin-top:18px;font-size:0.82rem;color:var(--gray-500);">
-      Already have access? <a href="#" style="color:var(--green-600);text-decoration:underline;" onclick="magicLink(event)">Sign in with magic link →</a>
-    </p>
   </div>
 </section>
 
@@ -940,13 +1061,13 @@
         <p>Help us cover printing, logistics, and competition registration fees for schools that can't afford them. 100% goes to programs.</p>
         <div class="inv-arrow">→</div>
       </a>
-      <a href="mailto:fairgameinitiative@outlook.com" class="inv-card">
+      <a href="mailto:fairgameinitiative@outlook.com?subject=Partnership Inquiry" class="inv-card">
         <div class="inv-card-tag">Partner</div>
-        <h3>Corporate Partnership</h3>
-        <p>Sponsor a school program, provide industry mentors, fund our video series, or host a science fair showcase at your facility.</p>
+        <h3>Corporate &amp; University Partners</h3>
+        <p>Sponsor a school, fund scholarships, provide employee mentors, match students with summer research, or host a showcase. Let's talk.</p>
         <div class="inv-arrow">→</div>
       </a>
-      <a href="#portal" class="inv-card">
+      <a href="#contact" class="inv-card">
         <div class="inv-card-tag">Schools</div>
         <h3>Partner Your School</h3>
         <p>We're looking for up to 10 school partners for the 2026–27 year. Free program, full support, no commitment beyond interest.</p>

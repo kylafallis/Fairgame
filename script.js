@@ -58,6 +58,26 @@ window.trackDL    = trackDownload;
 /* ─────────────────────────────────────────────────────────────
    NAV — transparent over hero, solid green on scroll
    ───────────────────────────────────────────────────────────── */
+
+/* ─────────────────────────────────────────────────────────────
+   NAV AUTH STATE — update user icon based on session
+   ───────────────────────────────────────────────────────────── */
+function updateNavAuthState() {
+  const btn = document.getElementById('navUserBtn');
+  if (!btn) return;
+  if (!sb) return;
+  sb.auth.getSession().then(({ data: { session } }) => {
+    if (session?.user) {
+      btn.classList.add('logged-in');
+      btn.setAttribute('title', session.user.email);
+      // Route to the right dashboard based on role stored in user metadata
+      const role = session.user.user_metadata?.role || 'student';
+      const dashMap = { teacher: '/portal-teacher.html', ambassador: '/portal-ambassador.html', student: '/portal-student.html', admin: '/portal-admin.html' };
+      btn.href = dashMap[role] || '/portal-student.html';
+    }
+  });
+}
+
 function initNav() {
   const nav = document.querySelector('nav');
   if (!nav) return;
@@ -931,6 +951,7 @@ function initLockedDownloads() {
    ───────────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
   initNav();
+  updateNavAuthState();
   initScrollReveal();
   initCountUp();
   initQuiz();
@@ -943,3 +964,149 @@ document.addEventListener('DOMContentLoaded', () => {
   // Log page view
   logEvent('page_view', { page: window.location.pathname });
 });
+
+
+/* ─────────────────────────────────────────────────────────────
+   FAIR REGISTRATION  (fairregister.html)
+   Teachers register their fair — writes to 'fairs' table
+   ───────────────────────────────────────────────────────────── */
+async function submitFair() {
+  const school   = document.getElementById('fSchool')?.value.trim();
+  const teacher  = document.getElementById('fTeacher')?.value.trim();
+  const email    = document.getElementById('fEmail')?.value.trim();
+  const city     = document.getElementById('fCity')?.value.trim();
+  const county   = document.getElementById('fCounty')?.value.trim();
+  const date     = document.getElementById('fDate')?.value;
+  const students = parseInt(document.getElementById('fStudents')?.value || '0');
+  const program  = document.getElementById('fProgram')?.value;
+  const msgEl    = document.getElementById('fairMsg');
+  if (!msgEl) return;
+
+  if (!school || !teacher || !email) {
+    msgEl.textContent = 'School name, teacher name, and email are required.';
+    msgEl.style.color = '#c0392b'; return;
+  }
+  msgEl.textContent = 'Registering your fair...'; msgEl.style.color = 'var(--gray-500)';
+
+  if (sb) {
+    const { data: fair, error } = await sb.from('fairs').insert([{
+      school_name: school, teacher_name: teacher, teacher_email: email,
+      city, county, fair_date: date, student_count: students,
+      program_type: program, status: 'planning'
+    }]).select().single();
+
+    if (error) { msgEl.textContent = 'Error — please try again or email us.'; msgEl.style.color = '#c0392b'; return; }
+
+    // Auto-match: find judges in same county
+    if (fair && county) {
+      const { data: nearbyJudges } = await sb.from('judges')
+        .select('*')
+        .eq('status', 'active')
+        .ilike('city', `%${county}%`);
+
+      if (nearbyJudges?.length) {
+        msgEl.textContent = `Fair registered! Found ${nearbyJudges.length} potential judge${nearbyJudges.length > 1 ? 's' : ''} in your area. Check the judge map to send requests.`;
+        msgEl.style.color = 'var(--green-600)';
+      } else {
+        msgEl.textContent = 'Fair registered! Visit the judge map to browse and request judges in your district.';
+        msgEl.style.color = 'var(--green-600)';
+      }
+    } else {
+      msgEl.textContent = 'Fair registered successfully!';
+      msgEl.style.color = 'var(--green-600)';
+    }
+  } else {
+    msgEl.textContent = 'Fair registered! (Supabase not connected — add credentials to script.js)';
+    msgEl.style.color = 'var(--green-600)';
+  }
+
+  logEvent('fair_registered', { school, program, county });
+}
+
+window.submitFair = submitFair;
+
+
+/* ─────────────────────────────────────────────────────────────
+   JUDGE ACCEPT / DECLINE  (linked from email)
+   When a judge receives a match request email, they click a
+   link that goes to ?request=<id>&action=accept|decline
+   ───────────────────────────────────────────────────────────── */
+async function handleJudgeResponse() {
+  const params  = new URLSearchParams(window.location.search);
+  const reqId   = params.get('request');
+  const action  = params.get('action');
+  const banner  = document.getElementById('judgeResponseBanner');
+  if (!reqId || !action || !banner) return;
+
+  banner.style.display = 'block';
+
+  if (!sb) {
+    banner.textContent = action === 'accept'
+      ? 'Thank you for accepting! The teacher will be in touch shortly.'
+      : 'Response recorded. Thank you for letting us know.';
+    return;
+  }
+
+  const status = action === 'accept' ? 'accepted' : 'declined';
+  const { error } = await sb.from('judge_requests')
+    .update({ status, responded_at: new Date().toISOString() })
+    .eq('id', reqId);
+
+  if (error) { banner.textContent = 'Error updating response. Please email fairgameinitiative@outlook.com'; return; }
+
+  banner.textContent = action === 'accept'
+    ? 'You\'re confirmed as a judge! The teacher will contact you with details.'
+    : 'No problem — your response has been recorded. Thank you for considering it.';
+  banner.style.background = action === 'accept' ? 'var(--green-50)' : 'var(--gray-50)';
+  banner.style.borderColor = action === 'accept' ? 'var(--green-500)' : 'var(--gray-300)';
+}
+
+window.handleJudgeResponse = handleJudgeResponse;
+
+
+/* ─────────────────────────────────────────────────────────────
+   CONTACT / INTEREST FORMS  (index.html contact section)
+   ───────────────────────────────────────────────────────────── */
+function switchContactTab(btn, type) {
+  document.querySelectorAll('.contact-tab').forEach(b => {
+    b.style.color = 'var(--gray-500)';
+    b.style.borderBottomColor = 'transparent';
+    b.classList.remove('active');
+  });
+  btn.style.color = 'var(--green-700)';
+  btn.style.borderBottomColor = 'var(--green-600)';
+  btn.classList.add('active');
+  document.getElementById('contactSchool').style.display  = type === 'school'  ? 'block' : 'none';
+  document.getElementById('contactStudent').style.display = type === 'student' ? 'block' : 'none';
+}
+window.switchContactTab = switchContactTab;
+
+async function submitContactForm(type) {
+  const msgEl = document.getElementById('contactFormMsg');
+  let name, email, school, message;
+  if (type === 'school') {
+    name    = document.getElementById('csName')?.value.trim();
+    email   = document.getElementById('csEmail')?.value.trim();
+    school  = document.getElementById('csSchool')?.value.trim();
+    message = document.getElementById('csMsg')?.value.trim();
+  } else {
+    name    = document.getElementById('ctName')?.value.trim();
+    email   = document.getElementById('ctEmail')?.value.trim();
+    school  = document.getElementById('ctSchool')?.value.trim();
+    message = document.getElementById('ctMsg')?.value.trim();
+  }
+  if (!name || !email) { msgEl.textContent = 'Name and email are required.'; msgEl.style.color = '#c0392b'; return; }
+  msgEl.textContent = 'Sending...'; msgEl.style.color = 'var(--gray-500)';
+
+  if (sb) {
+    const { error } = await sb.from('portal_requests').insert([{
+      name, email, school: school || '', type: type === 'school' ? 'teacher' : 'student',
+      status: 'interest', data: { message, source: 'contact_form' }
+    }]);
+    if (error) { msgEl.textContent = 'Something went wrong — email us at fairgameinitiative@outlook.com'; msgEl.style.color = '#c0392b'; return; }
+  }
+  msgEl.textContent = "Got it! We'll be in touch within 48 hours.";
+  msgEl.style.color = 'var(--green-600)';
+  logEvent('contact_form', { type, school });
+}
+window.submitContactForm = submitContactForm;

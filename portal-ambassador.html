@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Ambassador Portal — FairGame</title>
+  <link rel="icon" href="/Images/logo.png" type="image/png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/portal.css"/>
+</head>
+<body>
+<!-- Mobile nav toggle -->
+<button class="pnav-mobile-toggle" onclick="openMobileNav()">☰</button>
+<div class="pnav-overlay" onclick="closeMobileNav()"></div>
+
+<div class="portal-shell">
+<!-- ── Sidebar ── -->
+<nav class="pnav">
+  <div class="pnav-logo">
+    <img src="/Images/logo.png" alt="" onerror="this.style.display='none'"/>
+    <div class="pnav-logo-text">
+      <div class="pnav-logo-name">FairGame</div>
+      <div class="pnav-logo-role">Ambassador</div>
+    </div>
+  </div>
+  <div class="pnav-body">
+    <div class="pnav-section">Main</div>
+    <a class="pnav-link active" data-section="home"     data-label="Dashboard"   onclick="showSection('home',this)">Dashboard</a>
+    <a class="pnav-link"       data-section="students"  data-label="My Students"  onclick="showSection('students',this)">My Students</a>
+    <a class="pnav-link"       data-section="documents" data-label="Documents"    onclick="showSection('documents',this)">Documents</a>
+    <div class="pnav-section">Support</div>
+    <a class="pnav-link"       data-section="schedule"  data-label="Schedule"     onclick="showSection('schedule',this)">Schedule a Meeting</a>
+    <a class="pnav-link"       data-section="resources" data-label="Resources"    onclick="showSection('resources',this)">Resources</a>
+    <div class="pnav-divider"></div>
+    <a class="pnav-link" href="/" style="font-size:.78rem;color:rgba(255,255,255,.3);">← Public site</a>
+  </div>
+  <div class="pnav-footer">
+    <div class="pnav-user-name" id="navUserName">—</div>
+    <div class="pnav-user-email" id="navUserEmail">—</div>
+    <button class="pnav-logout" onclick="portalLogout()">Sign out</button>
+  </div>
+</nav>
+
+<!-- ── Main ── -->
+<div class="portal-main">
+  <div class="portal-topbar">
+    <span class="topbar-title" id="topbarTitle">Dashboard</span>
+    <div class="topbar-right">
+      <button class="btn-primary" onclick="openModal('addStudentModal')" style="font-size:.78rem;padding:8px 14px;">+ Add Student</button>
+    </div>
+  </div>
+
+  <div class="portal-content">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="portal-section active" id="sec-home">
+      <div class="kpi-row" id="homeKpis">
+        <div class="kpi-card"><div class="kpi-card-n" id="kStudents">—</div><div class="kpi-card-l">Students</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kDocs">—</div><div class="kpi-card-l">Docs Uploaded</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kMentored">—</div><div class="kpi-card-l">Mentor-Matched</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kReady">—</div><div class="kpi-card-l">Paperwork Ready</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h3>Recent Students</h3>
+          <a class="btn-ghost" onclick="showSection('students',document.querySelector('[data-section=students]'))">View all →</a>
+        </div>
+        <div class="card-body-flush" id="recentStudentsTable"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>Next Steps</h3></div>
+        <div class="card-body">
+          <div style="display:flex;flex-direction:column;gap:12px;" id="nextStepsList">
+            <div class="flex items-center gap-12"><div style="width:6px;height:6px;background:var(--g400);flex-shrink:0;"></div><span class="text-sm">Add all club members to your student roster</span></div>
+            <div class="flex items-center gap-12"><div style="width:6px;height:6px;background:var(--g400);flex-shrink:0;"></div><span class="text-sm">Upload permission slips and project proposals for each student</span></div>
+            <div class="flex items-center gap-12"><div style="width:6px;height:6px;background:var(--g400);flex-shrink:0;"></div><span class="text-sm">Schedule a check-in call with the FairGame team</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── STUDENTS ── -->
+    <div class="portal-section" id="sec-students">
+      <div class="section-heading flex justify-between items-center" style="flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2>My Students</h2>
+          <p>Everyone in your school's science fair club</p>
+        </div>
+        <button class="btn-primary" onclick="openModal('addStudentModal')">+ Add Student</button>
+      </div>
+      <div class="card">
+        <div class="card-header">
+          <h3 id="studentCountLabel">Students</h3>
+          <input type="text" id="studentSearch" placeholder="Search by name or project…" style="max-width:220px;padding:7px 11px;font-size:.82rem;" oninput="filterStudents(this.value)"/>
+        </div>
+        <div class="card-body-flush" style="overflow-x:auto;">
+          <table class="data-table" id="studentTable">
+            <thead><tr>
+              <th>Name</th><th>Grade</th><th>Project Title</th>
+              <th>Field</th><th>Paperwork</th><th>Mentor</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="studentTbody"><tr><td colspan="7"><div class="spinner-wrap"><div class="spinner"></div></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DOCUMENTS ── -->
+    <div class="portal-section" id="sec-documents">
+      <div class="section-heading">
+        <h2>Document Vault</h2>
+        <p>All student paperwork in one organised place — PDFs and images only, max 10MB each</p>
+      </div>
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header"><h3>Select Student</h3></div>
+        <div class="card-body">
+          <select id="docStudentSelect" onchange="loadStudentDocs(this.value)" style="max-width:320px;">
+            <option value="">— Choose a student —</option>
+          </select>
+        </div>
+      </div>
+      <div class="card" id="docVaultCard" style="display:none;">
+        <div class="card-header">
+          <h3 id="docVaultTitle">Documents</h3>
+          <button class="btn-primary" onclick="openModal('uploadModal')" style="font-size:.78rem;padding:8px 14px;">+ Upload File</button>
+        </div>
+        <div class="card-body">
+          <div id="docList" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SCHEDULE ── -->
+    <div class="portal-section" id="sec-schedule">
+      <div class="section-heading">
+        <h2>Schedule a Meeting</h2>
+        <p>Book a call with the FairGame team for OAS registration help, paperwork review, or general guidance</p>
+      </div>
+      <div class="card" style="max-width:560px;">
+        <div class="card-header"><h3>Request a Meeting</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">Preferred date <span class="req">*</span></label><input type="date" id="schedDate"/></div>
+            <div class="form-group"><label class="form-label">Preferred time</label>
+              <select id="schedTime"><option>Morning (9–12)</option><option>Afternoon (12–4)</option><option>Evening (4–7)</option></select>
+            </div>
+          </div>
+          <div class="form-group"><label class="form-label">What do you need help with? <span class="req">*</span></label>
+            <textarea id="schedNotes" placeholder="e.g. Help with ProjectBoard registration for 3 students, need to review project proposals…"></textarea>
+          </div>
+          <button class="btn-primary" onclick="requestMeeting()">Request Meeting →</button>
+          <div class="msg-strip" id="schedMsg"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RESOURCES ── -->
+    <div class="portal-section" id="sec-resources">
+      <div class="section-heading">
+        <h2>Resources</h2>
+        <p>Everything unlocked for portal members</p>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;">
+        <div class="card" style="margin:0;"><div class="card-body">
+          <div class="text-serif fw-600" style="color:var(--g900);margin-bottom:4px;">Research Guide</div>
+          <div class="text-sm text-muted" style="margin-bottom:12px;">Topic → experiment → display board</div>
+          <a href="/researchguide.html" class="btn-outline text-sm" style="font-size:.78rem;padding:7px 14px;">View Guide →</a>
+        </div></div>
+        <div class="card" style="margin:0;"><div class="card-body">
+          <div class="text-serif fw-600" style="color:var(--g900);margin-bottom:4px;">Ohio Competition Pathway</div>
+          <div class="text-sm text-muted" style="margin-bottom:12px;">District contacts, deadlines, ISEF path</div>
+          <a href="/stateresources.html" class="btn-outline text-sm" style="font-size:.78rem;padding:7px 14px;">View →</a>
+        </div></div>
+        <div class="card" style="margin:0;"><div class="card-body">
+          <div class="text-serif fw-600" style="color:var(--g900);margin-bottom:4px;">Display Board Template</div>
+          <div class="text-sm text-muted" style="margin-bottom:12px;">Pre-sized Canva template, all sections</div>
+          <button onclick="dlRes('student/display-board-template.pdf')" class="btn-outline text-sm" style="font-size:.78rem;padding:7px 14px;">Download →</button>
+        </div></div>
+        <div class="card" style="margin:0;"><div class="card-body">
+          <div class="text-serif fw-600" style="color:var(--g900);margin-bottom:4px;">Research Paper Template</div>
+          <div class="text-sm text-muted" style="margin-bottom:12px;">Standard format, all required sections</div>
+          <button onclick="dlRes('student/research-paper-template.docx')" class="btn-outline text-sm" style="font-size:.78rem;padding:7px 14px;">Download →</button>
+        </div></div>
+        <div class="card" style="margin:0;"><div class="card-body">
+          <div class="text-serif fw-600" style="color:var(--g900);margin-bottom:4px;">Project Proposal Form</div>
+          <div class="text-sm text-muted" style="margin-bottom:12px;">Hypothesis, variables, safety</div>
+          <button onclick="dlRes('student/project-proposal-form.pdf')" class="btn-outline text-sm" style="font-size:.78rem;padding:7px 14px;">Download →</button>
+        </div></div>
+        <div class="card" style="margin:0;"><div class="card-body">
+          <div class="text-serif fw-600" style="color:var(--g900);margin-bottom:4px;">Judging Score Cards</div>
+          <div class="text-sm text-muted" style="margin-bottom:12px;">Official OAS 2026 vertical layout</div>
+          <a href="/Documents/2026-Judging-Score-Cards-Vertical-layout.pdf" target="_blank" class="btn-outline text-sm" style="font-size:.78rem;padding:7px 14px;">Download →</a>
+        </div></div>
+      </div>
+    </div>
+
+  </div><!-- portal-content -->
+</div><!-- portal-main -->
+</div><!-- portal-shell -->
+
+<!-- Add Student Modal -->
+<div class="modal-overlay" id="addStudentModal">
+  <div class="modal-box">
+    <h3>Add a Student</h3>
+    <p class="modal-sub">Add a student to your club. You can upload their paperwork afterward.</p>
+    <div class="form-grid">
+      <div class="form-group"><label class="form-label">Name <span class="req">*</span></label><input type="text" id="snName" placeholder="First Last"/></div>
+      <div class="form-group"><label class="form-label">Grade</label><input type="text" id="snGrade" placeholder="9th"/></div>
+      <div class="form-group"><label class="form-label">Student email</label><input type="email" id="snEmail" placeholder="student@school.edu"/></div>
+      <div class="form-group"><label class="form-label">Project field</label>
+        <select id="snField">
+          <option value="">Select…</option>
+          <option>Biology / Life Sciences</option><option>Chemistry</option>
+          <option>Physics / Engineering</option><option>Environmental Science</option>
+          <option>Computer Science / Math</option><option>Medicine / Health</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Project title (if known)</label><input type="text" id="snTitle" placeholder="e.g. Effect of microplastics on aquatic invertebrates"/></div>
+    <div class="form-group"><label class="form-label">Notes / abstract</label><textarea id="snDesc" placeholder="Optional additional info…" rows="2"></textarea></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('addStudentModal')">Cancel</button>
+      <button class="btn-primary" onclick="saveStudent()">Add Student →</button>
+    </div>
+    <div class="msg-strip" id="addStudentMsg"></div>
+  </div>
+</div>
+
+<!-- Upload Doc Modal -->
+<div class="modal-overlay" id="uploadModal">
+  <div class="modal-box">
+    <h3>Upload Document</h3>
+    <p class="modal-sub" id="uploadFor">Select a student and file type, then upload.</p>
+    <input type="hidden" id="uploadStudentId"/>
+    <div class="form-group"><label class="form-label">Document type</label>
+      <select id="docType">
+        <option>Project Proposal</option><option>Permission Slip</option><option>Research Paper Draft</option>
+        <option>Data Tables</option><option>Safety Form</option><option>Display Board Photo</option>
+        <option>Registration Confirmation</option><option>Other</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="upload-zone upload-zone-label">
+        <div class="upload-zone" id="uploadZone">
+          <div class="upload-zone-icon">📎</div>
+          <p>Click to select file</p>
+          <span>PDF or image · max 10MB</span>
+          <input type="file" id="docFile" accept=".pdf,.jpg,.jpeg,.png" style="display:none;" onchange="previewFile(this)"/>
+        </div>
+      </label>
+      <div id="filePreview" style="font-size:.8rem;color:var(--g700);margin-top:6px;"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('uploadModal')">Cancel</button>
+      <button class="btn-primary" id="uploadBtn" onclick="doUpload()">Upload →</button>
+    </div>
+    <div class="msg-strip" id="uploadMsg"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/portal-shared.js"></script>
+<script>
+/* ── State ── */
+let allStudents = [], ambassadorId = null;
+let activeDocStudentId = null;
+
+const DEMO_STUDENTS = [
+  { id:'s1', name:'Priya Sharma',  grade:'10th', project_title:'Microplastics in Olentangy River', project_field:'Environmental Science', paperwork_status:'uploaded', mentor_id:'m1' },
+  { id:'s2', name:'Marcus Lee',    grade:'9th',  project_title:'Solar Cell Efficiency Optimizer',  project_field:'Physics / Engineering',  paperwork_status:'pending',  mentor_id:null },
+  { id:'s3', name:'Sofia Reyes',   grade:'11th', project_title:'CRISPR in E. Coli',                project_field:'Biology / Life Sciences',paperwork_status:'verified', mentor_id:'m2' },
+  { id:'s4', name:'James Okafor',  grade:'9th',  project_title:null,                               project_field:null,                     paperwork_status:'pending',  mentor_id:null },
+];
+
+/* ── Init ── */
+requireAuth('ambassador', async (user) => {
+  ambassadorId = user.id;
+  await loadStudents();
+  onSectionLoad('documents', populateDocSelect);
+});
+
+async function loadStudents() {
+  if (!sb) { allStudents = DEMO_STUDENTS; }
+  else {
+    const { data } = await sb.from('students').select('*').eq('ambassador_id', ambassadorId).order('name');
+    allStudents = data || [];
+  }
+  renderStudentTable(allStudents);
+  renderHomeStats(allStudents);
+  renderRecentStudents(allStudents.slice(0, 5));
+}
+
+function renderHomeStats(students) {
+  document.getElementById('kStudents').textContent = students.length;
+  document.getElementById('kDocs').textContent     = students.filter(s => s.paperwork_status !== 'pending').length;
+  document.getElementById('kMentored').textContent = students.filter(s => s.mentor_id).length;
+  document.getElementById('kReady').textContent    = students.filter(s => s.paperwork_status === 'verified').length;
+}
+
+function renderRecentStudents(students) {
+  const el = document.getElementById('recentStudentsTable');
+  if (!students.length) { el.innerHTML = '<div class="empty-state"><p>No students yet — add your first student using the button above.</p></div>'; return; }
+  el.innerHTML = `<table class="data-table">
+    <thead><tr><th>Name</th><th>Project</th><th>Paperwork</th></tr></thead>
+    <tbody>${students.map(s => `<tr>
+      <td class="col-name">${s.name}</td>
+      <td class="col-sm text-muted">${s.project_title || '<em>Not set</em>'}</td>
+      <td><span class="chip chip-${s.paperwork_status||'pending'}">${s.paperwork_status||'pending'}</span></td>
+    </tr>`).join('')}</tbody>
+  </table>`;
+}
+
+function renderStudentTable(students) {
+  const tbody = document.getElementById('studentTbody');
+  document.getElementById('studentCountLabel').textContent = `${students.length} Student${students.length !== 1 ? 's' : ''}`;
+  if (!students.length) {
+    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><p>No students yet. Use "+ Add Student" to get started.</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = students.map(s => `<tr>
+    <td class="col-name">${s.name}</td>
+    <td class="col-sm">${s.grade || '—'}</td>
+    <td class="col-sm" style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.project_title || '<span class="text-muted"><em>Not set</em></span>'}</td>
+    <td class="col-sm text-muted">${s.project_field || '—'}</td>
+    <td><span class="chip chip-${s.paperwork_status||'pending'}">${s.paperwork_status||'pending'}</span></td>
+    <td class="col-sm">${s.mentor_id ? '<span class="text-green">Assigned</span>' : '<span class="text-muted">None</span>'}</td>
+    <td style="white-space:nowrap;">
+      <button class="btn-xs" onclick="openUploadFor('${s.id}','${s.name.replace(/'/g,"\\'")}')">Upload</button>
+      <button class="btn-xs" onclick="viewDocSection('${s.id}','${s.name.replace(/'/g,"\\'")}')">Files</button>
+    </td>
+  </tr>`).join('');
+}
+
+function filterStudents(q) {
+  const f = q.toLowerCase();
+  renderStudentTable(q ? allStudents.filter(s =>
+    s.name?.toLowerCase().includes(f) || s.project_title?.toLowerCase().includes(f) || s.project_field?.toLowerCase().includes(f)
+  ) : allStudents);
+}
+window.filterStudents = filterStudents;
+
+/* ── Add student ── */
+async function saveStudent() {
+  const name  = document.getElementById('snName').value.trim();
+  const grade = document.getElementById('snGrade').value.trim();
+  const email = document.getElementById('snEmail').value.trim();
+  const field = document.getElementById('snField').value;
+  const title = document.getElementById('snTitle').value.trim();
+  const desc  = document.getElementById('snDesc').value.trim();
+  if (!name) { showMsg('addStudentMsg','Student name is required.','err'); return; }
+  showMsg('addStudentMsg','Saving…','info');
+  const row = { name, grade, email, project_field: field, project_title: title, abstract: desc, ambassador_id: ambassadorId, paperwork_status: 'pending' };
+  if (sb) {
+    const { error } = await sb.from('students').insert([row]);
+    if (error) { showMsg('addStudentMsg', error.message, 'err'); return; }
+  } else { row.id = 'local_'+Date.now(); allStudents.push(row); }
+  showMsg('addStudentMsg','Student added!','ok');
+  setTimeout(() => { closeModal('addStudentModal'); loadStudents(); }, 1200);
+  portalLog('student_added', { name });
+}
+window.saveStudent = saveStudent;
+
+/* ── Documents ── */
+function populateDocSelect() {
+  const sel = document.getElementById('docStudentSelect');
+  sel.innerHTML = '<option value="">— Choose a student —</option>' +
+    allStudents.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+}
+
+async function loadStudentDocs(studentId) {
+  if (!studentId) return;
+  activeDocStudentId = studentId;
+  const student = allStudents.find(s => s.id === studentId);
+  document.getElementById('docVaultTitle').textContent = student?.name + ' — Documents';
+  document.getElementById('docVaultCard').style.display = 'block';
+  document.getElementById('uploadStudentId').value = studentId;
+  document.getElementById('uploadFor').textContent = 'Uploading for: ' + (student?.name || '');
+  const list = document.getElementById('docList');
+  list.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
+  if (!sb) { list.innerHTML = '<div class="empty-state"><p>Connect Supabase to view documents.</p></div>'; return; }
+  const { data: docs } = await sb.from('documents').select('*').eq('student_id', studentId).order('uploaded_at', { ascending: false });
+  if (!docs?.length) { list.innerHTML = '<div class="empty-state"><p>No files yet — click Upload File to add the first one.</p></div>'; return; }
+  list.innerHTML = docs.map(d => `
+    <div class="flex items-center gap-12" style="padding:10px 0;border-bottom:var(--border,1px solid #e2e6e2);">
+      <div style="flex:1;">
+        <div class="fw-500" style="font-size:.86rem;color:#1c3a1c;">${d.file_name}</div>
+        <div class="text-xs text-muted">${d.file_type} · ${new Date(d.uploaded_at||d.created_at).toLocaleDateString()}</div>
+      </div>
+      <button class="btn-xs" onclick="downloadDoc('${d.file_path}')">Download</button>
+    </div>`).join('');
+}
+window.loadStudentDocs = loadStudentDocs;
+
+function openUploadFor(studentId, studentName) {
+  document.getElementById('uploadStudentId').value = studentId;
+  document.getElementById('uploadFor').textContent = 'Uploading for: ' + studentName;
+  openModal('uploadModal');
+}
+function viewDocSection(studentId, studentName) {
+  showSection('documents', document.querySelector('[data-section="documents"]'));
+  setTimeout(() => {
+    document.getElementById('docStudentSelect').value = studentId;
+    loadStudentDocs(studentId);
+  }, 50);
+}
+window.openUploadFor = openUploadFor;
+window.viewDocSection = viewDocSection;
+
+function previewFile(input) {
+  const f = input.files[0];
+  document.getElementById('filePreview').textContent = f ? f.name + ' (' + (f.size/1024/1024).toFixed(1) + 'MB)' : '';
+}
+window.previewFile = previewFile;
+
+async function doUpload() {
+  const studentId = document.getElementById('uploadStudentId').value;
+  const docType   = document.getElementById('docType').value;
+  const fileInput = document.getElementById('docFile');
+  if (!fileInput.files.length) { showMsg('uploadMsg','Select a file first.','err'); return; }
+  const file = fileInput.files[0];
+  if (file.size > 10 * 1024 * 1024) { showMsg('uploadMsg','File must be under 10MB.','err'); return; }
+  showMsg('uploadMsg','Uploading…','info');
+  const path = `students/${ambassadorId}/${studentId}/${Date.now()}_${file.name.replace(/\s+/g,'_')}`;
+  if (sb) {
+    const { error: upErr } = await uploadPortalFile('student-docs', path, file);
+    if (upErr) { showMsg('uploadMsg','Upload failed — check file type and size.','err'); return; }
+    await sb.from('documents').insert([{ owner_id: ambassadorId, owner_type: 'ambassador', student_id: studentId, file_path: path, file_name: file.name, file_type: docType, uploaded_at: new Date().toISOString() }]);
+    await sb.from('students').update({ paperwork_status: 'uploaded' }).eq('id', studentId);
+  }
+  showMsg('uploadMsg','Uploaded successfully!','ok');
+  fileInput.value = ''; document.getElementById('filePreview').textContent = '';
+  setTimeout(() => { closeModal('uploadModal'); loadStudents(); if (activeDocStudentId === studentId) loadStudentDocs(studentId); }, 1400);
+}
+window.doUpload = doUpload;
+
+async function downloadDoc(path) {
+  const url = await getSignedUrl('student-docs', path);
+  if (url) window.open(url); else alert('Could not generate download link.');
+}
+window.downloadDoc = downloadDoc;
+
+/* ── Schedule ── */
+async function requestMeeting() {
+  const date  = document.getElementById('schedDate').value;
+  const time  = document.getElementById('schedTime').value;
+  const notes = document.getElementById('schedNotes').value.trim();
+  if (!date || !notes) { showMsg('schedMsg','Please set a date and describe what you need help with.','err'); return; }
+  showMsg('schedMsg','Sending…','info');
+  if (sb) await sb.from('messages').insert([{ from_user_id: ambassadorId, from_role:'ambassador', to_role:'admin', subject:`Meeting Request — ${date} ${time}`, body: notes }]).catch(()=>{});
+  const sub  = encodeURIComponent(`FairGame Meeting Request — ${date}`);
+  const body = encodeURIComponent(`Hi FairGame Team,\n\nI'd like to schedule a meeting on ${date} (${time}).\n\n${notes}`);
+  window.open(`mailto:fairgameinitiative@outlook.com?subject=${sub}&body=${body}`);
+  showMsg('schedMsg',"Request sent! We'll confirm within 48 hours.",'ok');
+}
+window.requestMeeting = requestMeeting;
+
+/* ── Resources download ── */
+async function dlRes(path) {
+  const url = await getSignedUrl('resources', path);
+  if (url) window.open(url); else alert('Resource not uploaded yet. Email fairgameinitiative@outlook.com');
+}
+window.dlRes = dlRes;
+</script>
+</body>
+</html>

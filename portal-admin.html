@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Admin Dashboard — FairGame</title>
+  <link rel="icon" href="/Images/logo.png" type="image/png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/portal.css"/>
+</head>
+<body>
+<button class="pnav-mobile-toggle" onclick="openMobileNav()">☰</button>
+<div class="pnav-overlay" onclick="closeMobileNav()"></div>
+<div class="portal-shell">
+<nav class="pnav">
+  <div class="pnav-logo">
+    <img src="/Images/logo.png" alt="" onerror="this.style.display='none'"/>
+    <div class="pnav-logo-text">
+      <div class="pnav-logo-name">FairGame Admin</div>
+      <div class="pnav-logo-role">Executive Dashboard</div>
+    </div>
+  </div>
+  <div class="pnav-body">
+    <div class="pnav-section">Overview</div>
+    <a class="pnav-link active" data-section="home"     data-label="Dashboard"    onclick="showSection('home',this)">Dashboard</a>
+    <a class="pnav-link"       data-section="activity"  data-label="Live Activity" onclick="showSection('activity',this)">Live Activity</a>
+    <div class="pnav-section">Programs</div>
+    <a class="pnav-link"       data-section="approvals" data-label="User Approvals" onclick="showSection('approvals',this)">User Approvals <span class="pnav-badge" id="approvalBadge" style="display:none;"></span></a>
+    <a class="pnav-link"       data-section="schools"   data-label="Schools"       onclick="showSection('schools',this)">Schools</a>
+    <a class="pnav-link"       data-section="judges"    data-label="Judges"        onclick="showSection('judges',this)">Judge Network</a>
+    <a class="pnav-link"       data-section="mentors"   data-label="Mentorships"   onclick="showSection('mentors',this)">Mentorships</a>
+    <div class="pnav-section">Reports</div>
+    <a class="pnav-link" href="/impactreport.html">Impact Report ↗</a>
+    <a class="pnav-link" href="/mentorlog.html">Mentor Log ↗</a>
+    <div class="pnav-section">Settings</div>
+    <a class="pnav-link"       data-section="settings"  data-label="Settings"      onclick="showSection('settings',this)">Site Settings</a>
+    <div class="pnav-divider"></div>
+    <a class="pnav-link" href="/" style="font-size:.78rem;color:rgba(255,255,255,.3);">← Public site</a>
+  </div>
+  <div class="pnav-footer">
+    <div class="pnav-user-name" id="navUserName">—</div>
+    <div class="pnav-user-email" id="navUserEmail">—</div>
+    <button class="pnav-logout" onclick="portalLogout()">Sign out</button>
+  </div>
+</nav>
+<div class="portal-main">
+  <div class="portal-topbar">
+    <span class="topbar-title" id="topbarTitle">Dashboard</span>
+    <div class="topbar-right">
+      <button class="btn-primary" onclick="loadAllData()" style="font-size:.76rem;padding:7px 14px;">↺ Refresh</button>
+    </div>
+  </div>
+  <div class="portal-content">
+
+    <!-- DASHBOARD -->
+    <div class="portal-section active" id="sec-home">
+      <div id="alertArea"></div>
+      <div class="kpi-row" id="homeKpis">
+        <div class="kpi-card"><div class="kpi-card-n" id="kSchools">—</div><div class="kpi-card-l">Active Schools</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kPending">—</div><div class="kpi-card-l">Pending Approvals</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kJudges">—</div><div class="kpi-card-l">Judges Registered</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kMentors">—</div><div class="kpi-card-l">Active Mentorships</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kDownloads">—</div><div class="kpi-card-l">Resource Downloads</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kSubscribers">—</div><div class="kpi-card-l">Email Subscribers</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kPortal">—</div><div class="kpi-card-l">Portal Members</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kJudgeReqs">—</div><div class="kpi-card-l">Judge Requests Sent</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>Quick Actions</h3></div>
+        <div class="card-body" style="display:flex;flex-wrap:wrap;gap:10px;">
+          <button class="btn-outline" onclick="showSection('approvals',document.querySelector('[data-section=approvals]'))">Review Pending Approvals</button>
+          <a href="/judgemap.html" class="btn-outline">View Judge Map ↗</a>
+          <a href="/impactreport.html" class="btn-outline">Impact Report ↗</a>
+          <a href="/mentorlog.html" class="btn-outline">Mentor Log ↗</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIVE ACTIVITY -->
+    <div class="portal-section" id="sec-activity">
+      <div class="section-heading"><h2>Live Activity</h2><p>Last 40 events across the site</p></div>
+      <div class="card">
+        <div class="card-header"><h3>Event Feed</h3><button class="btn-xs" onclick="loadActivity()">Refresh</button></div>
+        <div class="card-body-flush" id="activityFeed">
+          <div class="spinner-wrap"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- USER APPROVALS -->
+    <div class="portal-section" id="sec-approvals">
+      <div class="section-heading"><h2>User Approvals</h2><p>Review and approve portal account requests</p></div>
+      <div class="card">
+        <div class="card-header">
+          <h3>Pending & Recent Requests</h3>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button class="btn-xs active" onclick="filterApp('all',this)">All</button>
+            <button class="btn-xs" onclick="filterApp('pending',this)">Pending</button>
+            <button class="btn-xs" onclick="filterApp('interest',this)">Interest</button>
+            <button class="btn-xs" onclick="filterApp('teacher',this)">Teachers</button>
+            <button class="btn-xs" onclick="filterApp('ambassador',this)">Ambassadors</button>
+          </div>
+        </div>
+        <div class="card-body-flush" style="overflow-x:auto;">
+          <table class="data-table" id="approvalsTable">
+            <thead><tr><th>Name</th><th>Email</th><th>School</th><th>Type</th><th>Submitted</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="approvalsTbody"><tr><td colspan="7"><div class="spinner-wrap"><div class="spinner"></div></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card mt-16">
+        <div class="card-body">
+          <h3 class="text-serif fw-600 mb-16" style="font-size:.96rem;color:var(--g900);">How to approve a user</h3>
+          <p class="text-sm text-muted" style="line-height:1.7;">
+            1. Click "Approve" to mark their request as active.<br>
+            2. Go to <strong>Supabase → Authentication → Users → Invite User</strong>.<br>
+            3. Enter their email and set user metadata: <code style="background:var(--gray-100);padding:1px 5px;font-size:.8rem;">{"role": "teacher", "name": "Their Name"}</code><br>
+            4. They receive a sign-in link. Once they log in, they land on their role dashboard automatically.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SCHOOLS -->
+    <div class="portal-section" id="sec-schools">
+      <div class="section-heading"><h2>School Partnerships</h2><p>All schools in the program</p></div>
+      <div class="card">
+        <div class="card-body-flush" style="overflow-x:auto;">
+          <table class="data-table" id="schoolsTable">
+            <thead><tr><th>School</th><th>Teacher</th><th>Program</th><th>Fair Date</th><th>Students</th><th>County</th><th>Status</th></tr></thead>
+            <tbody id="schoolsTbody"><tr><td colspan="7"><div class="spinner-wrap"><div class="spinner"></div></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- JUDGES -->
+    <div class="portal-section" id="sec-judges">
+      <div class="section-heading"><h2>Judge Network</h2><p>All registered judges and their verification status</p></div>
+      <div class="card">
+        <div class="card-body-flush" style="overflow-x:auto;">
+          <table class="data-table" id="judgesTable">
+            <thead><tr><th>Code</th><th>Name</th><th>Expertise</th><th>Location</th><th>Level</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody id="judgesTbody"><tr><td colspan="7"><div class="spinner-wrap"><div class="spinner"></div></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- MENTORSHIPS -->
+    <div class="portal-section" id="sec-mentors">
+      <div class="section-heading">
+        <h2>Mentorships</h2>
+        <p>All mentor-student pairs — <a href="/mentorlog.html" style="color:var(--g600);">Open full Mentor Log ↗</a></p>
+      </div>
+      <div class="card">
+        <div class="card-body-flush" style="overflow-x:auto;">
+          <table class="data-table" id="mentorsTable">
+            <thead><tr><th>Student</th><th>Mentor</th><th>School</th><th>Hours</th><th>Sessions</th><th>Status</th></tr></thead>
+            <tbody id="mentorsTbody"><tr><td colspan="6"><div class="spinner-wrap"><div class="spinner"></div></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="portal-section" id="sec-settings">
+      <div class="section-heading"><h2>Site Settings</h2><p>Update the live counter numbers on the homepage hero</p></div>
+      <div class="card" style="max-width:480px;">
+        <div class="card-header"><h3>Homepage Stats</h3><button class="btn-primary" onclick="saveStats()" style="font-size:.78rem;padding:8px 14px;">Save →</button></div>
+        <div class="card-body" id="statsForm"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+        <div class="msg-strip" id="statsMsg" style="margin:0 20px 16px;"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/portal-shared.js"></script>
+<script>
+/* ── Demo data ── */
+const DEMO = {
+  approvals: [
+    { id:'a1', name:'Ms. Williams', email:'mwilliams@bath.edu', school:'Bath High School', type:'teacher',    status:'pending',  created_at:'2026-03-10T10:00:00Z' },
+    { id:'a2', name:'Priya Sharma', email:'priya@walnut.edu',  school:'Walnut Hills HS',  type:'ambassador', status:'interest', created_at:'2026-03-12T14:30:00Z' },
+    { id:'a3', name:'Mr. Davis',    email:'tdavis@lima.edu',   school:'Lima Senior HS',   type:'teacher',    status:'active',   created_at:'2026-03-01T09:00:00Z' },
+  ],
+  schools: [
+    { school_name:'Bath High School',    teacher_name:'Ms. Williams', program_type:'School fair only', fair_date:'2026-03-14', student_count:35, county:'Allen County',    status:'planning' },
+    { school_name:'Lima Senior HS',      teacher_name:'Mr. Davis',    program_type:'OAS District fair', fair_date:'2026-03-21', student_count:55, county:'Allen County',    status:'active'   },
+    { school_name:'Linden-McKinley STEM',teacher_name:'Mr. Jones',    program_type:'Club Launch',       fair_date:null,        student_count:20, county:'Franklin County', status:'planning' },
+  ],
+  judges: [
+    { code:'EN-163-7X', name:'Dr. Robert Davis', expertise:['Environmental Science'], city:'Lima, Allen County',      available_level:'Any level',  status:'active' },
+    { code:'BI-163-K2', name:'Dr. Laura Chen',   expertise:['Biology'],               city:'Lima, Allen County',      available_level:'School fair', status:'unverified' },
+    { code:'CH-489-Q5', name:'Mark Thompson',    expertise:['Chemistry'],             city:'Columbus, Franklin County',available_level:'District fair',status:'active' },
+  ],
+  mentors: [
+    { student_name:'Rishi Pampati',  mentor_name:'Kyla Fallis',    school:'Walnut Hills HS',      topic:'Biosensors', total_hours:6.5, session_count:4, status:'active' },
+    { student_name:'Aisha Williams', mentor_name:'Dr. Sarah Chen', school:'Linden-McKinley STEM', topic:'ML in water quality', total_hours:3.0, session_count:2, status:'active' },
+  ],
+};
+
+let allApprovals = [], approvalFilter = 'all';
+
+requireAuth('admin', () => {
+  loadAllData();
+  onSectionLoad('activity',  loadActivity);
+  onSectionLoad('approvals', loadApprovals);
+  onSectionLoad('schools',   loadSchools);
+  onSectionLoad('judges',    loadJudges);
+  onSectionLoad('mentors',   loadMentors);
+  onSectionLoad('settings',  loadStats);
+});
+
+async function loadAllData() {
+  if (!sb) {
+    document.getElementById('kSchools').textContent    = DEMO.schools.filter(s=>s.status==='active').length;
+    document.getElementById('kPending').textContent    = DEMO.approvals.filter(a=>a.status==='pending').length;
+    document.getElementById('kJudges').textContent     = DEMO.judges.length;
+    document.getElementById('kMentors').textContent    = DEMO.mentors.length;
+    document.getElementById('kDownloads').textContent  = '425';
+    document.getElementById('kSubscribers').textContent= '94';
+    document.getElementById('kPortal').textContent     = '72';
+    document.getElementById('kJudgeReqs').textContent  = '23';
+    const p = DEMO.approvals.filter(a=>a.status==='pending').length;
+    if (p > 0) setAlert(`${p} pending approval${p>1?'s':''} need your review.`, 'approvals');
+  } else {
+    const [{ count:schools },{ count:pending },{ count:judges },{ count:mentors },{ count:downloads },{ count:subscribers },{ count:portal },{ count:judgeReqs }] = await Promise.all([
+      sb.from('fairs').select('id',{count:'exact',head:true}).eq('status','active'),
+      sb.from('portal_requests').select('id',{count:'exact',head:true}).eq('status','pending'),
+      sb.from('judges').select('id',{count:'exact',head:true}).eq('status','active'),
+      sb.from('mentorships').select('id',{count:'exact',head:true}).eq('status','active'),
+      sb.from('resource_downloads').select('id',{count:'exact',head:true}),
+      sb.from('email_subscribers').select('id',{count:'exact',head:true}),
+      sb.from('portal_requests').select('id',{count:'exact',head:true}).neq('status','pending'),
+      sb.from('judge_requests').select('id',{count:'exact',head:true}),
+    ]);
+    document.getElementById('kSchools').textContent    = schools||0;
+    document.getElementById('kPending').textContent    = pending||0;
+    document.getElementById('kJudges').textContent     = judges||0;
+    document.getElementById('kMentors').textContent    = mentors||0;
+    document.getElementById('kDownloads').textContent  = downloads||0;
+    document.getElementById('kSubscribers').textContent= subscribers||0;
+    document.getElementById('kPortal').textContent     = portal||0;
+    document.getElementById('kJudgeReqs').textContent  = judgeReqs||0;
+    const p = pending||0;
+    const badge = document.getElementById('approvalBadge');
+    if (p > 0) { badge.textContent = p; badge.style.display = 'inline-block'; setAlert(`${p} pending approval${p>1?'s':''}.`, 'approvals'); }
+  }
+}
+
+function setAlert(text, section) {
+  document.getElementById('alertArea').innerHTML = `<div class="alert-banner"><span>${text}</span><button class="btn-xs" onclick="showSection('${section}',document.querySelector('[data-section=${section}]'))">Review →</button></div>`;
+}
+
+async function loadActivity() {
+  const feed = document.getElementById('activityFeed');
+  if (!sb) { feed.innerHTML = '<div class="empty-state"><p>Connect Supabase to see live activity.</p></div>'; return; }
+  const { data } = await sb.from('events').select('*').order('ts',{ascending:false}).limit(40);
+  if (!data?.length) { feed.innerHTML = '<div class="empty-state"><p>No events recorded yet.</p></div>'; return; }
+  const COLORS = { page_view:'var(--gray-100)', quiz_complete:'var(--g100)', judge_request:'#e0f2fe', portal_request:'#fef3c7', contact_form:'var(--g50)' };
+  feed.innerHTML = data.map(e => `
+    <div class="activity-item">
+      <div class="act-date">${new Date(e.ts).toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'})}</div>
+      <div class="act-body">${e.event}${e.data?.page?' · '+e.data.page:''}${e.data?.role?' · '+e.data.role:''}</div>
+      <span style="font-size:.62rem;font-weight:600;padding:2px 7px;background:${COLORS[e.event]||'var(--gray-100)'};color:var(--gray-700);white-space:nowrap;">${e.event.replace(/_/g,' ')}</span>
+    </div>`).join('');
+}
+
+async function loadApprovals() {
+  allApprovals = sb ? (await sb.from('portal_requests').select('*').order('created_at',{ascending:false})).data||[] : DEMO.approvals;
+  renderApprovals();
+}
+function filterApp(type, btn) {
+  approvalFilter = type;
+  document.querySelectorAll('[onclick^="filterApp"]').forEach(b => b.style.fontWeight = '400');
+  btn.style.fontWeight = '700';
+  renderApprovals();
+}
+window.filterApp = filterApp;
+function renderApprovals() {
+  const f = approvalFilter === 'all' ? allApprovals : allApprovals.filter(a => a.type === approvalFilter || a.status === approvalFilter);
+  document.getElementById('approvalsTbody').innerHTML = !f.length
+    ? '<tr><td colspan="7"><div class="empty-state"><p>No records match the current filter.</p></div></td></tr>'
+    : f.map(a => `<tr>
+        <td class="col-name">${a.name}</td>
+        <td class="col-sm">${a.email}</td>
+        <td class="col-sm">${a.school}</td>
+        <td><span class="chip chip-interest">${a.type}</span></td>
+        <td class="col-sm">${new Date(a.created_at).toLocaleDateString()}</td>
+        <td><span class="chip chip-${a.status}">${a.status}</span></td>
+        <td style="white-space:nowrap;display:flex;gap:6px;">
+          ${a.status==='pending'||a.status==='interest' ? `<button class="btn-xs approve" onclick="approveUser('${a.id}','${a.email}','${a.type}')">Approve</button>` : ''}
+          <button class="btn-xs danger" onclick="rejectUser('${a.id}')">Reject</button>
+        </td>
+      </tr>`).join('');
+}
+
+async function approveUser(id, email, type) {
+  if (!confirm(`Approve ${email} as ${type}?\n\nYou'll still need to send them a portal invite from Supabase → Authentication → Users → Invite User.`)) return;
+  if (sb) await sb.from('portal_requests').update({ status:'active' }).eq('id', id);
+  await loadApprovals();
+}
+async function rejectUser(id) {
+  if (!confirm('Reject this request?')) return;
+  if (sb) await sb.from('portal_requests').update({ status:'rejected' }).eq('id', id);
+  await loadApprovals();
+}
+window.approveUser = approveUser; window.rejectUser = rejectUser;
+
+async function loadSchools() {
+  const data = sb ? (await sb.from('fairs').select('*').order('created_at',{ascending:false})).data||[] : DEMO.schools;
+  document.getElementById('schoolsTbody').innerHTML = !data.length
+    ? '<tr><td colspan="7"><div class="empty-state"><p>No schools registered yet.</p></div></td></tr>'
+    : data.map(s => `<tr>
+        <td class="col-name">${s.school_name}</td>
+        <td class="col-sm">${s.teacher_name}</td>
+        <td class="col-sm">${s.program_type||'—'}</td>
+        <td class="col-sm">${s.fair_date||'TBD'}</td>
+        <td class="col-sm">${s.student_count||'—'}</td>
+        <td class="col-sm">${s.county||'—'}</td>
+        <td><span class="chip chip-${s.status||'planning'}">${s.status||'planning'}</span></td>
+      </tr>`).join('');
+}
+
+async function loadJudges() {
+  const data = sb ? (await sb.from('judges').select('*').order('created_at',{ascending:false})).data||[] : DEMO.judges;
+  document.getElementById('judgesTbody').innerHTML = !data.length
+    ? '<tr><td colspan="7"><div class="empty-state"><p>No judges yet.</p></div></td></tr>'
+    : data.map(j => `<tr>
+        <td class="col-mono">${j.code||'—'}</td>
+        <td class="col-name">${j.name}</td>
+        <td class="col-sm">${(j.expertise||[]).join(', ')}</td>
+        <td class="col-sm">${j.city||'—'}</td>
+        <td class="col-sm">${j.available_level||'—'}</td>
+        <td><span class="chip chip-${j.status}">${j.status}</span></td>
+        <td style="white-space:nowrap;">
+          ${j.status==='unverified' ? `<button class="btn-xs approve" onclick="verifyJudge('${j.id}')">Verify</button>` : ''}
+          <button class="btn-xs danger" onclick="deactivateJudge('${j.id}')">Deactivate</button>
+        </td>
+      </tr>`).join('');
+}
+async function verifyJudge(id) {
+  if (sb) await sb.from('judges').update({ status:'active' }).eq('id', id);
+  await loadJudges();
+}
+async function deactivateJudge(id) {
+  if (!confirm('Deactivate this judge?')) return;
+  if (sb) await sb.from('judges').update({ status:'inactive' }).eq('id', id);
+  await loadJudges();
+}
+window.verifyJudge = verifyJudge; window.deactivateJudge = deactivateJudge;
+
+async function loadMentors() {
+  const data = sb ? (await sb.from('mentorships').select('*').order('created_at',{ascending:false})).data||[] : DEMO.mentors;
+  document.getElementById('mentorsTbody').innerHTML = !data.length
+    ? '<tr><td colspan="6"><div class="empty-state"><p>No mentorships yet.</p></div></td></tr>'
+    : data.map(m => `<tr>
+        <td class="col-name">${m.student_name}</td>
+        <td class="col-sm">${m.mentor_name}</td>
+        <td class="col-sm">${m.school||'—'}</td>
+        <td class="col-sm" style="color:var(--g700);font-weight:500;">${m.total_hours||0}h</td>
+        <td class="col-sm">${m.session_count||0}</td>
+        <td><span class="chip chip-${m.status==='active'?'active':'declined'}">${m.status}</span></td>
+      </tr>`).join('');
+}
+
+const STAT_KEYS   = ['schools_supported','states_covered','resources_count','teachers_network'];
+const STAT_LABELS = ['Schools Supported','States Covered','Resources Count','Teacher Network'];
+async function loadStats() {
+  let vals = { schools_supported:12, states_covered:1, resources_count:47, teachers_network:100 };
+  if (sb) { const { data } = await sb.from('stats').select('*'); (data||[]).forEach(r => vals[r.key] = r.value); }
+  document.getElementById('statsForm').innerHTML = STAT_KEYS.map((k,i) => `
+    <div class="form-group"><label class="form-label">${STAT_LABELS[i]}</label><input type="number" id="stat_${k}" value="${vals[k]}" min="0"/></div>`).join('');
+}
+async function saveStats() {
+  for (const key of STAT_KEYS) {
+    const val = parseInt(document.getElementById('stat_'+key)?.value||'0');
+    if (sb) await sb.from('stats').update({ value: val, updated_at: new Date().toISOString() }).eq('key', key);
+  }
+  showMsg('statsMsg','Stats saved — homepage counters will update.','ok');
+}
+window.saveStats = saveStats;
+</script>
+</body>
+</html>
