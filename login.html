@@ -1,280 +1,391 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>Sign In — FairGame Initiative</title>
-  <link rel="icon" href="/Images/logo.png" type="image/png"/>
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
-  <style>
-    :root{--g900:#1c3a1c;--g700:#2d6030;--g600:#357a38;--g500:#4a9e4e;--g400:#6ab86e;--g50:#f1faf2;--white:#fff;--gray-100:#f0f2f0;--gray-200:#e2e6e2;--gray-300:#c8cec8;--gray-400:#a0a8a0;--gray-500:#6b756b;--gray-700:#3d453d;--gray-900:#1a1e1a;--red:#c0392b;--ff-serif:'Playfair Display',Georgia,serif;--ff-sans:'DM Sans',system-ui,sans-serif;--shadow:0 4px 20px rgba(0,0,0,.12);}
-    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-    body{font-family:var(--ff-sans);background:var(--g900);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;}
-    /* Background texture */
-    body::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 50%,rgba(53,122,56,.25) 0%,transparent 70%),radial-gradient(ellipse 60% 80% at 80% 20%,rgba(28,58,28,.6) 0%,transparent 60%);pointer-events:none;}
-    body::after{content:'';position:absolute;top:-120px;right:-120px;width:400px;height:400px;border:60px solid rgba(106,184,110,.06);border-radius:50%;pointer-events:none;}
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Sign In — FairGame Initiative</title>
+<link rel="icon" href="/Images/logo.png" type="image/png"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{--g900:#1c3a1c;--g700:#2d6030;--g600:#357a38;--g500:#4a9e4e;--g400:#6ab86e;--g50:#f1faf2;--white:#fff;--gray-100:#f0f2f0;--gray-200:#e2e6e2;--gray-300:#c8cec8;--gray-400:#a0a8a0;--gray-500:#6b756b;--gray-700:#3d453d;--gray-900:#1a1e1a;--red:#c0392b;--ff-serif:'Playfair Display',Georgia,serif;--ff-sans:'DM Sans',system-ui,sans-serif;--shadow:0 4px 20px rgba(0,0,0,.12);}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--ff-sans);background:var(--g900);min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;position:relative;overflow:hidden;}
+body::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 50%,rgba(53,122,56,.25) 0%,transparent 70%),radial-gradient(ellipse 60% 80% at 80% 20%,rgba(28,58,28,.6) 0%,transparent 60%);pointer-events:none;}
+body::after{content:'';position:absolute;top:-120px;right:-120px;width:400px;height:400px;border:60px solid rgba(106,184,110,.06);border-radius:50%;pointer-events:none;}
+.login-wrap{position:relative;z-index:1;width:100%;max-width:420px;}
+.login-brand{display:flex;align-items:center;gap:10px;margin-bottom:24px;justify-content:center;}
+.login-brand img{height:36px;}
+.login-brand-name{font-family:var(--ff-serif);font-size:1.3rem;font-weight:700;color:var(--white);}
+.login-card{background:var(--white);padding:36px 40px 32px;box-shadow:var(--shadow);border-top:3px solid var(--g600);}
+@media(max-width:440px){.login-card{padding:28px 22px 24px;}}
+.login-card h2{font-family:var(--ff-serif);font-size:1.45rem;font-weight:600;color:var(--gray-900);margin-bottom:4px;}
+.login-sub{font-size:0.84rem;color:var(--gray-400);margin-bottom:24px;line-height:1.6;}
+.auth-tabs{display:flex;border-bottom:1.5px solid var(--gray-200);margin-bottom:22px;}
+.auth-tab{flex:1;padding:9px 8px;background:none;border:none;font-family:var(--ff-sans);font-size:0.84rem;font-weight:500;cursor:pointer;color:var(--gray-400);border-bottom:2px solid transparent;margin-bottom:-1.5px;transition:all .15s;}
+.auth-tab.active{color:var(--g700);border-bottom-color:var(--g600);}
+.auth-panel{display:none;}
+.auth-panel.active{display:block;}
+.form-label{display:block;font-size:0.7rem;font-weight:500;color:var(--gray-500);margin-bottom:4px;letter-spacing:.03em;}
+.form-group{margin-bottom:14px;}
+input[type=email],input[type=password],input[type=text]{
+  width:100%;padding:11px 13px;border:1.5px solid var(--gray-300);
+  font-family:var(--ff-sans);font-size:0.9rem;outline:none;
+  color:var(--gray-900);border-radius:3px;transition:border-color .15s;
+}
+input:focus{border-color:var(--g600);}
+.btn-main{
+  width:100%;padding:12px;background:var(--g600);color:var(--white);
+  border:none;font-family:var(--ff-serif);font-size:0.96rem;font-weight:600;
+  font-style:italic;cursor:pointer;transition:background .18s;border-radius:3px;
+  letter-spacing:.01em;
+}
+.btn-main:hover{background:var(--g700);}
+.btn-main:disabled{opacity:.5;cursor:not-allowed;}
+.divider{display:flex;align-items:center;gap:10px;color:var(--gray-300);font-size:0.74rem;margin:16px 0;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--gray-200);}
+.btn-google{
+  width:100%;padding:10px 14px;background:var(--white);
+  border:1.5px solid var(--gray-200);font-family:var(--ff-sans);font-size:0.86rem;
+  font-weight:500;cursor:pointer;color:var(--gray-700);display:flex;
+  align-items:center;justify-content:center;gap:10px;transition:all .16s;border-radius:3px;
+}
+.btn-google:hover{background:var(--gray-100);border-color:var(--gray-300);}
+.google-icon{width:18px;height:18px;flex-shrink:0;}
+.msg{font-size:0.8rem;margin-top:10px;padding:9px 12px;display:none;border-radius:3px;}
+.msg.ok {display:block;background:var(--g50);color:var(--g900);border-left:3px solid var(--g400);}
+.msg.err{display:block;background:#fdf0ef;color:var(--red);border-left:3px solid var(--red);}
+.login-footer{margin-top:18px;text-align:center;font-size:0.76rem;color:rgba(255,255,255,.35);}
+.login-footer a{color:rgba(255,255,255,.55);transition:color .15s;}
+.login-footer a:hover{color:rgba(255,255,255,.85);}
+.forgot-link{float:right;font-size:0.72rem;color:var(--g600);transition:color .15s;}
+.forgot-link:hover{color:var(--g700);}
+.pw-wrap{position:relative;}
+.pw-wrap input{padding-right:40px;}
+.pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gray-400);padding:0;font-size:0.78rem;}
 
-    .login-wrap{position:relative;z-index:1;width:100%;max-width:400px;}
-
-    /* Logo above card */
-    .login-brand{display:flex;align-items:center;gap:10px;margin-bottom:24px;justify-content:center;}
-    .login-brand img{height:36px;}
-    .login-brand-name{font-family:var(--ff-serif);font-size:1.3rem;font-weight:700;color:var(--white);}
-
-    /* Card */
-    .login-card{background:var(--white);padding:36px 40px 32px;box-shadow:var(--shadow);border-top:3px solid var(--g600);}
-    @media(max-width:440px){.login-card{padding:28px 22px 24px;}}
-
-    .login-card h2{font-family:var(--ff-serif);font-size:1.45rem;font-weight:600;color:var(--gray-900);margin-bottom:4px;}
-    .login-sub{font-size:0.84rem;color:var(--gray-400);margin-bottom:24px;line-height:1.6;}
-
-    /* Tab switcher */
-    .auth-tabs{display:flex;border-bottom:1.5px solid var(--gray-200);margin-bottom:22px;}
-    .auth-tab{flex:1;padding:9px 8px;background:none;border:none;font-family:var(--ff-sans);font-size:0.84rem;font-weight:500;cursor:pointer;color:var(--gray-400);border-bottom:2px solid transparent;margin-bottom:-1.5px;transition:all .15s;}
-    .auth-tab.active{color:var(--g700);border-bottom-color:var(--g600);}
-
-    /* Panels */
-    .auth-panel{display:none;}
-    .auth-panel.active{display:block;}
-
-    .form-label{display:block;font-size:0.7rem;font-weight:500;color:var(--gray-500);margin-bottom:4px;letter-spacing:.03em;}
-    .form-group{margin-bottom:14px;}
-    input[type=email],input[type=password]{
-      width:100%;padding:11px 13px;border:1.5px solid var(--gray-300);
-      font-family:var(--ff-sans);font-size:0.9rem;outline:none;
-      color:var(--gray-900);border-radius:3px;transition:border-color .15s;
-    }
-    input:focus{border-color:var(--g600);}
-    .input-row{display:flex;gap:10px;}
-    .input-row input{flex:1;}
-
-    .btn-main{
-      width:100%;padding:12px;background:var(--g600);color:var(--white);
-      border:none;font-family:var(--ff-serif);font-size:0.96rem;font-weight:600;
-      font-style:italic;cursor:pointer;transition:background .18s;border-radius:3px;
-      letter-spacing:.01em;
-    }
-    .btn-main:hover{background:var(--g700);}
-    .btn-main:disabled{opacity:.5;cursor:not-allowed;}
-
-    .divider{display:flex;align-items:center;gap:10px;color:var(--gray-300);font-size:0.74rem;margin:16px 0;}
-    .divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--gray-200);}
-
-    /* Google button */
-    .btn-google{
-      width:100%;padding:10px 14px;background:var(--white);
-      border:1.5px solid var(--gray-200);font-family:var(--ff-sans);font-size:0.86rem;
-      font-weight:500;cursor:pointer;color:var(--gray-700);display:flex;
-      align-items:center;justify-content:center;gap:10px;transition:all .16s;border-radius:3px;
-    }
-    .btn-google:hover{background:var(--gray-100);border-color:var(--gray-300);}
-    .google-icon{width:18px;height:18px;flex-shrink:0;}
-
-    .msg{font-size:0.8rem;margin-top:10px;padding:9px 12px;display:none;border-radius:3px;}
-    .msg.ok {display:block;background:var(--g50);color:var(--g900);border-left:3px solid var(--g400);}
-    .msg.err{display:block;background:#fdf0ef;color:var(--red);border-left:3px solid var(--red);}
-
-    .login-footer{margin-top:18px;text-align:center;font-size:0.76rem;color:rgba(255,255,255,.35);}
-    .login-footer a{color:rgba(255,255,255,.55);transition:color .15s;}
-    .login-footer a:hover{color:rgba(255,255,255,.85);}
-
-    .forgot-link{float:right;font-size:0.72rem;color:var(--g600);transition:color .15s;}
-    .forgot-link:hover{color:var(--g700);}
-
-    /* Password toggle */
-    .pw-wrap{position:relative;}
-    .pw-wrap input{padding-right:40px;}
-    .pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--gray-400);padding:0;font-size:0.78rem;}
-  </style>
+/* ─── NEW: Age / legal consent styles ─── */
+.age-confirm{margin:14px 0 16px;padding:12px 14px;background:var(--g50);border:1.5px solid #c8e6ca;border-radius:3px;}
+.age-confirm-row{display:flex;align-items:flex-start;gap:10px;}
+.age-confirm-row input[type=checkbox]{
+  width:17px;height:17px;min-width:17px;margin-top:2px;flex-shrink:0;
+  accent-color:var(--g600);cursor:pointer;
+}
+.age-confirm-row label{font-size:0.82rem;color:var(--gray-700);line-height:1.5;cursor:pointer;}
+/* Under-13 guardian panel — hidden by default */
+.under13-panel{display:none;margin-top:12px;padding:12px 14px;background:#fff3cd;border:1.5px solid #ffc107;border-radius:3px;}
+.under13-panel p{font-size:0.8rem;color:#856404;margin-bottom:8px;line-height:1.5;}
+.under13-panel input{width:100%;padding:9px 11px;border:1.5px solid #ffc107;border-radius:3px;font-size:0.85rem;font-family:var(--ff-sans);}
+/* Legal links bar */
+.legal-links{font-size:0.73rem;color:var(--gray-400);margin-top:14px;text-align:center;line-height:1.6;}
+.legal-links a{color:var(--g600);}
+.legal-links a:hover{color:var(--g700);}
+.legal-badge{display:flex;align-items:center;justify-content:center;gap:6px;font-size:0.68rem;color:var(--gray-400);margin-top:8px;}
+.legal-badge svg{flex-shrink:0;color:var(--g500);}
+</style>
 </head>
 <body>
-  <div class="login-wrap">
-    <div class="login-brand">
-      <img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'"/>
-      <span class="login-brand-name">FairGame</span>
-    </div>
+<div class="login-wrap">
 
-    <div class="login-card">
-      <h2>Welcome back</h2>
-      <p class="login-sub">Sign in to your portal account.</p>
-
-      <!-- Tab switcher -->
-      <div class="auth-tabs">
-        <button class="auth-tab active" onclick="switchTab('login',this)">Sign In</button>
-        <button class="auth-tab" onclick="switchTab('signup',this)">Create Account</button>
-      </div>
-
-      <!-- SIGN IN panel -->
-      <div class="auth-panel active" id="panel-login">
-        <div class="form-group">
-          <label class="form-label">Email address</label>
-          <input type="email" id="loginEmail" placeholder="you@school.edu" autocomplete="email"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">
-            Password
-            <a href="#" class="forgot-link" onclick="showForgot(event)">Forgot password?</a>
-          </label>
-          <div class="pw-wrap">
-            <input type="password" id="loginPw" placeholder="••••••••" autocomplete="current-password"/>
-            <button class="pw-toggle" onclick="togglePw('loginPw',this)" type="button">Show</button>
-          </div>
-        </div>
-        <button class="btn-main" id="loginBtn" onclick="doLogin()">Sign in →</button>
-        <div class="msg" id="loginMsg"></div>
-
-        <div class="divider">or</div>
-        <button class="btn-google" onclick="doGoogle()">
-          <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-          </svg>
-          Continue with Google
-        </button>
-      </div>
-
-      <!-- CREATE ACCOUNT panel -->
-      <div class="auth-panel" id="panel-signup">
-        <div class="form-group">
-          <label class="form-label">Full name</label>
-          <input type="text" id="signupName" placeholder="Your name" autocomplete="name"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Email address</label>
-          <input type="email" id="signupEmail" placeholder="you@school.edu" autocomplete="email"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Password (min 8 characters)</label>
-          <div class="pw-wrap">
-            <input type="password" id="signupPw" placeholder="Create a password" autocomplete="new-password"/>
-            <button class="pw-toggle" onclick="togglePw('signupPw',this)" type="button">Show</button>
-          </div>
-        </div>
-        <button class="btn-main" id="signupBtn" onclick="doSignup()">Create Account →</button>
-        <div class="msg" id="signupMsg"></div>
-        <p style="font-size:.74rem;color:var(--gray-400);margin-top:12px;line-height:1.6;">
-          Accounts are invite-only. If you don't have an approved account, 
-          <a href="/#contact" style="color:var(--g600);">reach out to us first →</a>
-        </p>
-        <div class="divider">or</div>
-        <button class="btn-google" onclick="doGoogle()">
-          <svg class="google-icon" viewBox="0 0 24 24">
-            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-          </svg>
-          Continue with Google
-        </button>
-      </div>
-    </div>
-
-    <div class="login-footer">
-      <a href="/">← Back to fairgameinitiative.org</a>
-      &nbsp;·&nbsp;
-      <a href="/volunteer.html">Register as a judge</a>
-    </div>
+  <div class="login-brand">
+    <img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'"/>
+    <span class="login-brand-name">FairGame</span>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    const SB_URL = 'https://buzcxrbjutexiofetgvn.supabase.co';
-    const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1emN4cmJqdXRleGlvZmV0Z3ZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Nzc1NTEsImV4cCI6MjA4OTM1MzU1MX0.ifMup4fCcfHaf7Q4TYfi1X1V-J8tQpu2JwaqvjBcsBQ';
+  <div class="login-card">
+    <h2>Welcome back</h2>
+    <p class="login-sub">Sign in to your portal account.</p>
 
-    let sb = null;
-    try { if (SB_URL !== 'YOUR_SUPABASE_URL') sb = window.supabase.createClient(SB_URL, SB_KEY, { auth: { detectSessionInUrl: true } }); } catch(e) {}
+    <!-- Tab switcher -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchTab('login',this)">Sign In</button>
+      <button class="auth-tab" onclick="switchTab('signup',this)">Create Account</button>
+    </div>
 
-    const ROUTES = { teacher:'/portal-teacher.html', ambassador:'/portal-ambassador.html', judge:'/portal-judge.html', admin:'/portal-admin.html' };
+    <!-- ══════════════════════════════════════════ -->
+    <!-- SIGN IN panel                             -->
+    <!-- ══════════════════════════════════════════ -->
+    <div class="auth-panel active" id="panel-login">
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input type="email" id="loginEmail" placeholder="you@school.edu" autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">
+          Password
+          <a href="#" class="forgot-link" onclick="showForgot(event)">Forgot password?</a>
+        </label>
+        <div class="pw-wrap">
+          <input type="password" id="loginPw" placeholder="••••••••" autocomplete="current-password"/>
+          <button class="pw-toggle" onclick="togglePw('loginPw',this)" type="button">Show</button>
+        </div>
+      </div>
+      <button class="btn-main" id="loginBtn" onclick="doLogin()">Sign in →</button>
+      <div class="msg" id="loginMsg"></div>
 
-    // If already logged in → redirect immediately
-    if (sb) sb.auth.getSession().then(({ data: { session } }) => { if (session?.user) go(session.user); });
+      <div class="divider">or</div>
+      <button class="btn-google" onclick="doGoogle()">
+        <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
 
-    // Handle Google OAuth callback (token in URL hash)
-    if (sb) sb.auth.onAuthStateChange((event, session) => {
-      if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) go(session.user);
-    });
+      <!-- Legal footer for sign-in panel -->
+      <div class="legal-links">
+        By signing in, you agree to our
+        <a href="/terms.html" target="_blank">Terms of Service</a> and
+        <a href="/privacy.html" target="_blank">Privacy Policy</a>.
+      </div>
+    </div>
 
-    function go(user) {
-      const role = user.user_metadata?.role || 'ambassador';
-      window.location.replace(ROUTES[role] || '/portal-ambassador.html');
+    <!-- ══════════════════════════════════════════ -->
+    <!-- CREATE ACCOUNT panel                      -->
+    <!-- ══════════════════════════════════════════ -->
+    <div class="auth-panel" id="panel-signup">
+      <div class="form-group">
+        <label class="form-label">Full name</label>
+        <input type="text" id="signupName" placeholder="Your name" autocomplete="name"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input type="email" id="signupEmail" placeholder="you@school.edu" autocomplete="email"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Password (min 8 characters)</label>
+        <div class="pw-wrap">
+          <input type="password" id="signupPw" placeholder="Create a password" autocomplete="new-password"/>
+          <button class="pw-toggle" onclick="togglePw('signupPw',this)" type="button">Show</button>
+        </div>
+      </div>
+
+      <!-- ─── AGE CONFIRMATION (COPPA) ─── -->
+      <div class="age-confirm" id="ageConfirmBox">
+        <div class="age-confirm-row">
+          <input type="checkbox" id="ageCheck" onchange="handleAgeCheck(this)"/>
+          <label for="ageCheck">
+            I confirm that I am <strong>13 years of age or older</strong>.
+          </label>
+        </div>
+
+        <!-- Under-13 guardian panel — shown if checkbox is unchecked after interaction -->
+        <div class="under13-panel" id="under13Panel">
+          <p>
+            <strong>Parental consent required.</strong> Because you are under 13, we need a parent or guardian to authorize your account before it is activated. Please enter a parent or guardian's email address below. We will send them a consent request — your account will not be active until they approve.
+          </p>
+          <input type="email" id="guardianEmail" placeholder="Parent / Guardian email address" autocomplete="off"/>
+        </div>
+      </div>
+      <!-- ─── END AGE CONFIRMATION ─── -->
+
+      <!-- ─── TERMS ACCEPTANCE ─── -->
+      <div class="age-confirm" style="background:#f8f9fa;border-color:var(--gray-300);">
+        <div class="age-confirm-row">
+          <input type="checkbox" id="termsCheck"/>
+          <label for="termsCheck">
+            I have read and agree to FairGame's
+            <a href="/terms.html" target="_blank">Terms of Service</a> and
+            <a href="/privacy.html" target="_blank">Privacy Policy</a>,
+            including the collection and use of my information as described therein.
+          </label>
+        </div>
+      </div>
+      <!-- ─── END TERMS ACCEPTANCE ─── -->
+
+      <button class="btn-main" id="signupBtn" onclick="doSignup()">Create Account →</button>
+      <div class="msg" id="signupMsg"></div>
+
+      <p style="font-size:.74rem;color:var(--gray-400);margin-top:12px;line-height:1.6;">
+        Accounts are invite-only. If you don't have an approved account,
+        <a href="/#contact" style="color:var(--g600);">reach out to us first →</a>
+      </p>
+
+      <div class="divider">or</div>
+      <button class="btn-google" onclick="doGoogle()">
+        <svg class="google-icon" viewBox="0 0 24 24">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <!-- Privacy assurance badge -->
+      <div class="legal-badge">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Student data is protected. We never sell or share your information.
+      </div>
+    </div>
+
+  </div><!-- /.login-card -->
+
+  <div class="login-footer">
+    <a href="/">← Back to fairgameinitiative.org</a>
+    &nbsp;·&nbsp;
+    <a href="/volunteer.html">Register as a judge</a>
+    &nbsp;·&nbsp;
+    <a href="/privacy.html">Privacy</a>
+    &nbsp;·&nbsp;
+    <a href="/terms.html">Terms</a>
+  </div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SB_URL = 'https://buzcxrbjutexiofetgvn.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1emN4cmJqdXRleGlvZmV0Z3ZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Nzc1NTEsImV4cCI6MjA4OTM1MzU1MX0.ifMup4fCcfHaf7Q4TYfi1X1V-J8tQpu2JwaqvjBcsBQ';
+let sb = null;
+try { if (SB_URL !== 'YOUR_SUPABASE_URL') sb = window.supabase.createClient(SB_URL, SB_KEY, { auth: { detectSessionInUrl: true } }); } catch(e) {}
+
+const ROUTES = { teacher:'/portal-teacher.html', ambassador:'/portal-ambassador.html', judge:'/portal-judge.html', admin:'/portal-admin.html' };
+
+if (sb) sb.auth.getSession().then(({ data: { session } }) => { if (session?.user) go(session.user); });
+if (sb) sb.auth.onAuthStateChange((event, session) => {
+  if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) go(session.user);
+});
+
+function go(user) {
+  const role = user.user_metadata?.role || 'ambassador';
+  window.location.replace(ROUTES[role] || '/portal-ambassador.html');
+}
+
+function switchTab(tab, btn) {
+  document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('panel-' + tab).classList.add('active');
+}
+
+function msg(id, text, type) {
+  const el = document.getElementById(id);
+  el.textContent = text; el.className = 'msg ' + type;
+}
+
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  btn.disabled = loading;
+  btn.textContent = loading ? 'Please wait…' : (btnId === 'loginBtn' ? 'Sign in →' : 'Create Account →');
+}
+
+// ─── Age checkbox handler ───────────────────────────────────────────────────
+// The checkbox is checked = "I am 13 or older." 
+// If user unchecks it, show the parental consent panel.
+function handleAgeCheck(checkbox) {
+  const panel = document.getElementById('under13Panel');
+  if (!checkbox.checked) {
+    panel.style.display = 'block';
+  } else {
+    panel.style.display = 'none';
+    document.getElementById('guardianEmail').value = '';
+  }
+}
+
+async function doLogin() {
+  const email = document.getElementById('loginEmail').value.trim();
+  const pw = document.getElementById('loginPw').value;
+  if (!email || !pw) { msg('loginMsg','Please fill in both fields.','err'); return; }
+  if (!sb) { msg('loginMsg','Auth not configured — add your Supabase credentials to login.html','err'); return; }
+  setLoading('loginBtn', true);
+  const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+  setLoading('loginBtn', false);
+  if (error) msg('loginMsg', error.message, 'err');
+}
+
+async function doSignup() {
+  const name = document.getElementById('signupName').value.trim();
+  const email = document.getElementById('signupEmail').value.trim();
+  const pw = document.getElementById('signupPw').value;
+  const ageChecked = document.getElementById('ageCheck').checked;
+  const termsChecked = document.getElementById('termsCheck').checked;
+  const guardianEmail = document.getElementById('guardianEmail').value.trim();
+
+  // Validate basic fields
+  if (!name || !email || !pw) { msg('signupMsg','All fields are required.','err'); return; }
+  if (pw.length < 8) { msg('signupMsg','Password must be at least 8 characters.','err'); return; }
+
+  // Validate legal consent
+  if (!termsChecked) {
+    msg('signupMsg','You must agree to the Terms of Service and Privacy Policy to create an account.','err');
+    return;
+  }
+
+  // Under-13 flow: if age checkbox is unchecked, require guardian email
+  const isUnder13 = !ageChecked;
+  if (isUnder13) {
+    if (!guardianEmail) {
+      msg('signupMsg','Please provide a parent or guardian email address. Accounts for users under 13 require parental consent before activation.','err');
+      return;
     }
-
-    function switchTab(tab, btn) {
-      document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
-      document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
-      btn.classList.add('active');
-      document.getElementById('panel-' + tab).classList.add('active');
+    if (!guardianEmail.includes('@')) {
+      msg('signupMsg','Please provide a valid parent or guardian email address.','err');
+      return;
     }
+  }
 
-    function msg(id, text, type) {
-      const el = document.getElementById(id);
-      el.textContent = text; el.className = 'msg ' + type;
-    }
+  if (!sb) { msg('signupMsg','Auth not configured.','err'); return; }
+  setLoading('signupBtn', true);
 
-    function setLoading(btnId, loading) {
-      const btn = document.getElementById(btnId);
-      btn.disabled = loading;
-      btn.textContent = loading ? 'Please wait…' : (btnId === 'loginBtn' ? 'Sign in →' : 'Create Account →');
-    }
+  const metadata = {
+    name,
+    role: 'ambassador',         // default role; admin upgrades after approval
+    age_confirmed: ageChecked,  // stored for audit trail
+    terms_accepted: true,
+    terms_accepted_at: new Date().toISOString()
+  };
+  if (isUnder13) {
+    metadata.guardian_consent_required = true;
+    metadata.guardian_email = guardianEmail;
+    metadata.account_status = 'pending_parental_consent';
+  }
 
-    async function doLogin() {
-      const email = document.getElementById('loginEmail').value.trim();
-      const pw    = document.getElementById('loginPw').value;
-      if (!email || !pw) { msg('loginMsg','Please fill in both fields.','err'); return; }
-      if (!sb) { msg('loginMsg','Auth not configured — add your Supabase credentials to login.html','err'); return; }
-      setLoading('loginBtn', true);
-      const { error } = await sb.auth.signInWithPassword({ email, password: pw });
-      setLoading('loginBtn', false);
-      if (error) msg('loginMsg', error.message, 'err');
-    }
+  const { error } = await sb.auth.signUp({
+    email, password: pw,
+    options: { data: metadata }
+  });
+  setLoading('signupBtn', false);
 
-    async function doSignup() {
-      const name  = document.getElementById('signupName').value.trim();
-      const email = document.getElementById('signupEmail').value.trim();
-      const pw    = document.getElementById('signupPw').value;
-      if (!name || !email || !pw) { msg('signupMsg','All fields are required.','err'); return; }
-      if (pw.length < 8)          { msg('signupMsg','Password must be at least 8 characters.','err'); return; }
-      if (!sb) { msg('signupMsg','Auth not configured.','err'); return; }
-      setLoading('signupBtn', true);
-      const { error } = await sb.auth.signUp({
-        email, password: pw,
-        options: { data: { name, role: 'ambassador' } }  // default role; admin upgrades after approval
-      });
-      setLoading('signupBtn', false);
-      if (error) msg('signupMsg', error.message, 'err');
-      else msg('signupMsg', 'Account created! Check your email to confirm, then sign in.', 'ok');
-    }
+  if (error) {
+    msg('signupMsg', error.message, 'err');
+  } else if (isUnder13) {
+    msg('signupMsg',
+      'Account created! Because you indicated you are under 13, we have sent a consent request to your parent or guardian at ' + guardianEmail + '. Your account will be activated once they approve. Please also check your own email to confirm your address.',
+      'ok');
+  } else {
+    msg('signupMsg', 'Account created! Check your email to confirm, then sign in.', 'ok');
+  }
+}
 
-    async function doGoogle() {
-      if (!sb) { alert('Google OAuth not configured — add Supabase credentials first.'); return; }
-      await sb.auth.signInWithOAuth({
-        provider: 'google',
-        options: { redirectTo: window.location.origin + '/login.html' }
-      });
-    }
+async function doGoogle() {
+  if (!sb) { alert('Google OAuth not configured — add Supabase credentials first.'); return; }
+  await sb.auth.signInWithOAuth({
+    provider: 'google',
+    options: { redirectTo: window.location.origin + '/login.html' }
+  });
+}
 
-    async function showForgot(e) {
-      e.preventDefault();
-      const email = document.getElementById('loginEmail').value.trim();
-      if (!email) { msg('loginMsg','Enter your email address above first.','err'); return; }
-      if (!sb) return;
-      const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/login.html' });
-      if (error) msg('loginMsg', error.message, 'err');
-      else msg('loginMsg', 'Password reset email sent — check your inbox.', 'ok');
-    }
+async function showForgot(e) {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim();
+  if (!email) { msg('loginMsg','Enter your email address above first.','err'); return; }
+  if (!sb) return;
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/login.html' });
+  if (error) msg('loginMsg', error.message, 'err');
+  else msg('loginMsg', 'Password reset email sent — check your inbox.', 'ok');
+}
 
-    function togglePw(inputId, btn) {
-      const inp = document.getElementById(inputId);
-      const show = inp.type === 'password';
-      inp.type = show ? 'text' : 'password';
-      btn.textContent = show ? 'Hide' : 'Show';
-    }
+function togglePw(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  btn.textContent = show ? 'Hide' : 'Show';
+}
 
-    // Enter key on password fields
-    ['loginPw','loginEmail'].forEach(id => document.getElementById(id)?.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); }));
-    document.getElementById('signupPw')?.addEventListener('keydown', e => { if (e.key === 'Enter') doSignup(); });
-  </script>
+['loginPw','loginEmail'].forEach(id => document.getElementById(id)?.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); }));
+document.getElementById('signupPw')?.addEventListener('keydown', e => { if (e.key === 'Enter') doSignup(); });
+</script>
 </body>
 </html>
