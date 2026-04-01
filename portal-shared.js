@@ -24,6 +24,7 @@ try {
 const ROLE_ROUTES = {
   teacher:    '/portal-teacher.html',
   ambassador: '/portal-ambassador.html',
+  student:    '/portal-student.html',
   judge:      '/portal-judge.html',
   admin:      '/portal-admin.html',
 };
@@ -41,9 +42,11 @@ function requireAuth(expectedRole, onReady) {
     if (typeof onReady === 'function') onReady(currentUser);
     return;
   }
-  sb.auth.getSession().then(({ data: { session }, error }) => {
+  sb.auth.getSession().then(async ({ data: { session }, error }) => {
     if (error || !session?.user) { window.location.replace('/login.html'); return; }
-    const user = session.user;
+    // Refresh token so user_metadata reflects any role changes made in the dashboard
+    const { data: refreshed } = await sb.auth.refreshSession();
+    const user = refreshed?.session?.user || session.user;
     const role = user.user_metadata?.role || 'ambassador';
     if (role === 'admin' || role === expectedRole) {
       currentUser = user; currentRole = role;

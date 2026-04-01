@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>Student Portal — FairGame</title>
+  <link rel="icon" href="/Images/logo.png" type="image/png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/portal.css"/>
+</head>
+<body>
+<!-- Mobile nav toggle -->
+<button class="pnav-mobile-toggle" onclick="openMobileNav()">☰</button>
+<div class="pnav-overlay" onclick="closeMobileNav()"></div>
+
+<div class="portal-shell">
+<!-- ── Sidebar ── -->
+<nav class="pnav">
+  <div class="pnav-logo">
+    <img src="/Images/logo.png" alt="" onerror="this.style.display='none'"/>
+    <div class="pnav-logo-text">
+      <div class="pnav-logo-name">FairGame</div>
+      <div class="pnav-logo-role">Student</div>
+    </div>
+  </div>
+  <div class="pnav-body">
+    <div class="pnav-section">Main</div>
+    <a class="pnav-link active" data-section="home"      data-label="Dashboard"      onclick="showSection('home',this)">Dashboard</a>
+    <a class="pnav-link"       data-section="project"   data-label="My Project"     onclick="showSection('project',this)">My Project</a>
+    <a class="pnav-link"       data-section="resources" data-label="Resources"      onclick="showSection('resources',this)">Resources</a>
+    <div class="pnav-section">Connect</div>
+    <a class="pnav-link"       data-section="community" data-label="Community"      onclick="showSection('community',this)">Community</a>
+    <a class="pnav-link"       data-section="help"      data-label="Ask for Help"   onclick="showSection('help',this)">Ask for Help</a>
+    <div class="pnav-divider"></div>
+    <a class="pnav-link" href="/" style="font-size:.78rem;color:rgba(255,255,255,.3);">← Public site</a>
+  </div>
+  <div class="pnav-footer">
+    <div class="pnav-user-name" id="navUserName">—</div>
+    <div class="pnav-user-email" id="navUserEmail">—</div>
+    <button class="pnav-logout" onclick="portalLogout()">Sign out</button>
+  </div>
+</nav>
+
+<!-- ── Main ── -->
+<div class="portal-main">
+  <div class="portal-topbar">
+    <span class="topbar-title" id="topbarTitle">Dashboard</span>
+    <div class="topbar-right">
+      <button class="btn-primary" onclick="openModal('editProjectModal')" style="font-size:.78rem;padding:8px 14px;">Update My Project</button>
+    </div>
+  </div>
+
+  <div class="portal-content">
+
+    <!-- ── DASHBOARD ── -->
+    <div class="portal-section active" id="sec-home">
+      <div class="kpi-row">
+        <div class="kpi-card"><div class="kpi-card-n" id="kProjectStatus">—</div><div class="kpi-card-l">Project Status</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kField">—</div><div class="kpi-card-l">Project Field</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kMessages">—</div><div class="kpi-card-l">Messages</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kResources">6</div><div class="kpi-card-l">Resources Available</div></div>
+      </div>
+
+      <!-- Welcome card -->
+      <div class="card" id="welcomeCard">
+        <div class="card-body">
+          <div style="display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;">
+            <div style="flex:1;min-width:220px;">
+              <div class="text-serif fw-600" style="font-size:1.15rem;color:var(--g900);margin-bottom:6px;">Welcome to FairGame, <span id="welcomeName">student</span>!</div>
+              <p class="text-sm text-muted" style="line-height:1.7;margin-bottom:14px;">
+                This is your personal hub — track your science fair project, access exclusive resources, connect with the FairGame community, and get support from our team whenever you need it.
+              </p>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button class="btn-primary" onclick="showSection('project',document.querySelector('[data-section=project]'))" style="font-size:.78rem;padding:8px 14px;">Set up my project →</button>
+                <button class="btn-outline" onclick="showSection('resources',document.querySelector('[data-section=resources]'))" style="font-size:.78rem;padding:8px 14px;">Browse resources</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Next steps -->
+      <div class="card">
+        <div class="card-header"><h3>Getting Started</h3></div>
+        <div class="card-body">
+          <div style="display:flex;flex-direction:column;gap:14px;" id="nextStepsList">
+            <div class="flex items-center gap-12">
+              <div style="width:22px;height:22px;border-radius:50%;background:var(--g400);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:white;font-weight:700;flex-shrink:0;">1</div>
+              <div><div class="text-sm fw-500" style="color:var(--g900);">Set up your project</div><div class="text-xs text-muted">Enter your project title, field, and a brief description so FairGame can connect you with the right resources and mentors.</div></div>
+            </div>
+            <div class="flex items-center gap-12">
+              <div style="width:22px;height:22px;border-radius:50%;background:var(--g400);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:white;font-weight:700;flex-shrink:0;">2</div>
+              <div><div class="text-sm fw-500" style="color:var(--g900);">Download your resources</div><div class="text-xs text-muted">Grab the Research Guide, Display Board Template, and Project Proposal form from the Resources section.</div></div>
+            </div>
+            <div class="flex items-center gap-12">
+              <div style="width:22px;height:22px;border-radius:50%;background:var(--g400);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:white;font-weight:700;flex-shrink:0;">3</div>
+              <div><div class="text-sm fw-500" style="color:var(--g900);">Join the community</div><div class="text-xs text-muted">Connect with other students, find a mentor, and stay up to date on FairGame events and deadlines.</div></div>
+            </div>
+            <div class="flex items-center gap-12">
+              <div style="width:22px;height:22px;border-radius:50%;background:var(--g400);display:flex;align-items:center;justify-content:center;font-size:.7rem;color:white;font-weight:700;flex-shrink:0;">4</div>
+              <div><div class="text-sm fw-500" style="color:var(--g900);">Reach out for help</div><div class="text-xs text-muted">Have questions? Use the Ask for Help section to message the FairGame team or schedule a call.</div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Announcements -->
+      <div class="card">
+        <div class="card-header"><h3>Announcements</h3></div>
+        <div class="card-body" id="announcementsList">
+          <div style="display:flex;flex-direction:column;gap:14px;">
+            <div style="padding:14px;background:var(--g50);border-left:3px solid var(--g400);border-radius:0 3px 3px 0;">
+              <div class="text-sm fw-500" style="color:var(--g900);margin-bottom:2px;">Welcome to the 2025–2026 FairGame cohort!</div>
+              <div class="text-xs text-muted">We're so excited to have you here. Explore your portal, download resources, and don't hesitate to ask for help. Science fair season is just getting started!</div>
+            </div>
+            <div style="padding:14px;background:#f8f9fa;border-left:3px solid var(--gray-300,#c8cec8);border-radius:0 3px 3px 0;">
+              <div class="text-sm fw-500" style="color:var(--g900);margin-bottom:2px;">2026 Judging Score Cards now available</div>
+              <div class="text-xs text-muted">The official OAS 2026 vertical-layout judging score cards are in the Resources section. Download them to understand exactly how your project will be evaluated.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── MY PROJECT ── -->
+    <div class="portal-section" id="sec-project">
+      <div class="section-heading flex justify-between items-center" style="flex-wrap:wrap;gap:12px;">
+        <div>
+          <h2>My Project</h2>
+          <p>Track your science fair project details and progress</p>
+        </div>
+        <button class="btn-primary" onclick="openModal('editProjectModal')">Edit Project</button>
+      </div>
+
+      <!-- Project detail card -->
+      <div class="card" id="projectCard">
+        <div class="card-body" id="projectDisplay">
+          <div class="empty-state">
+            <p>You haven't set up your project yet.</p>
+            <button class="btn-primary" onclick="openModal('editProjectModal')" style="margin-top:12px;font-size:.82rem;">Set up my project →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress tracker -->
+      <div class="card">
+        <div class="card-header"><h3>Project Milestones</h3></div>
+        <div class="card-body">
+          <div style="display:flex;flex-direction:column;gap:10px;" id="milestoneList">
+            <label class="milestone-item" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+              <input type="checkbox" id="ms1" onchange="saveMilestones()" style="accent-color:var(--g600);width:16px;height:16px;flex-shrink:0;"/>
+              <span class="text-sm">Chose a topic and wrote my hypothesis</span>
+            </label>
+            <label class="milestone-item" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+              <input type="checkbox" id="ms2" onchange="saveMilestones()" style="accent-color:var(--g600);width:16px;height:16px;flex-shrink:0;"/>
+              <span class="text-sm">Completed background research</span>
+            </label>
+            <label class="milestone-item" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+              <input type="checkbox" id="ms3" onchange="saveMilestones()" style="accent-color:var(--g600);width:16px;height:16px;flex-shrink:0;"/>
+              <span class="text-sm">Designed my experiment / identified variables</span>
+            </label>
+            <label class="milestone-item" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+              <input type="checkbox" id="ms4" onchange="saveMilestones()" style="accent-color:var(--g600);width:16px;height:16px;flex-shrink:0;"/>
+              <span class="text-sm">Conducted experiment and collected data</span>
+            </label>
+            <label class="milestone-item" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+              <input type="checkbox" id="ms5" onchange="saveMilestones()" style="accent-color:var(--g600);width:16px;height:16px;flex-shrink:0;"/>
+              <span class="text-sm">Analyzed results and drew conclusions</span>
+            </label>
+            <label class="milestone-item" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+              <input type="checkbox" id="ms6" onchange="saveMilestones()" style="accent-color:var(--g600);width:16px;height:16px;flex-shrink:0;"/>
+              <span class="text-sm">Built display board</span>
+            </label>
+            <label class="milestone-item" style="display:flex;align-items:center;gap:10px;cursor:pointer;">
+              <input type="checkbox" id="ms7" onchange="saveMilestones()" style="accent-color:var(--g600);width:16px;height:16px;flex-shrink:0;"/>
+              <span class="text-sm">Submitted paperwork and registered</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div class="card" style="max-width:640px;">
+        <div class="card-header"><h3>My Notes</h3><button class="btn-ghost" onclick="saveNotes()">Save</button></div>
+        <div class="card-body">
+          <textarea id="projectNotes" placeholder="Use this space for anything — ideas, reminders, links, questions for your teacher…" style="width:100%;min-height:160px;resize:vertical;border:1.5px solid var(--gray-200,#e2e6e2);padding:10px 12px;font-family:var(--ff-sans);font-size:.86rem;line-height:1.6;color:var(--gray-900,#1a1e1a);border-radius:3px;outline:none;"></textarea>
+          <div class="msg-strip" id="notesMsg"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── RESOURCES ── -->
+    <div class="portal-section" id="sec-resources">
+      <div class="section-heading">
+        <h2>Resources</h2>
+        <p>Everything you need — unlocked for portal members</p>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;">
+
+        <div class="card" style="margin:0;">
+          <div class="card-body">
+            <div class="text-serif fw-600" style="color:var(--g900);margin-bottom:4px;">Research Guide</div>
+            <div class="text-sm text-muted" style="margin-bottom:12px;">Step-by-step: topic → experiment → display board</div>
+            <a href="/researchguide.html" class="btn-outline text-sm" style="font-size:.78rem;padding:7px 14px;">View Guide →</a>
+          </div>
+        </div>
+
+        <div class="card" style="margin:0;">
+          <div class="card-body">
+            <div class="text-serif fw-600" style="color:var(--g900);margin-bottom:4px;">Setup Guide</div>
+            <div class="text-sm text-muted" style="margin-bottom:12px;">How to navigate the OAS registration process</div>
+            <a href="/setupguide.html" class="btn-outline text-sm" style="font-size:.78rem;padding:7px 14px;">View Guide →</a>
+          </div>
+        </div>
+
+        <div class="card" style="margin:0;">
+          <div class="card-body">
+            <div class="text-serif fw-600" style="color:var(--g900);margin-bottom:4px;">Ohio Competition Pathway</div>
+            <div class="text-sm text-muted" style="margin-bottom:12px;">District contacts, deadlines, path to ISEF</div>
+            <a href="/stateresources.html" class="btn-outline text-sm" style="font-size:.78rem;padding:7px 14px;">View →</a>
+          </div>
+        </div>
+
+        <div class="card" style="margin:0;">
+          <div class="card-body">
+            <div class="text-serif fw-600" style="color:var(--g900);margin-bottom:4px;">Display Board Template</div>
+            <div class="text-sm text-muted" style="margin-bottom:12px;">Pre-sized Canva template with all required sections</div>
+            <button onclick="dlRes('student/display-board-template.pdf')" class="btn-outline text-sm" style="font-size:.78rem;padding:7px 14px;">Download →</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin:0;">
+          <div class="card-body">
+            <div class="text-serif fw-600" style="color:var(--g900);margin-bottom:4px;">Research Paper Template</div>
+            <div class="text-sm text-muted" style="margin-bottom:12px;">Standard format with all required sections</div>
+            <button onclick="dlRes('student/research-paper-template.docx')" class="btn-outline text-sm" style="font-size:.78rem;padding:7px 14px;">Download →</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin:0;">
+          <div class="card-body">
+            <div class="text-serif fw-600" style="color:var(--g900);margin-bottom:4px;">Project Proposal Form</div>
+            <div class="text-sm text-muted" style="margin-bottom:12px;">Hypothesis, variables, safety checklist</div>
+            <button onclick="dlRes('student/project-proposal-form.pdf')" class="btn-outline text-sm" style="font-size:.78rem;padding:7px 14px;">Download →</button>
+          </div>
+        </div>
+
+        <div class="card" style="margin:0;">
+          <div class="card-body">
+            <div class="text-serif fw-600" style="color:var(--g900);margin-bottom:4px;">Judging Score Cards</div>
+            <div class="text-sm text-muted" style="margin-bottom:12px;">Official OAS 2026 vertical layout — know how you'll be scored</div>
+            <a href="/Documents/2026-Judging-Score-Cards-Vertical-layout.pdf" target="_blank" class="btn-outline text-sm" style="font-size:.78rem;padding:7px 14px;">Download →</a>
+          </div>
+        </div>
+
+        <div class="card" style="margin:0;">
+          <div class="card-body">
+            <div class="text-serif fw-600" style="color:var(--g900);margin-bottom:4px;">Start Here Guide</div>
+            <div class="text-sm text-muted" style="margin-bottom:12px;">New to science fair? Begin here</div>
+            <a href="/starthere.html" class="btn-outline text-sm" style="font-size:.78rem;padding:7px 14px;">View →</a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── COMMUNITY ── -->
+    <div class="portal-section" id="sec-community">
+      <div class="section-heading">
+        <h2>Community</h2>
+        <p>Connect with other students and the FairGame network</p>
+      </div>
+
+      <!-- Intro -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-body">
+          <div class="text-serif fw-600" style="color:var(--g900);margin-bottom:6px;">You're part of something bigger.</div>
+          <p class="text-sm text-muted" style="line-height:1.7;margin-bottom:14px;">
+            FairGame connects students, school ambassadors, teachers, and professional mentors across Ohio. Use this space to introduce yourself, ask questions, and celebrate wins together.
+          </p>
+          <button class="btn-primary" onclick="openModal('introModal')" style="font-size:.78rem;padding:8px 14px;">Introduce yourself →</button>
+        </div>
+      </div>
+
+      <!-- Community board -->
+      <div class="card">
+        <div class="card-header">
+          <h3>Community Board</h3>
+          <button class="btn-ghost" onclick="openModal('postModal')">+ Post</button>
+        </div>
+        <div class="card-body" id="communityPosts">
+          <div style="display:flex;flex-direction:column;gap:16px;">
+
+            <div style="padding:14px;border:1.5px solid var(--gray-200,#e2e6e2);border-radius:3px;">
+              <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+                <div style="width:32px;height:32px;border-radius:50%;background:var(--g400);display:flex;align-items:center;justify-content:center;font-size:.78rem;color:white;font-weight:600;flex-shrink:0;">FG</div>
+                <div>
+                  <div class="text-sm fw-500" style="color:var(--g900);">FairGame Team</div>
+                  <div class="text-xs text-muted">Welcome post</div>
+                </div>
+              </div>
+              <p class="text-sm" style="line-height:1.6;color:var(--gray-700,#3d453d);">
+                Welcome to the FairGame student community! This board is a place to share updates on your project, ask questions, celebrate milestones, and support each other through the science fair journey. We can't wait to see what you build.
+              </p>
+            </div>
+
+            <div id="communityPostsList">
+              <!-- Dynamic posts loaded here -->
+            </div>
+
+            <div class="empty-state" id="noPostsMsg" style="display:none;">
+              <p>No posts yet — be the first to share!</p>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Mentorship -->
+      <div class="card">
+        <div class="card-header"><h3>Looking for a Mentor?</h3></div>
+        <div class="card-body">
+          <p class="text-sm text-muted" style="line-height:1.7;margin-bottom:14px;">
+            FairGame can connect you with professional scientists, engineers, and researchers in your field. If you'd like a mentor to review your project and offer guidance, let us know.
+          </p>
+          <button class="btn-primary" onclick="requestMentor()" style="font-size:.78rem;padding:8px 14px;">Request a Mentor →</button>
+          <div class="msg-strip" id="mentorMsg"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── ASK FOR HELP ── -->
+    <div class="portal-section" id="sec-help">
+      <div class="section-heading">
+        <h2>Ask for Help</h2>
+        <p>Message the FairGame team or schedule a call — we're here for you</p>
+      </div>
+
+      <!-- Quick message -->
+      <div class="card" style="max-width:600px;margin-bottom:16px;">
+        <div class="card-header"><h3>Send a Message</h3></div>
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label">What do you need help with? <span class="req">*</span></label>
+            <select id="helpTopic">
+              <option value="">Select a topic…</option>
+              <option>Choosing a research topic</option>
+              <option>Designing my experiment</option>
+              <option>Understanding the judging criteria</option>
+              <option>OAS / competition registration</option>
+              <option>Display board design</option>
+              <option>Finding a mentor</option>
+              <option>Technical questions about my project</option>
+              <option>Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Your message <span class="req">*</span></label>
+            <textarea id="helpMessage" placeholder="Describe your question or what you're working on — the more detail the better!" style="min-height:120px;"></textarea>
+          </div>
+          <button class="btn-primary" onclick="sendHelpMessage()">Send Message →</button>
+          <div class="msg-strip" id="helpMsg"></div>
+        </div>
+      </div>
+
+      <!-- Schedule a call -->
+      <div class="card" style="max-width:600px;">
+        <div class="card-header"><h3>Schedule a Call</h3></div>
+        <div class="card-body">
+          <p class="text-sm text-muted" style="line-height:1.7;margin-bottom:16px;">
+            Want to talk through your project face-to-face? Book a 30-minute video call with a FairGame team member.
+          </p>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Preferred date <span class="req">*</span></label>
+              <input type="date" id="callDate"/>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Preferred time</label>
+              <select id="callTime">
+                <option>Morning (9–12)</option>
+                <option>Afternoon (12–4)</option>
+                <option>Evening (4–7)</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">What would you like to cover?</label>
+            <textarea id="callNotes" placeholder="e.g. I want to talk through my hypothesis before I start my experiment…" style="min-height:80px;"></textarea>
+          </div>
+          <button class="btn-primary" onclick="scheduleCall()">Request Call →</button>
+          <div class="msg-strip" id="callMsg"></div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- portal-content -->
+</div><!-- portal-main -->
+</div><!-- portal-shell -->
+
+<!-- ── Edit Project Modal ── -->
+<div class="modal-overlay" id="editProjectModal">
+  <div class="modal-box">
+    <h3>My Project</h3>
+    <p class="modal-sub">Tell us about your science fair project — this helps us connect you with the right resources and support.</p>
+    <div class="form-grid">
+      <div class="form-group" style="grid-column:1/-1;">
+        <label class="form-label">Project title <span class="req">*</span></label>
+        <input type="text" id="projTitle" placeholder="e.g. Effect of microplastics on water filtration efficiency"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Project field</label>
+        <select id="projField">
+          <option value="">Select…</option>
+          <option>Biology / Life Sciences</option>
+          <option>Chemistry</option>
+          <option>Physics / Engineering</option>
+          <option>Environmental Science</option>
+          <option>Computer Science / Math</option>
+          <option>Medicine / Health</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Grade</label>
+        <input type="text" id="projGrade" placeholder="e.g. 10th"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Current stage</label>
+        <select id="projStage">
+          <option value="planning">Planning / Choosing a topic</option>
+          <option value="research">Conducting background research</option>
+          <option value="experiment">Running experiment</option>
+          <option value="analysis">Analyzing results</option>
+          <option value="display">Building display board</option>
+          <option value="registered">Registered and ready</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">School name</label>
+        <input type="text" id="projSchool" placeholder="Your school"/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Project description / hypothesis</label>
+      <textarea id="projDesc" placeholder="Briefly describe what you're investigating and your hypothesis…" rows="3"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('editProjectModal')">Cancel</button>
+      <button class="btn-primary" onclick="saveProject()">Save Project →</button>
+    </div>
+    <div class="msg-strip" id="projectMsg"></div>
+  </div>
+</div>
+
+<!-- ── Introduce Yourself Modal ── -->
+<div class="modal-overlay" id="introModal">
+  <div class="modal-box">
+    <h3>Introduce Yourself</h3>
+    <p class="modal-sub">Share a quick intro to the community — what you're working on and what you're excited about.</p>
+    <div class="form-group">
+      <label class="form-label">Your introduction <span class="req">*</span></label>
+      <textarea id="introText" placeholder="Hi, I'm [name] from [school]. I'm working on [project topic]. I'm most excited about…" rows="4"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('introModal')">Cancel</button>
+      <button class="btn-primary" onclick="postIntro()">Post to Community →</button>
+    </div>
+    <div class="msg-strip" id="introMsg"></div>
+  </div>
+</div>
+
+<!-- ── New Post Modal ── -->
+<div class="modal-overlay" id="postModal">
+  <div class="modal-box">
+    <h3>Post to Community</h3>
+    <p class="modal-sub">Share a question, update, or milestone with the FairGame community.</p>
+    <div class="form-group">
+      <label class="form-label">Your post <span class="req">*</span></label>
+      <textarea id="postText" placeholder="What's on your mind? Share a milestone, question, or encouragement for your fellow students…" rows="4"></textarea>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeModal('postModal')">Cancel</button>
+      <button class="btn-primary" onclick="submitPost()">Post →</button>
+    </div>
+    <div class="msg-strip" id="postMsg"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/portal-shared.js"></script>
+<script>
+'use strict';
+
+let studentId = null;
+let projectData = {};
+
+/* ── Init ── */
+requireAuth('student', async (user) => {
+  studentId = user.id;
+  const name = user.user_metadata?.name || user.email?.split('@')[0] || 'there';
+  document.getElementById('welcomeName').textContent = name;
+  await loadProject();
+  loadMilestones();
+  loadNotes();
+  loadMessages();
+});
+
+/* ── Project ── */
+async function loadProject() {
+  if (!sb) {
+    renderProjectDisplay({ title: 'Demo Project', field: 'Environmental Science', stage: 'experiment', school: 'Demo High School', description: 'Testing water filtration.' });
+    document.getElementById('kProjectStatus').textContent = 'In Progress';
+    document.getElementById('kField').textContent = 'Env. Science';
+    return;
+  }
+  const { data } = await sb.from('student_projects').select('*').eq('student_id', studentId).maybeSingle();
+  if (data) {
+    projectData = data;
+    renderProjectDisplay(data);
+    document.getElementById('kProjectStatus').textContent = stageLabel(data.stage);
+    document.getElementById('kField').textContent = shortField(data.field) || '—';
+    // Pre-fill modal fields
+    document.getElementById('projTitle').value  = data.title  || '';
+    document.getElementById('projField').value  = data.field  || '';
+    document.getElementById('projGrade').value  = data.grade  || '';
+    document.getElementById('projStage').value  = data.stage  || 'planning';
+    document.getElementById('projSchool').value = data.school || '';
+    document.getElementById('projDesc').value   = data.description || '';
+  } else {
+    document.getElementById('kProjectStatus').textContent = 'Not set';
+    document.getElementById('kField').textContent = '—';
+  }
+}
+
+function renderProjectDisplay(d) {
+  if (!d || !d.title) return;
+  document.getElementById('projectDisplay').innerHTML = `
+    <div style="display:grid;gap:14px;">
+      <div>
+        <div class="text-xs text-muted" style="margin-bottom:2px;">Project Title</div>
+        <div class="text-serif fw-600" style="font-size:1.05rem;color:var(--g900);">${d.title}</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;">
+        <div><div class="text-xs text-muted">Field</div><div class="text-sm fw-500">${d.field || '—'}</div></div>
+        <div><div class="text-xs text-muted">Grade</div><div class="text-sm fw-500">${d.grade || '—'}</div></div>
+        <div><div class="text-xs text-muted">Stage</div><div class="text-sm fw-500">${stageLabel(d.stage)}</div></div>
+        <div><div class="text-xs text-muted">School</div><div class="text-sm fw-500">${d.school || '—'}</div></div>
+      </div>
+      ${d.description ? `<div><div class="text-xs text-muted" style="margin-bottom:4px;">Description / Hypothesis</div><p class="text-sm" style="line-height:1.6;color:var(--gray-700,#3d453d);">${d.description}</p></div>` : ''}
+    </div>
+  `;
+}
+
+function stageLabel(s) {
+  const map = { planning:'Planning', research:'Researching', experiment:'Experimenting', analysis:'Analyzing', display:'Building Board', registered:'Registered' };
+  return map[s] || s || '—';
+}
+function shortField(f) {
+  if (!f) return '';
+  const m = { 'Biology / Life Sciences':'Biology', 'Physics / Engineering':'Physics/Eng', 'Environmental Science':'Env. Science', 'Computer Science / Math':'CS / Math', 'Medicine / Health':'Medicine' };
+  return m[f] || f;
+}
+
+async function saveProject() {
+  const title  = document.getElementById('projTitle').value.trim();
+  const field  = document.getElementById('projField').value;
+  const grade  = document.getElementById('projGrade').value.trim();
+  const stage  = document.getElementById('projStage').value;
+  const school = document.getElementById('projSchool').value.trim();
+  const desc   = document.getElementById('projDesc').value.trim();
+  if (!title) { showMsg('projectMsg', 'Project title is required.', 'err'); return; }
+  showMsg('projectMsg', 'Saving…', 'info');
+  const row = { student_id: studentId, title, field, grade, stage, school, description: desc, updated_at: new Date().toISOString() };
+  if (sb) {
+    const { error } = await sb.from('student_projects').upsert([row], { onConflict: 'student_id' });
+    if (error) { showMsg('projectMsg', error.message, 'err'); return; }
+  }
+  showMsg('projectMsg', 'Saved!', 'ok');
+  projectData = row;
+  renderProjectDisplay(row);
+  document.getElementById('kProjectStatus').textContent = stageLabel(stage);
+  document.getElementById('kField').textContent = shortField(field) || '—';
+  setTimeout(() => closeModal('editProjectModal'), 1200);
+  portalLog('project_updated', { title });
+}
+window.saveProject = saveProject;
+
+/* ── Milestones (localStorage) ── */
+function loadMilestones() {
+  const saved = JSON.parse(localStorage.getItem('fg_milestones') || '{}');
+  for (let i = 1; i <= 7; i++) {
+    const el = document.getElementById('ms' + i);
+    if (el) el.checked = !!saved['ms' + i];
+  }
+}
+function saveMilestones() {
+  const out = {};
+  for (let i = 1; i <= 7; i++) {
+    const el = document.getElementById('ms' + i);
+    if (el) out['ms' + i] = el.checked;
+  }
+  localStorage.setItem('fg_milestones', JSON.stringify(out));
+}
+window.saveMilestones = saveMilestones;
+
+/* ── Notes (localStorage) ── */
+function loadNotes() {
+  document.getElementById('projectNotes').value = localStorage.getItem('fg_student_notes') || '';
+}
+function saveNotes() {
+  localStorage.setItem('fg_student_notes', document.getElementById('projectNotes').value);
+  showMsg('notesMsg', 'Notes saved.', 'ok');
+}
+window.saveNotes = saveNotes;
+
+/* ── Messages count ── */
+async function loadMessages() {
+  if (!sb) { document.getElementById('kMessages').textContent = '0'; return; }
+  const { count } = await sb.from('messages').select('*', { count: 'exact', head: true }).eq('to_user_id', studentId).eq('read', false);
+  document.getElementById('kMessages').textContent = count ?? '0';
+}
+
+/* ── Help / Contact ── */
+async function sendHelpMessage() {
+  const topic   = document.getElementById('helpTopic').value;
+  const message = document.getElementById('helpMessage').value.trim();
+  if (!topic || !message) { showMsg('helpMsg', 'Please select a topic and write your message.', 'err'); return; }
+  showMsg('helpMsg', 'Sending…', 'info');
+  if (sb) {
+    await sb.from('messages').insert([{
+      from_user_id: studentId, from_role: 'student', to_role: 'admin',
+      subject: topic, body: message
+    }]).catch(() => {});
+  }
+  const sub  = encodeURIComponent(`FairGame Student Question — ${topic}`);
+  const body = encodeURIComponent(`Topic: ${topic}\n\n${message}`);
+  window.open(`mailto:fairgameinitiative@outlook.com?subject=${sub}&body=${body}`);
+  document.getElementById('helpTopic').value = '';
+  document.getElementById('helpMessage').value = '';
+  showMsg('helpMsg', "Message sent! We'll reply within 48 hours.", 'ok');
+  portalLog('help_message_sent', { topic });
+}
+window.sendHelpMessage = sendHelpMessage;
+
+async function scheduleCall() {
+  const date  = document.getElementById('callDate').value;
+  const time  = document.getElementById('callTime').value;
+  const notes = document.getElementById('callNotes').value.trim();
+  if (!date) { showMsg('callMsg', 'Please select a date.', 'err'); return; }
+  showMsg('callMsg', 'Sending…', 'info');
+  if (sb) {
+    await sb.from('messages').insert([{
+      from_user_id: studentId, from_role: 'student', to_role: 'admin',
+      subject: `Call Request — ${date} ${time}`,
+      body: notes || '(No additional notes)'
+    }]).catch(() => {});
+  }
+  const sub  = encodeURIComponent(`FairGame Call Request — ${date}`);
+  const bod  = encodeURIComponent(`Hi FairGame Team,\n\nI'd like to schedule a 30-minute call on ${date} (${time}).\n\n${notes}`);
+  window.open(`mailto:fairgameinitiative@outlook.com?subject=${sub}&body=${bod}`);
+  showMsg('callMsg', "Request sent! We'll confirm within 48 hours.", 'ok');
+}
+window.scheduleCall = scheduleCall;
+
+/* ── Mentor request ── */
+async function requestMentor() {
+  showMsg('mentorMsg', 'Sending…', 'info');
+  const name  = currentUser?.user_metadata?.name || currentUser?.email || 'A student';
+  const field = projectData.field || 'General';
+  const title = projectData.title || '(not set)';
+  if (sb) {
+    await sb.from('messages').insert([{
+      from_user_id: studentId, from_role: 'student', to_role: 'admin',
+      subject: 'Mentor Request',
+      body: `${name} is requesting a mentor.\nProject: ${title}\nField: ${field}`
+    }]).catch(() => {});
+  }
+  const sub = encodeURIComponent('FairGame Mentor Request');
+  const bod = encodeURIComponent(`Hi FairGame Team,\n\nI'd like to be connected with a mentor for my project.\n\nProject: ${title}\nField: ${field}\n\n— ${name}`);
+  window.open(`mailto:fairgameinitiative@outlook.com?subject=${sub}&body=${bod}`);
+  showMsg('mentorMsg', "Mentor request sent! We'll be in touch shortly.", 'ok');
+  portalLog('mentor_requested', { field, title });
+}
+window.requestMentor = requestMentor;
+
+/* ── Community posts ── */
+async function loadCommunityPosts() {
+  if (!sb) { document.getElementById('noPostsMsg').style.display = 'block'; return; }
+  const { data: posts } = await sb.from('community_posts').select('*').eq('audience', 'student').order('created_at', { ascending: false }).limit(20);
+  const list = document.getElementById('communityPostsList');
+  if (!posts?.length) { document.getElementById('noPostsMsg').style.display = 'block'; return; }
+  list.innerHTML = posts.map(p => {
+    const initials = (p.author_name || 'U').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    return `<div style="padding:14px;border:1.5px solid var(--gray-200,#e2e6e2);border-radius:3px;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--g500);display:flex;align-items:center;justify-content:center;font-size:.78rem;color:white;font-weight:600;flex-shrink:0;">${initials}</div>
+        <div>
+          <div class="text-sm fw-500" style="color:var(--g900);">${p.author_name || 'Student'}</div>
+          <div class="text-xs text-muted">${new Date(p.created_at).toLocaleDateString()}</div>
+        </div>
+      </div>
+      <p class="text-sm" style="line-height:1.6;color:var(--gray-700,#3d453d);">${p.body}</p>
+    </div>`;
+  }).join('');
+}
+
+async function postIntro() {
+  const text = document.getElementById('introText').value.trim();
+  if (!text) { showMsg('introMsg', 'Please write something first.', 'err'); return; }
+  await _submitPost(text, 'introMsg');
+  if (document.getElementById('introMsg').classList.contains('ok')) {
+    setTimeout(() => closeModal('introModal'), 1400);
+    document.getElementById('introText').value = '';
+  }
+}
+window.postIntro = postIntro;
+
+async function submitPost() {
+  const text = document.getElementById('postText').value.trim();
+  if (!text) { showMsg('postMsg', 'Please write something first.', 'err'); return; }
+  await _submitPost(text, 'postMsg');
+  if (document.getElementById('postMsg').classList.contains('ok')) {
+    setTimeout(() => closeModal('postModal'), 1400);
+    document.getElementById('postText').value = '';
+  }
+}
+window.submitPost = submitPost;
+
+async function _submitPost(body, msgId) {
+  showMsg(msgId, 'Posting…', 'info');
+  const authorName = currentUser?.user_metadata?.name || currentUser?.email?.split('@')[0] || 'Student';
+  if (sb) {
+    const { error } = await sb.from('community_posts').insert([{
+      author_id: studentId, author_role: 'student', author_name: authorName,
+      body, audience: 'student', created_at: new Date().toISOString()
+    }]);
+    if (error) { showMsg(msgId, error.message, 'err'); return; }
+  }
+  showMsg(msgId, 'Posted!', 'ok');
+  loadCommunityPosts();
+}
+
+/* ── Resources download ── */
+async function dlRes(path) {
+  const url = await getSignedUrl('resources', path);
+  if (url) window.open(url);
+  else alert('Resource not yet uploaded. Email fairgameinitiative@outlook.com to request it.');
+}
+window.dlRes = dlRes;
+
+/* ── Load community posts on section open ── */
+onSectionLoad('community', loadCommunityPosts);
+</script>
+</body>
+</html>

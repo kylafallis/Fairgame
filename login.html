@@ -241,17 +241,19 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 let sb = null;
 try { if (SB_URL !== 'YOUR_SUPABASE_URL') sb = window.supabase.createClient(SB_URL, SB_KEY, { auth: { detectSessionInUrl: true } }); } catch(e) {}
 
-const ROUTES = { teacher:'/portal-teacher.html', ambassador:'/portal-ambassador.html', judge:'/portal-judge.html', admin:'/portal-admin.html' };
+const ROUTES = { teacher:'/portal-teacher.html', ambassador:'/portal-ambassador.html', student:'/portal-student.html', judge:'/portal-judge.html', admin:'/portal-admin.html' };
 
-if (sb) sb.auth.getSession().then(({ data: { session } }) => {
+if (sb) sb.auth.getSession().then(async ({ data: { session } }) => {
   if (session?.user) {
-    const role = session.user.user_metadata?.role || 'ambassador';
-    // Show a "you're already signed in" notice with options
+    // Refresh the token so user_metadata reflects any changes made in the dashboard
+    const { data: refreshed } = await sb.auth.refreshSession();
+    const user = refreshed?.session?.user || session.user;
+    const role = user.user_metadata?.role || 'ambassador';
     const card = document.querySelector('.login-card');
     card.innerHTML = `
       <h2>You're signed in</h2>
       <p class="login-sub" style="margin-bottom:20px;">
-        Signed in as <strong>${session.user.email}</strong> (${role})
+        Signed in as <strong>${user.email}</strong> (${role})
       </p>
       <a href="${ROUTES[role] || '/portal-ambassador.html'}"
          class="btn-main" style="display:block;text-align:center;padding:12px;
@@ -267,7 +269,7 @@ if (sb) sb.auth.getSession().then(({ data: { session } }) => {
       </div>
     `;
   }
-}
+});
 
 if (sb) sb.auth.onAuthStateChange((event, session) => {
   if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) go(session.user);
