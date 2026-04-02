@@ -6,35 +6,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/style.css" />
-  <style>
-    .featured-story { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: var(--border); border-top: 3px solid var(--green-600); margin-bottom: 48px; }
-    @media (max-width: 760px) { .featured-story { grid-template-columns: 1fr; } }
-    .featured-quote { background: var(--green-900); padding: 48px 44px; display: flex; flex-direction: column; justify-content: center; }
-    .featured-mark { font-family: var(--ff-serif); font-size: 4rem; color: var(--green-400); opacity: 0.5; line-height: 0.7; margin-bottom: 16px; }
-    .featured-text { font-family: var(--ff-serif); font-style: italic; font-size: 1.15rem; color: var(--white); line-height: 1.65; margin-bottom: 24px; }
-    .featured-attr { font-size: 0.78rem; color: rgba(255,255,255,0.45); letter-spacing: 0.08em; text-transform: uppercase; }
-    .featured-attr strong { color: var(--green-400); font-weight: 500; }
-    .featured-context { background: var(--gray-50); padding: 48px 44px; }
-    .featured-context h3 { color: var(--green-900); margin-bottom: 14px; }
-    .featured-context p { font-size: 0.9rem; color: var(--gray-500); margin-bottom: 12px; line-height: 1.75; }
-    .achievement-tag { display: inline-block; padding: 4px 10px; background: var(--green-600); color: var(--white); font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; margin-top: 8px; }
-
-    .stories-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: var(--border); }
-    @media (max-width: 860px) { .stories-grid { grid-template-columns: 1fr 1fr; } }
-    @media (max-width: 480px) { .stories-grid { grid-template-columns: 1fr; } }
-    .story-card { padding: 28px 24px; border-right: var(--border); border-bottom: var(--border); background: var(--white); }
-    .story-card:nth-child(3n) { border-right: none; }
-    .story-school { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gray-300); margin-bottom: 10px; }
-    .story-quote { font-family: var(--ff-serif); font-style: italic; font-size: 0.96rem; color: var(--gray-700); margin-bottom: 14px; line-height: 1.65; }
-    .story-quote::before { content: '\201C'; color: var(--green-400); }
-    .story-quote::after  { content: '\201D'; color: var(--green-400); }
-    .story-name { font-size: 0.84rem; font-weight: 500; color: var(--green-900); margin-bottom: 8px; }
-    .story-badge { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; color: var(--green-700); background: var(--green-50); padding: 2px 7px; }
-
-    .share-cta { background: var(--gray-50); border: var(--border); padding: 40px; text-align: center; margin-top: 48px; }
-    .share-cta h3 { color: var(--green-900); margin-bottom: 10px; }
-    .share-cta p { color: var(--gray-500); font-size: 0.92rem; margin-bottom: 20px; max-width: 480px; margin-left: auto; margin-right: auto; }
-  </style>
 </head>
 <body>
 <nav>
@@ -186,10 +157,6 @@
   </div>
 </footer>
 
-<script>
-const ro = new IntersectionObserver(e => e.forEach(x => { if(x.isIntersecting){x.target.classList.add('vis');ro.unobserve(x.target);}}),{threshold:0.08});
-document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
-document.querySelector('.nav-hamburger').addEventListener('click',()=>{const nl=document.querySelector('.nav-links');const o=nl.style.display==='flex';Object.assign(nl.style,{display:o?'none':'flex',flexDirection:'column',position:'fixed',top:'68px',left:'0',right:'0',background:'var(--white)',padding:'8px 0 16px',borderBottom:'var(--border)',boxShadow:'var(--shadow-md)'});});
-</script>
-</body>
+<script src="/script.js"></script>
+
 </html>

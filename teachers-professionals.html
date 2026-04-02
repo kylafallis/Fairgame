@@ -6,21 +6,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/style.css" />
-  <style>
-    .tab-nav { display: flex; gap: 0; border-bottom: 2px solid var(--gray-200); margin-bottom: 40px; }
-    .tab-btn { padding: 12px 24px; font-size: 0.88rem; font-weight: 500; background: none; border: none; color: var(--gray-500); border-bottom: 2px solid transparent; margin-bottom: -2px; cursor: pointer; font-family: var(--ff-sans); transition: all 0.15s; }
-    .tab-btn.active { color: var(--green-700); border-bottom-color: var(--green-600); }
-    .tab-panel { display: none; } .tab-panel.active { display: block; }
-    .dl-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: var(--border); }
-    @media (max-width: 760px) { .dl-grid-3 { grid-template-columns: 1fr 1fr; } }
-    .dl-card { padding: 22px 20px; border-right: var(--border); border-bottom: var(--border); background: var(--white); display: flex; flex-direction: column; }
-    .dl-card:nth-child(3n) { border-right: none; }
-    .dl-card h4 { color: var(--green-900); margin-bottom: 6px; font-size: 0.9rem; }
-    .dl-card p { font-size: 0.8rem; color: var(--gray-500); flex: 1; margin-bottom: 16px; line-height: 1.55; }
-    .dl-card-btn { padding: 8px 14px; background: var(--green-600); color: var(--white); border: none; font-size: 0.76rem; font-weight: 500; font-family: var(--ff-sans); cursor: pointer; align-self: flex-start; transition: background 0.15s; }
-    .dl-card-btn:hover { background: var(--green-700); }
-    .dl-card-btn.locked { background: var(--gray-200); color: var(--gray-500); cursor: default; }
-  </style>
 </head>
 <body>
 <nav>
@@ -187,16 +172,6 @@
   </div>
 </footer>
 
-<script>
-function showTab(id, btn) {
-  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('tab-'+id).classList.add('active');
-  btn.classList.add('active');
-}
-const ro = new IntersectionObserver(e => e.forEach(x => { if(x.isIntersecting){x.target.classList.add('vis');ro.unobserve(x.target);}}),{threshold:0.08});
-document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
-document.querySelector('.nav-hamburger').addEventListener('click',()=>{const nl=document.querySelector('.nav-links');const o=nl.style.display==='flex';Object.assign(nl.style,{display:o?'none':'flex',flexDirection:'column',position:'fixed',top:'68px',left:'0',right:'0',background:'var(--white)',padding:'8px 0 16px',borderBottom:'var(--border)',boxShadow:'var(--shadow-md)'});});
-</script>
-</body>
+<script src="/script.js"></script>
+
 </html>

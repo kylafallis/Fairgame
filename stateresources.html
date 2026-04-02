@@ -7,43 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/style.css" />
-  <style>
-    .pathway-flow { display: flex; align-items: stretch; gap: 0; margin: 28px 0; }
-    @media (max-width: 640px) { .pathway-flow { flex-direction: column; } }
-    .pathway-step { flex: 1; padding: 20px 18px; border: var(--border); background: var(--white); position: relative; }
-    .pathway-step + .pathway-step { border-left: none; }
-    @media (max-width: 640px) { .pathway-step + .pathway-step { border-left: var(--border); border-top: none; } }
-    .pathway-num { font-family: var(--ff-serif); font-size: 1.6rem; font-weight: 700; color: var(--green-400); line-height: 1; margin-bottom: 6px; }
-    .pathway-step h4 { color: var(--green-900); margin-bottom: 6px; font-size: 0.9rem; }
-    .pathway-step p { font-size: 0.8rem; color: var(--gray-500); line-height: 1.6; }
-    .pathway-arrow { display: flex; align-items: center; padding: 0 4px; color: var(--green-400); font-size: 1.2rem; flex-shrink: 0; }
-    @media (max-width: 640px) { .pathway-arrow { display: none; } }
-
-    .district-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border: var(--border); }
-    @media (max-width: 860px) { .district-grid { grid-template-columns: 1fr 1fr; } }
-    @media (max-width: 480px) { .district-grid { grid-template-columns: 1fr; } }
-    .district-card { padding: 20px 18px; border-right: var(--border); border-bottom: var(--border); }
-    .district-card:nth-child(3n) { border-right: none; }
-    .district-name { font-weight: 500; font-size: 0.9rem; color: var(--green-900); margin-bottom: 4px; }
-    .district-detail { font-size: 0.78rem; color: var(--gray-500); line-height: 1.55; }
-    .district-contact { font-size: 0.76rem; color: var(--green-600); margin-top: 8px; }
-
-    .deadline-list { display: flex; flex-direction: column; gap: 0; }
-    .deadline-row { display: grid; grid-template-columns: 100px 1fr 120px; gap: 16px; align-items: center; padding: 14px 0; border-bottom: var(--border); }
-    @media (max-width: 640px) { .deadline-row { grid-template-columns: 80px 1fr; } }
-    .deadline-date { font-family: var(--ff-serif); font-size: 0.92rem; font-weight: 600; color: var(--green-600); }
-    .deadline-name { font-size: 0.88rem; font-weight: 500; color: var(--gray-900); }
-    .deadline-type { font-size: 0.76rem; color: var(--gray-500); margin-top: 2px; }
-    .deadline-tag { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 8px; background: var(--green-50); color: var(--green-700); white-space: nowrap; }
-    @media (max-width: 640px) { .deadline-tag { display: none; } }
-
-    .nat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    @media (max-width: 640px) { .nat-grid { grid-template-columns: 1fr; } }
-    .nat-card { border: var(--border); padding: 22px; background: var(--white); }
-    .nat-card h4 { color: var(--green-900); margin-bottom: 6px; }
-    .nat-card p { font-size: 0.84rem; color: var(--gray-500); margin-bottom: 10px; line-height: 1.6; }
-    .nat-card a { font-size: 0.78rem; color: var(--green-600); font-weight: 500; }
-  </style>
 </head>
 <body>
 <nav>
@@ -190,10 +153,6 @@
   </div>
 </footer>
 
-<script>
-const ro = new IntersectionObserver(e => e.forEach(x => { if(x.isIntersecting){x.target.classList.add('vis');ro.unobserve(x.target);}}),{threshold:0.08});
-document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
-document.querySelector('.nav-hamburger').addEventListener('click',()=>{const nl=document.querySelector('.nav-links');const o=nl.style.display==='flex';Object.assign(nl.style,{display:o?'none':'flex',flexDirection:'column',position:'fixed',top:'68px',left:'0',right:'0',background:'var(--white)',padding:'8px 0 16px',borderBottom:'var(--border)',boxShadow:'var(--shadow-md)'});});
-</script>
-</body>
+<script src="/script.js"></script>
+
 </html>

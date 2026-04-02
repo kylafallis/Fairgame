@@ -6,30 +6,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/style.css" />
-  <style>
-    .donate-grid { display: grid; grid-template-columns: 1fr 380px; gap: 64px; align-items: start; }
-    @media (max-width: 860px) { .donate-grid { grid-template-columns: 1fr; } }
-    .impact-amounts { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0; border: var(--border); margin-bottom: 32px; }
-    .amount-card { padding: 20px 18px; border-right: var(--border); border-bottom: var(--border); }
-    .amount-card:nth-child(2n) { border-right: none; }
-    .amount-num { font-family: var(--ff-serif); font-size: 1.6rem; font-weight: 700; color: var(--green-600); margin-bottom: 4px; }
-    .amount-desc { font-size: 0.82rem; color: var(--gray-500); line-height: 1.55; }
-    .donate-box { border: var(--border); border-top: 3px solid var(--green-600); padding: 32px; position: sticky; top: calc(var(--nav-h) + 24px); }
-    .donate-box h3 { color: var(--green-900); margin-bottom: 8px; }
-    .donate-box p { font-size: 0.86rem; color: var(--gray-500); margin-bottom: 20px; }
-    .amount-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
-    .amt-btn { padding: 10px 8px; border: 1.5px solid var(--gray-200); background: var(--white); font-size: 0.9rem; font-weight: 600; font-family: var(--ff-serif); color: var(--gray-700); cursor: pointer; transition: all 0.15s; }
-    .amt-btn:hover, .amt-btn.active { border-color: var(--green-600); background: var(--green-50); color: var(--green-800); }
-    .custom-amount { display: flex; align-items: center; border: 1.5px solid var(--gray-300); background: var(--white); border-radius: var(--r-input); margin-bottom: 16px; overflow: hidden; }
-    .custom-amount span { padding: 0 12px; color: var(--gray-400); font-size: 1rem; }
-    .custom-amount input { flex: 1; border: none; padding: 11px 8px 11px 0; font-size: 0.96rem; outline: none; background: transparent; font-family: var(--ff-sans); }
-    .donate-note { font-size: 0.76rem; color: var(--gray-300); margin-top: 10px; line-height: 1.5; }
-    .partner-tiers { display: flex; flex-direction: column; gap: 0; }
-    .tier-row { display: grid; grid-template-columns: 100px 1fr; gap: 16px; align-items: start; padding: 18px 0; border-bottom: var(--border); }
-    .tier-amt { font-family: var(--ff-serif); font-weight: 700; color: var(--green-600); font-size: 1.1rem; }
-    .tier-name { font-weight: 500; color: var(--green-900); margin-bottom: 4px; font-size: 0.92rem; }
-    .tier-desc { font-size: 0.82rem; color: var(--gray-500); line-height: 1.6; }
-  </style>
 </head>
 <body>
 <nav>
@@ -112,19 +88,6 @@
   </div>
 </section>
 
-<script>
-let currentAmt = '50';
-function setAmt(btn, val) {
-  document.querySelectorAll('.amt-btn').forEach(b => { if(['$25','$50','$100','$250','$500','Other'].some(l=>b.textContent===l)) b.classList.remove('active'); });
-  btn.classList.add('active');
-  if (val !== 'other') { document.getElementById('customAmt').value = val; currentAmt = val; document.getElementById('btnAmt').textContent = val; }
-}
-document.getElementById('customAmt').addEventListener('input', e => { currentAmt = e.target.value; document.getElementById('btnAmt').textContent = e.target.value || '0'; });
-function setFreq(f, btn) { document.querySelectorAll('#freqOnce,#freqMonthly').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); }
-function goToDonate() { alert('Donation processing coming soon! For now, please email fairgameinitiative@outlook.com or use the PayPal link that will be configured here.'); }
-const ro = new IntersectionObserver(e => e.forEach(x => { if(x.isIntersecting){x.target.classList.add('vis');ro.unobserve(x.target);}}),{threshold:0.08});
-document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
-document.querySelector('.nav-hamburger').addEventListener('click',()=>{const nl=document.querySelector('.nav-links');const o=nl.style.display==='flex';Object.assign(nl.style,{display:o?'none':'flex',flexDirection:'column',position:'fixed',top:'68px',left:'0',right:'0',background:'var(--white)',padding:'8px 0 16px',borderBottom:'var(--border)',boxShadow:'var(--shadow-md)'});});
-</script>
-</body>
+<script src="/script.js"></script>
+
 </html>

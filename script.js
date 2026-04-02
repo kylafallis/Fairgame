@@ -1110,3 +1110,32 @@ async function submitContactForm(type) {
   logEvent('contact_form', { type, school });
 }
 window.submitContactForm = submitContactForm;
+
+/* === index.html === */
+(function() {
+  const SB_URL = 'https://buzcxrbjutexiofetgvn.supabase.co';
+  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1emN4cmJqdXRleGlvZmV0Z3ZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Nzc1NTEsImV4cCI6MjA4OTM1MzU1MX0.ifMup4fCcfHaf7Q4TYfi1X1V-J8tQpu2JwaqvjBcsBQ';
+  const ROUTES = {
+    teacher: '/portal-teacher.html',
+    ambassador: '/portal-ambassador.html',
+    student: '/portal-student.html',
+    judge: '/portal-judge.html',
+    admin: '/portal-admin.html'
+  };
+  try {
+    const sb = window.supabase
+      ? window.supabase.createClient(SB_URL, SB_KEY)
+      : null;
+    if (sb) {
+      sb.auth.getSession().then(({ data: { session } }) => {
+        const btn = document.getElementById('navUserBtn');
+        if (session?.user && btn) {
+          const role = session.user.user_metadata?.role || 'ambassador';
+          btn.href = ROUTES[role] || '/portal-ambassador.html';
+          btn.title = 'Go to my portal';
+          btn.classList.add('logged-in');
+        }
+      });
+    }
+  } catch(e) {}
+})();

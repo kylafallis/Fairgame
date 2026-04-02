@@ -7,23 +7,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/style.css" />
-  <style>
-    .phase-steps { display: flex; flex-direction: column; gap: 0; }
-    .phase-step { display: grid; grid-template-columns: 56px 1fr; gap: 24px; align-items: start; padding: 28px 0; border-bottom: var(--border); }
-    .phase-num { font-family: var(--ff-serif); font-size: 2rem; font-weight: 700; color: var(--green-400); line-height: 1; }
-    .phase-step h3 { color: var(--green-900); margin-bottom: 8px; }
-    .phase-step p { font-size: 0.9rem; color: var(--gray-500); margin-bottom: 10px; line-height: 1.7; }
-    .phase-step ul { padding-left: 18px; font-size: 0.88rem; color: var(--gray-500); }
-    .phase-step li { margin-bottom: 5px; line-height: 1.6; }
-    .tip-box { background: var(--green-50); border-left: 3px solid var(--green-500); padding: 14px 16px; margin-top: 12px; font-size: 0.86rem; color: var(--green-800); line-height: 1.65; }
-    .tip-box strong { font-weight: 500; display: block; margin-bottom: 3px; }
-    .dl-row { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 14px 16px; border: var(--border); background: var(--white); margin-bottom: 8px; }
-    .dl-row-name { font-size: 0.88rem; font-weight: 500; color: var(--gray-900); }
-    .dl-row-desc { font-size: 0.76rem; color: var(--gray-500); margin-top: 2px; }
-    .dl-btn { flex-shrink: 0; padding: 7px 14px; background: var(--green-600); color: var(--white); font-size: 0.76rem; font-weight: 500; font-family: var(--ff-sans); border: none; cursor: pointer; transition: background 0.15s; }
-    .dl-btn:hover { background: var(--green-700); }
-    .dl-btn.locked { background: var(--gray-200); color: var(--gray-500); cursor: default; }
-  </style>
 </head>
 <body>
 <nav>
@@ -179,11 +162,6 @@
   </div>
 </section>
 
-<script>
-const ro = new IntersectionObserver(e => e.forEach(x => { if(x.isIntersecting){x.target.classList.add('vis');ro.unobserve(x.target);}}),{threshold:0.08});
-document.querySelectorAll('.reveal').forEach(el=>ro.observe(el));
-document.querySelector('.nav-hamburger').addEventListener('click',()=>{const nl=document.querySelector('.nav-links');const o=nl.style.display==='flex';Object.assign(nl.style,{display:o?'none':'flex',flexDirection:'column',position:'fixed',top:'68px',left:'0',right:'0',background:'var(--white)',padding:'8px 0 16px',borderBottom:'var(--border)',boxShadow:'var(--shadow-md)'});});
-</script>
 
 <footer>
   <div class="container">
@@ -237,5 +215,6 @@ document.querySelector('.nav-hamburger').addEventListener('click',()=>{const nl=
   </div>
 </footer>
 
-</body>
+<script src="/script.js"></script>
+
 </html>

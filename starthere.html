@@ -9,58 +9,6 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/style.css" />
-  <style>
-    .role-grid {
-      display: grid; grid-template-columns: repeat(3, 1fr); gap: 0;
-      border: var(--border); margin-bottom: 64px;
-    }
-    @media (max-width: 860px) { .role-grid { grid-template-columns: 1fr 1fr; } }
-    @media (max-width: 560px) { .role-grid { grid-template-columns: 1fr; } }
-    .role-card {
-      padding: 32px 28px; border-right: var(--border); border-bottom: var(--border);
-      background: var(--white); text-decoration: none; color: inherit;
-      display: flex; flex-direction: column; transition: background 0.15s;
-    }
-    .role-card:hover { background: var(--green-50); }
-    .role-card:nth-child(3n) { border-right: none; }
-    .role-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--green-600); margin-bottom: 10px; }
-    .role-card h3 { color: var(--green-900); margin-bottom: 10px; }
-    .role-card p { font-size: 0.86rem; color: var(--gray-500); margin-bottom: 20px; flex: 1; line-height: 1.65; }
-    .role-steps { list-style: none; margin-bottom: 24px; }
-    .role-steps li {
-      font-size: 0.84rem; color: var(--gray-700); padding: 6px 0;
-      border-bottom: var(--border); display: flex; align-items: flex-start; gap: 10px;
-    }
-    .role-steps li:last-child { border-bottom: none; }
-    .step-num { font-family: var(--ff-serif); font-weight: 700; color: var(--green-400); font-size: 0.88rem; min-width: 18px; line-height: 1.4; }
-    .role-cta { font-size: 0.78rem; font-weight: 500; color: var(--green-600); letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px; margin-top: auto; }
-    .role-card:hover .role-cta { gap: 10px; }
-
-    .popular-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
-    @media (max-width: 860px) { .popular-grid { grid-template-columns: 1fr 1fr; } }
-    @media (max-width: 480px) { .popular-grid { grid-template-columns: 1fr; } }
-    .pop-card {
-      background: var(--gray-50); border: var(--border); padding: 24px 20px;
-      text-decoration: none; color: inherit; transition: all 0.15s;
-      display: flex; flex-direction: column;
-    }
-    .pop-card:hover { border-color: var(--green-500); background: var(--green-50); }
-    .pop-card-label { font-size: 0.68rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; color: var(--green-600); margin-bottom: 8px; }
-    .pop-card h4 { color: var(--green-900); margin-bottom: 6px; font-size: 0.94rem; }
-    .pop-card p { font-size: 0.82rem; color: var(--gray-500); flex: 1; margin-bottom: 12px; line-height: 1.55; }
-    .pop-card-link { font-size: 0.76rem; color: var(--green-600); font-weight: 500; }
-
-    .events-list { display: flex; flex-direction: column; gap: 0; }
-    .event-row {
-      display: grid; grid-template-columns: 80px 1fr auto;
-      gap: 20px; align-items: center;
-      padding: 16px 0; border-bottom: var(--border);
-    }
-    .event-date { font-family: var(--ff-serif); font-size: 1.3rem; font-weight: 700; color: var(--green-600); line-height: 1; }
-    .event-date span { display: block; font-size: 0.7rem; font-weight: 400; font-family: var(--ff-sans); text-transform: uppercase; letter-spacing: 0.1em; color: var(--gray-300); margin-top: 2px; }
-    .event-info h4 { font-size: 0.94rem; color: var(--gray-900); margin-bottom: 2px; }
-    .event-info p { font-size: 0.8rem; color: var(--gray-500); }
-  </style>
 </head>
 <body>
 <nav>
