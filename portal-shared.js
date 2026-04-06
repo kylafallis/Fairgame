@@ -47,7 +47,7 @@ function requireAuth(expectedRole, onReady) {
     // Refresh token so user_metadata reflects any role changes made in the dashboard
     const { data: refreshed } = await sb.auth.refreshSession();
     const user = refreshed?.session?.user || session.user;
-    const role = user.user_metadata?.role || 'ambassador';
+    const role = user.user_metadata?.role || user.app_metadata?.role || 'ambassador';
     if (role === 'admin' || role === expectedRole) {
       currentUser = user; currentRole = role;
       document.body.classList.add('ready');

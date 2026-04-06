@@ -13,7 +13,7 @@ const ROUTES = {
 // Supabase magic link puts the token in the URL hash
 sb.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_IN' && session?.user) {
-    const role = session.user.user_metadata?.role;
+    const role = session.user.user_metadata?.role || session.user.app_metadata?.role;
     window.location.replace(ROUTES[role] || '/portal-ambassador.html');
   }
   if (event === 'SIGNED_OUT') {
@@ -28,7 +28,7 @@ sb.auth.getSession().then(({ data: { session }, error }) => {
       'Sign-in failed: ' + error.message + '<br><a href="/login.html">Try again →</a>';
     document.querySelector('.spinner').style.display = 'none';
   } else if (session?.user) {
-    const role = session.user.user_metadata?.role;
+    const role = session.user.user_metadata?.role || session.user.app_metadata?.role;
     if (!role) {
       console.warn('No role found in user_metadata:', session.user.user_metadata);
     }

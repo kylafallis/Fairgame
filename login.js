@@ -10,7 +10,7 @@ if (sb) sb.auth.getSession().then(async ({ data: { session } }) => {
     // Refresh the token so user_metadata reflects any changes made in the dashboard
     const { data: refreshed } = await sb.auth.refreshSession();
     const user = refreshed?.session?.user || session.user;
-    const role = user.user_metadata?.role || 'ambassador';
+    const role = user.user_metadata?.role || user.app_metadata?.role || 'ambassador';
     const card = document.querySelector('.login-card');
     card.innerHTML = `
       <h2>You're signed in</h2>
@@ -38,7 +38,7 @@ if (sb) sb.auth.onAuthStateChange((event, session) => {
 });
 
 function go(user) {
-  const role = user.user_metadata?.role || 'ambassador';
+  const role = user.user_metadata?.role || user.app_metadata?.role || 'ambassador';
   window.location.replace(ROUTES[role] || '/portal-ambassador.html');
 }
 
