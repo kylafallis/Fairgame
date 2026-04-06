@@ -2,23 +2,48 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Success Stories — FairGame Initiative</title>
+  <title>Success Stories - FairGame Initiative</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
-<nav>
+<nav class="scrolled">
   <div class="nav-inner">
-    <a href="/" class="nav-logo"><img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'" />FairGame</a>
-    <button class="nav-hamburger">☰</button>
+    <a href="/" class="nav-logo">
+      <img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'" />
+      FairGame
+    </a>
+    <div class="nav-spacer"></div>
+    <button class="nav-hamburger" aria-label="Menu">&#9776;</button>
     <ul class="nav-links">
-      <li class="dropdown"><a href="#">Resources ▾</a><div class="dropdown-menu"><a href="/starthere.html">Start Here</a><a href="/setupguide.html">Setup Guide</a><a href="/stateresources.html">State Resources</a><a href="/researchguide.html">Research Guide</a><a href="/teachers-professionals.html">For Teachers</a></div></li>
-      <li class="dropdown"><a href="#">Get Involved ▾</a><div class="dropdown-menu"><a href="/volunteer.html">Volunteer / Judge</a><a href="/donate.html">Donate</a><a href="/#portal">Ambassador Portal</a><a href="/#portal">Teacher Portal</a></div></li>
+      <li class="dropdown"><a href="#">Resources</a>
+        <div class="dropdown-menu">
+          <a href="/starthere.html">Start Here</a>
+          <a href="/setupguide.html">Setup Guide</a>
+          <a href="/stateresources.html">State Resources</a>
+          <a href="/researchguide.html">Research Guide</a>
+          <a href="/teachers-professionals.html">For Teachers</a>
+        </div>
+      </li>
+      <li class="dropdown"><a href="#">Get Involved</a>
+        <div class="dropdown-menu">
+          <a href="/volunteer.html">Volunteer / Judge</a>
+          <a href="/donate.html">Donate</a>
+          <a href="/login.html">Ambassador Portal</a>
+          <a href="/login.html">Teacher Portal</a>
+        </div>
+      </li>
       <li><a href="/successstories.html">Stories</a></li>
       <li><a href="/donate.html">Donate</a></li>
       <li><a href="/starthere.html" class="nav-cta">Get Started</a></li>
     </ul>
+    <a href="/login.html" class="nav-user-icon" id="navUserBtn" title="Sign in">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+    </a>
   </div>
 </nav>
 
@@ -45,9 +70,9 @@
         </div>
         <div class="featured-context">
           <h3>How Rishi got to ISEF</h3>
-          <p>Rishi came to FairGame as a student at Walnut Hills High School looking for guidance on his research project. He had a strong idea but needed support navigating the science fair process — from experimental design through the competition pathway.</p>
+          <p>Rishi came to FairGame as a student at Walnut Hills High School looking for guidance on his research project. He had a strong idea but needed support navigating the science fair process - from experimental design through the competition pathway.</p>
           <p>Through FairGame's individual mentorship program, Rishi was connected with Kyla Fallis, FairGame's founder and a multi-award-winning science fair competitor herself (ISEF qualifier, EPA Award recipient). Over several months and many hours of calls and document reviews, Rishi developed and refined his project.</p>
-          <p>Rishi advanced from his school fair through district and state competitions, ultimately qualifying for Regeneron ISEF — the world's largest pre-college science competition.</p>
+          <p>Rishi advanced from his school fair through district and state competitions, ultimately qualifying for Regeneron ISEF - the world's largest pre-college science competition.</p>
           <div class="achievement-tag">ISEF Qualifier</div>
         </div>
       </div>
@@ -57,34 +82,66 @@
     <div class="reveal" style="margin-top:64px;">
       <span class="overline">School Programs</span>
       <h2 style="margin-bottom:24px;">Schools we've supported</h2>
-      <div class="stories-grid">
+            <div class="stories-grid">
         <div class="story-card">
-          <div class="story-school">Bath High School &mdash; Lima, Ohio</div>
-          <div class="story-quote">First science fair program launched for the 2026&ndash;27 school year after a preliminary meeting in February 2026.</div>
-          <div class="story-name">Program Status: Active Partner</div>
-          <div class="story-badge">2026&ndash;27 Launch</div>
+          <div class="story-school">Your School Here</div>
+          <div class="story-quote">We're actively recruiting school partners for the 2026-27 school year. Reach out to bring FairGame to your students.</div>
+          <div class="story-name">Apply for Partnership</div>
+          <a href="mailto:fairgameinitiative@outlook.com" class="story-badge" style="text-decoration:none;cursor:pointer;">Apply &rarr;</a>
         </div>
         <div class="story-card">
-          <div class="story-school">Lima Senior High School &mdash; Lima, Ohio</div>
+          <div class="story-school">Your School Here</div>
+          <div class="story-quote">Every school is different - we meet you where you are, whether you're starting from scratch or improving an existing program.</div>
+          <div class="story-name">Learn More</div>
+          <a href="/setupguide.html" class="story-badge" style="text-decoration:none;cursor:pointer;">Setup Guide &rarr;</a>
+        </div>
+        <div class="story-card">
+          <div class="story-school">Your School Here</div>
+          <div class="story-quote">FairGame is completely free. No fees, no strings - just support, resources, and mentorship for your students.</div>
+          <div class="story-name">Get Started</div>
+          <a href="mailto:fairgameinitiative@outlook.com" class="story-badge" style="text-decoration:none;cursor:pointer;">Contact Us &rarr;</a>
+        </div>
+        <div class="story-card">
+          <div class="story-school">Your School Here</div>
+          <div class="story-quote">Programs are launching across the country for 2026-27. Be part of the next cohort of FairGame partner schools.</div>
+          <div class="story-name">Join the Waitlist</div>
+          <a href="mailto:fairgameinitiative@outlook.com" class="story-badge" style="text-decoration:none;cursor:pointer;">Reach Out &rarr;</a>
+        </div>
+        <div class="story-card">
+          <div class="story-school">Your School Here</div>
+          <div class="story-quote">Whether urban, rural, or suburban - any school that wants to run a science fair qualifies for FairGame support.</div>
+          <div class="story-name">Any School, Any Size</div>
+          <a href="/starthere.html" class="story-badge" style="text-decoration:none;cursor:pointer;">Start Here &rarr;</a>
+        </div>
+        <div class="story-card">
+          <div class="story-school">Your School Here</div>
+          <div class="story-quote">We're looking for up to 10 school partners for the 2026-27 school year. Program is free and fully supported.</div>
+          <div class="story-name">Apply for partnership</div>
+          <a href="mailto:fairgameinitiative@outlook.com" class="story-badge" style="text-decoration:none;cursor:pointer;">Apply &rarr;</a>
+        </div>
+      </div>
+    </div>
+        <div class="story-card">
+          <div class="story-school">Lima Senior High School - Lima, Ohio</div>
           <div class="story-quote">FairGame partnership established to bring competitive science fair programming to one of Allen County's largest public schools.</div>
           <div class="story-name">Program Status: Active Partner</div>
           <div class="story-badge">Active Partner</div>
         </div>
         <div class="story-card">
-          <div class="story-school">Linden-McKinley STEM Academy &mdash; Columbus</div>
+          <div class="story-school">Linden-McKinley STEM Academy - Columbus</div>
           <div class="story-quote">Science fair program development underway at Columbus City Schools' STEM-focused high school.</div>
           <div class="story-name">Program Status: In Development</div>
           <div class="story-badge">In Development</div>
         </div>
         <div class="story-card">
-          <div class="story-school">Reynoldsburg High School &mdash; Reynoldsburg, Ohio</div>
+          <div class="story-school">Reynoldsburg High School - Reynoldsburg, Ohio</div>
           <div class="story-quote">Outreach and partnership development ongoing for the 2026&ndash;27 school year.</div>
           <div class="story-name">Program Status: Outreach</div>
           <div class="story-badge">Outreach</div>
         </div>
         <div class="story-card">
-          <div class="story-school">Ashtabula High School &mdash; Ashtabula, Ohio</div>
-          <div class="story-quote">Northeast Ohio school with no existing science fair program — in early planning stages for launch.</div>
+          <div class="story-school">Ashtabula High School - Ashtabula, Ohio</div>
+          <div class="story-quote">Northeast Ohio school with no existing science fair program - in early planning stages for launch.</div>
           <div class="story-name">Program Status: Early Stage</div>
           <div class="story-badge">Early Stage</div>
         </div>

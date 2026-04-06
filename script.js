@@ -1105,6 +1105,23 @@ async function submitContactForm(type) {
     }]);
     if (error) { msgEl.textContent = 'Something went wrong — email us at fairgameinitiative@outlook.com'; msgEl.style.color = '#c0392b'; return; }
   }
+
+  // Send email notification via EmailJS
+  // To activate: sign up at emailjs.com, create a service + template, paste IDs below.
+  // Template variables available: {{from_name}}, {{from_email}}, {{school}}, {{contact_type}}, {{message}}
+  const EMAILJS_SERVICE  = 'YOUR_SERVICE_ID';   // e.g. 'service_abc123'
+  const EMAILJS_TEMPLATE = 'YOUR_TEMPLATE_ID';  // e.g. 'template_xyz456'
+  const EMAILJS_KEY      = 'YOUR_PUBLIC_KEY';   // found under Account > API Keys
+  if (EMAILJS_SERVICE !== 'YOUR_SERVICE_ID' && typeof emailjs !== 'undefined') {
+    emailjs.send(EMAILJS_SERVICE, EMAILJS_TEMPLATE, {
+      from_name:    name,
+      from_email:   email,
+      school:       school || '(not provided)',
+      contact_type: type === 'school' ? 'School / Teacher' : 'Student',
+      message:      message || '(no message)'
+    }, EMAILJS_KEY).catch(() => {}); // fire-and-forget; don't block on email failure
+  }
+
   msgEl.textContent = "Got it! We'll be in touch within 48 hours.";
   msgEl.style.color = 'var(--green-600)';
   logEvent('contact_form', { type, school });

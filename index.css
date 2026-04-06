@@ -44,6 +44,7 @@
       font-size: 16px;
       line-height: 1.65;
       overflow-x: hidden;
+      padding-top: 0; /* transparent nav overlaps hero — no offset needed */
     }
     img { display: block; max-width: 100%; }
     a { color: inherit; text-decoration: none; }

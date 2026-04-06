@@ -2,57 +2,221 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Research Guide — FairGame Initiative</title>
-  <meta name="description" content="From choosing a project topic to building your display board — everything a student needs to develop a winning science fair project." />
+  <title>Research Guide - FairGame Initiative</title>
+  <meta name="description" content="From choosing a project topic to building your display board - everything a student needs to develop a winning science fair project." />
+  <link rel="icon" href="/Images/logo.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/style.css" />
+  <style>
+    /* ── RESEARCH GUIDE ──────────────────────────────────────── */
+    .rg-hero {
+      background: var(--green-900);
+      padding: 64px 0 56px;
+    }
+    .rg-hero .overline { color: rgba(255,255,255,0.5); }
+    .rg-hero h1 { color: var(--white); margin: 12px 0 16px; font-size: clamp(1.9rem,4vw,2.8rem); }
+    .rg-hero p { color: rgba(255,255,255,0.7); font-size: 1rem; max-width: 520px; line-height: 1.65; }
+
+    /* Mentor callout (near top) */
+    .mentor-callout {
+      background: var(--green-50);
+      border: 1px solid var(--green-200);
+      border-radius: 12px;
+      padding: 24px 28px;
+      display: flex; align-items: center; gap: 24px;
+      margin: 48px 0 56px;
+    }
+    @media (max-width: 600px) { .mentor-callout { flex-direction: column; gap: 16px; } }
+    .mentor-callout-icon {
+      flex: none; width: 52px; height: 52px; border-radius: 50%;
+      background: var(--green-600);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--white);
+    }
+    .mentor-callout-text { flex: 1; }
+    .mentor-callout-text strong { display: block; font-size: 1rem; color: var(--green-900); margin-bottom: 4px; }
+    .mentor-callout-text p { font-size: 0.88rem; color: var(--green-800); margin: 0; line-height: 1.6; }
+    .mentor-callout-btn { flex: none; }
+
+    /* Phase steps */
+    .phase-intro { margin-bottom: 40px; }
+    .phase-intro h2 { margin-bottom: 8px; }
+    .phase-intro p { color: var(--gray-500); font-size: 0.97rem; }
+
+    .phase-grid {
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .phase-step {
+      display: grid;
+      grid-template-columns: 64px 1fr;
+      gap: 0;
+      padding: 0 0 40px;
+      position: relative;
+    }
+    .phase-step:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      left: 31px; top: 56px; bottom: 0;
+      width: 2px; background: var(--green-100);
+    }
+    .phase-num-wrap { display: flex; justify-content: center; padding-top: 4px; }
+    .phase-num {
+      width: 40px; height: 40px; border-radius: 50%;
+      background: var(--green-600); color: var(--white);
+      font-family: var(--ff-serif); font-size: 1.05rem; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex: none; position: relative; z-index: 1;
+    }
+    .phase-content { padding-left: 24px; padding-top: 8px; }
+    .phase-content h3 {
+      font-family: var(--ff-serif); font-size: 1.25rem; color: var(--green-900);
+      margin-bottom: 10px;
+    }
+    .phase-content p { color: var(--gray-600); font-size: 0.94rem; line-height: 1.7; margin-bottom: 12px; }
+    .phase-content ul { padding-left: 0; margin-bottom: 14px; }
+    .phase-content ul li {
+      font-size: 0.92rem; color: var(--gray-600); padding: 5px 0 5px 22px;
+      position: relative; border-bottom: 1px solid var(--gray-50); line-height: 1.6;
+    }
+    .phase-content ul li::before {
+      content: ''; position: absolute; left: 0; top: 13px;
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green-400);
+    }
+
+    .tip-box {
+      background: var(--green-50); border-left: 3px solid var(--green-500);
+      border-radius: 0 8px 8px 0;
+      padding: 14px 18px; font-size: 0.88rem; color: var(--green-900);
+      line-height: 1.65; margin-top: 12px;
+    }
+
+    /* Pathway cards */
+    .pathway-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 12px; margin-top: 16px;
+    }
+    .pathway-card {
+      border: 1px solid var(--gray-100); border-radius: 10px; padding: 18px 16px;
+      text-align: center;
+    }
+    .pathway-card-arrow { font-size: 1.2rem; color: var(--gray-300); margin: 10px 0 2px; }
+    .pathway-card h4 { font-size: 0.88rem; color: var(--green-900); margin-bottom: 4px; }
+    .pathway-card p { font-size: 0.78rem; color: var(--gray-500); line-height: 1.5; margin: 0; }
+    .pathway-card.highlight { background: var(--green-900); border-color: var(--green-900); }
+    .pathway-card.highlight h4 { color: var(--white); }
+    .pathway-card.highlight p { color: rgba(255,255,255,0.6); }
+
+    /* Downloads in-line */
+    .dl-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 16px; border-radius: 8px; border: 1px solid var(--gray-100);
+      margin-bottom: 8px; gap: 16px;
+    }
+    .dl-row-name { font-size: 0.9rem; font-weight: 600; color: var(--gray-900); }
+    .dl-row-desc { font-size: 0.79rem; color: var(--gray-500); margin-top: 2px; }
+    .dl-btn {
+      flex: none; font-size: 0.78rem; font-weight: 600;
+      padding: 7px 14px; border-radius: 6px;
+      background: var(--green-600); color: var(--white);
+      border: none; cursor: pointer; text-decoration: none;
+      transition: background 0.15s; white-space: nowrap;
+    }
+    .dl-btn:hover { background: var(--green-700); }
+    .dl-btn.locked { background: var(--gray-100); color: var(--gray-400); cursor: default; }
+
+    .section-divider {
+      border: none; border-top: 1px solid var(--gray-100); margin: 56px 0;
+    }
+  </style>
 </head>
 <body>
-<nav>
+<nav class="scrolled">
   <div class="nav-inner">
-    <a href="/" class="nav-logo"><img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'" />FairGame</a>
-    <button class="nav-hamburger">☰</button>
+    <a href="/" class="nav-logo">
+      <img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'" />
+      FairGame
+    </a>
+    <div class="nav-spacer"></div>
+    <button class="nav-hamburger" aria-label="Menu">&#9776;</button>
     <ul class="nav-links">
-      <li class="dropdown"><a href="#">Resources ▾</a><div class="dropdown-menu"><a href="/starthere.html">Start Here</a><a href="/setupguide.html">Setup Guide</a><a href="/stateresources.html">State Resources</a><a href="/researchguide.html">Research Guide</a><a href="/teachers-professionals.html">For Teachers</a></div></li>
-      <li class="dropdown"><a href="#">Get Involved ▾</a><div class="dropdown-menu"><a href="/volunteer.html">Volunteer / Judge</a><a href="/donate.html">Donate</a><a href="/#portal">Ambassador Portal</a><a href="/#portal">Teacher Portal</a></div></li>
+      <li class="dropdown"><a href="#">Resources</a>
+        <div class="dropdown-menu">
+          <a href="/starthere.html">Start Here</a>
+          <a href="/setupguide.html">Setup Guide</a>
+          <a href="/stateresources.html">State Resources</a>
+          <a href="/researchguide.html">Research Guide</a>
+          <a href="/teachers-professionals.html">For Teachers</a>
+        </div>
+      </li>
+      <li class="dropdown"><a href="#">Get Involved</a>
+        <div class="dropdown-menu">
+          <a href="/volunteer.html">Volunteer / Judge</a>
+          <a href="/donate.html">Donate</a>
+          <a href="/login.html">Ambassador Portal</a>
+          <a href="/login.html">Teacher Portal</a>
+        </div>
+      </li>
       <li><a href="/successstories.html">Stories</a></li>
       <li><a href="/donate.html">Donate</a></li>
       <li><a href="/starthere.html" class="nav-cta">Get Started</a></li>
     </ul>
+    <a href="/login.html" class="nav-user-icon" id="navUserBtn" title="Sign in">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+    </a>
   </div>
 </nav>
 
-<div class="page-header">
+<!-- Hero -->
+<section class="rg-hero">
   <div class="container">
-    <div class="breadcrumb"><a href="/">Home</a><span>/</span><a href="/starthere.html">Resources</a><span>/</span>Research Guide</div>
     <span class="overline">For Students</span>
     <h1>Research Guide</h1>
-    <p>From choosing a topic to standing at your display board — a complete guide to developing a strong science fair project.</p>
+    <p>From choosing a topic to standing at your display board - a complete guide to developing a strong science fair project.</p>
   </div>
-</div>
+</section>
 
-<section class="section">
+<section class="section" style="padding-top: 48px; padding-bottom: 80px;">
   <div class="container">
 
-    <div style="margin-bottom:48px;" class="reveal">
-      <span class="overline">Step by Step</span>
-      <h2>The six phases of a science fair project</h2>
-      <p style="color:var(--gray-500);font-size:0.97rem;margin-top:8px;">Work through these in order. Each phase builds on the last — skipping steps is the most common reason projects fall apart at the fair.</p>
+    <!-- Mentor callout - prominent near top -->
+    <div class="mentor-callout">
+      <div class="mentor-callout-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="mentor-callout-text">
+        <strong>Want guidance from someone who's been there?</strong>
+        <p>FairGame's student ambassador program pairs you with an experienced ISEF or state fair competitor who can review your experimental design, answer your questions, and help you prepare for judging - at no cost.</p>
+      </div>
+      <div class="mentor-callout-btn">
+        <a href="/login.html" class="btn btn-primary" style="white-space:nowrap;">Get a Mentor &rarr;</a>
+      </div>
     </div>
 
-    <div class="phase-steps reveal">
+    <!-- Phase steps -->
+    <div class="phase-intro">
+      <span class="overline">Step by Step</span>
+      <h2>The six phases of a science fair project</h2>
+      <p>Work through these in order. Each phase builds on the last - skipping steps is the most common reason projects fall apart at the fair.</p>
+    </div>
+
+    <div class="phase-grid">
 
       <div class="phase-step" id="topic">
-        <div class="phase-num">1</div>
-        <div>
+        <div class="phase-num-wrap"><div class="phase-num">1</div></div>
+        <div class="phase-content">
           <h3>Choosing a topic</h3>
-          <p>The best science fair projects come from genuine curiosity — things you already wonder about. Start broad, then narrow down to something testable.</p>
+          <p>The best science fair projects come from genuine curiosity - things you already wonder about. Start broad, then narrow down to something testable.</p>
           <ul>
             <li>Ask "What would happen if..." or "Does X affect Y?"</li>
             <li>Look at everyday problems in your community, school, or home</li>
             <li>Browse previous ISEF award-winning projects for inspiration (not to copy)</li>
-            <li>Make sure you can actually run the experiment — consider time, materials, and access</li>
+            <li>Make sure you can actually run the experiment - consider time, materials, and access</li>
             <li>Avoid topics that require controlled substances, human subjects without IRB approval, or vertebrate animals without proper protocols</li>
           </ul>
           <div class="tip-box"><strong>What judges look for in topic selection:</strong> Originality and genuine inquiry. A modest, well-executed original idea beats an ambitious project that copies existing research.</div>
@@ -60,12 +224,12 @@
       </div>
 
       <div class="phase-step" id="design">
-        <div class="phase-num">2</div>
-        <div>
+        <div class="phase-num-wrap"><div class="phase-num">2</div></div>
+        <div class="phase-content">
           <h3>Designing your experiment</h3>
           <p>A strong experimental design is the backbone of a good project. This is where most students need the most help.</p>
           <ul>
-            <li><strong>Hypothesis:</strong> A specific, testable prediction — "If [X], then [Y], because [reason]"</li>
+            <li><strong>Hypothesis:</strong> A specific, testable prediction - "If [X], then [Y], because [reason]"</li>
             <li><strong>Independent variable:</strong> What you change (only one)</li>
             <li><strong>Dependent variable:</strong> What you measure</li>
             <li><strong>Constants:</strong> Everything else you keep the same</li>
@@ -78,13 +242,13 @@
       </div>
 
       <div class="phase-step" id="data">
-        <div class="phase-num">3</div>
-        <div>
+        <div class="phase-num-wrap"><div class="phase-num">3</div></div>
+        <div class="phase-content">
           <h3>Collecting and analyzing data</h3>
-          <p>Keep a lab notebook from day one. Write down everything — even failed trials and unexpected results. Judges respect honesty about what didn't work.</p>
+          <p>Keep a lab notebook from day one. Write down everything - even failed trials and unexpected results. Judges respect honesty about what didn't work.</p>
           <ul>
             <li>Use a consistent data table for every trial</li>
-            <li>Record raw data — don't average before you've saved the originals</li>
+            <li>Record raw data - don't average before you've saved the originals</li>
             <li>Calculate mean, median, and standard deviation where appropriate</li>
             <li>Create graphs that clearly show the relationship between your variables</li>
             <li>Use appropriate graph types: bar charts for categories, line graphs for continuous data</li>
@@ -94,29 +258,35 @@
       </div>
 
       <div class="phase-step" id="display">
-        <div class="phase-num">4</div>
-        <div>
+        <div class="phase-num-wrap"><div class="phase-num">4</div></div>
+        <div class="phase-content">
           <h3>Creating your display board</h3>
           <p>Your display board is your project's first impression. It needs to communicate your entire project clearly within about 60 seconds of a judge looking at it.</p>
           <ul>
-            <li>Standard size: 36&rdquo; tall &times; 48&rdquo; wide (tri-fold board)</li>
+            <li>Standard size: 36" tall x 48" wide (tri-fold board)</li>
             <li>Required sections: Title, Purpose/Question, Hypothesis, Materials, Procedure, Results, Conclusion, References</li>
             <li>Use clear headers, legible font (minimum 18pt for body text), and consistent color scheme</li>
             <li>Charts and graphs should be large enough to read from two feet away</li>
             <li>Your written research paper sits separately on the table in front of the board</li>
           </ul>
-          <div class="dl-row" style="margin-top:14px;"><div><div class="dl-row-name">Display Board Layout Template</div><div class="dl-row-desc">Canva template — pre-sized with all required sections</div></div><button class="dl-btn locked">Download (Portal)</button></div>
-          <div class="dl-row"><div><div class="dl-row-name">Poster Layout Guide</div><div class="dl-row-desc">Spacing, font, and content guidelines</div></div><button class="dl-btn locked">Download (Portal)</button></div>
+          <div class="dl-row" style="margin-top:14px;">
+            <div><div class="dl-row-name">Display Board Layout Template</div><div class="dl-row-desc">Canva template - pre-sized with all required sections</div></div>
+            <button class="dl-btn locked">Portal Login</button>
+          </div>
+          <div class="dl-row">
+            <div><div class="dl-row-name">Poster Layout Guide</div><div class="dl-row-desc">Spacing, font, and content guidelines</div></div>
+            <button class="dl-btn locked">Portal Login</button>
+          </div>
         </div>
       </div>
 
       <div class="phase-step" id="present">
-        <div class="phase-num">5</div>
-        <div>
+        <div class="phase-num-wrap"><div class="phase-num">5</div></div>
+        <div class="phase-content">
           <h3>Presenting to judges</h3>
-          <p>You'll have approximately 5&ndash;10 minutes with each judge. Most of it will be conversation, not a formal presentation. Judges want to understand how you think, not just what you found.</p>
+          <p>You'll have approximately 5-10 minutes with each judge. Most of it will be conversation, not a formal presentation. Judges want to understand how you think, not just what you found.</p>
           <ul>
-            <li>Prepare a 2-minute opening summary of your project — purpose, method, key result, conclusion</li>
+            <li>Prepare a 2-minute opening summary: purpose, method, key result, conclusion</li>
             <li>Practice answering: "Why did you choose this topic?" and "What would you do differently?"</li>
             <li>Know your data. Be ready to explain every number on your display board</li>
             <li>Dress professionally. First impressions matter.</li>
@@ -127,41 +297,50 @@
       </div>
 
       <div class="phase-step" id="compete">
-        <div class="phase-num">6</div>
-        <div>
+        <div class="phase-num-wrap"><div class="phase-num">6</div></div>
+        <div class="phase-content">
           <h3>Understanding the competition pathway</h3>
-          <p>If your school participates in OAS, winning at your school fair can advance you all the way to international competition.</p>
-          <ul>
-            <li><strong>School Fair</strong> &rarr; top projects advance to District Science Day</li>
-            <li><strong>OAS District Science Day</strong> &rarr; top projects advance to State Science Day</li>
-            <li><strong>OAS State Science Day</strong> &rarr; top projects qualify for Regeneron ISEF (international)</li>
-            <li>Many specialized awards at each level: EPA Special Award, ASM Materials Award, and more</li>
-          </ul>
-          <p>See the full Ohio competition pathway, deadlines, and contact information on the <a href="/stateresources.html" style="color:var(--green-600);">State Resources page</a>.</p>
+          <p>Winning at your school fair can advance you all the way to international competition through a series of qualifying rounds.</p>
+          <div class="pathway-grid">
+            <div class="pathway-card">
+              <h4>School Fair</h4>
+              <p>Your starting point - internal competition</p>
+              <div class="pathway-card-arrow">&#8595;</div>
+            </div>
+            <div class="pathway-card">
+              <h4>District Science Day</h4>
+              <p>Top projects from school fairs compete</p>
+              <div class="pathway-card-arrow">&#8595;</div>
+            </div>
+            <div class="pathway-card">
+              <h4>State Science Day</h4>
+              <p>Top district projects compete statewide</p>
+              <div class="pathway-card-arrow">&#8595;</div>
+            </div>
+            <div class="pathway-card highlight">
+              <h4>Regeneron ISEF</h4>
+              <p>International finals - top state projects qualify</p>
+            </div>
+          </div>
+          <p style="margin-top:18px;font-size:0.9rem;color:var(--gray-600);">Many specialized awards exist at each level - EPA Special Award, ASM Materials Award, and more. See the full competition pathway, deadlines, and registration links on the <a href="/stateresources.html" style="color:var(--green-600);">State Resources page</a>.</p>
         </div>
       </div>
 
     </div>
 
-    <div class="reveal" style="margin-top:64px;">
-      <span class="overline">Templates &amp; Downloads</span>
-      <h2 style="margin-bottom:24px;">Student resources</h2>
-      <div class="dl-row"><div><div class="dl-row-name">Research Paper Template</div><div class="dl-row-desc">Standard science fair research paper format with section guides</div></div><button class="dl-btn locked">Download (Portal)</button></div>
-      <div class="dl-row"><div><div class="dl-row-name">Lab Notebook Data Table</div><div class="dl-row-desc">Printable data recording sheet for experiments</div></div><button class="dl-btn locked">Download (Portal)</button></div>
-      <div class="dl-row"><div><div class="dl-row-name">Project Proposal Form</div><div class="dl-row-desc">Outline your hypothesis and experimental design before you begin</div></div><button class="dl-btn locked">Download (Portal)</button></div>
-      <div class="dl-row"><div><div class="dl-row-name">Display Board Checklist</div><div class="dl-row-desc">Verify your board has all required sections before fair day</div></div><button class="dl-btn locked">Download (Portal)</button></div>
-      <p style="margin-top:14px;font-size:0.82rem;color:var(--gray-500);">Student downloads are accessible after applying for the <a href="/#portal" style="color:var(--green-600);">Ambassador Portal</a>, or ask your teacher to request Teacher Portal access.</p>
-    </div>
+    <hr class="section-divider" />
 
-    <div class="reveal" style="margin-top:64px;background:var(--green-900);padding:40px;">
-      <h3 style="color:var(--white);margin-bottom:10px;">Need a mentor?</h3>
-      <p style="color:rgba(255,255,255,0.6);margin-bottom:20px;font-size:0.94rem;">Our student ambassador program connects you with a STEM professional who can answer your questions, review your experimental design, and help you prepare for judging.</p>
-      <a href="/#portal" class="btn btn-white">Apply for Mentorship &rarr;</a>
-    </div>
+    <!-- Downloads -->
+    <span class="overline">Templates &amp; Downloads</span>
+    <h2 style="margin: 10px 0 24px;">Student resources</h2>
+    <div class="dl-row"><div><div class="dl-row-name">Research Paper Template</div><div class="dl-row-desc">Standard science fair research paper format with section guides</div></div><button class="dl-btn locked">Portal Login</button></div>
+    <div class="dl-row"><div><div class="dl-row-name">Lab Notebook Data Table</div><div class="dl-row-desc">Printable data recording sheet for experiments</div></div><button class="dl-btn locked">Portal Login</button></div>
+    <div class="dl-row"><div><div class="dl-row-name">Project Proposal Form</div><div class="dl-row-desc">Outline your hypothesis and experimental design before you begin</div></div><button class="dl-btn locked">Portal Login</button></div>
+    <div class="dl-row"><div><div class="dl-row-name">Display Board Checklist</div><div class="dl-row-desc">Verify your board has all required sections before fair day</div></div><button class="dl-btn locked">Portal Login</button></div>
+    <p style="margin-top:14px;font-size:0.82rem;color:var(--gray-500);">Student downloads are accessible after applying for the <a href="/login.html" style="color:var(--green-600);">Student or Ambassador Portal</a>, or ask your teacher to request Teacher Portal access.</p>
 
   </div>
 </section>
-
 
 <footer>
   <div class="container">
@@ -195,7 +374,7 @@
         <ul>
           <li><a href="/volunteer.html">Volunteer / Judge</a></li>
           <li><a href="/donate.html">Donate</a></li>
-          <li><a href="#portal">Ambassador Portal</a></li>
+          <li><a href="/login.html">Ambassador Portal</a></li>
           <li><a href="mailto:fairgameinitiative@outlook.com">Partner With Us</a></li>
         </ul>
       </div>
@@ -210,11 +389,12 @@
     </div>
     <div class="footer-bottom">
       <p>© 2026 FairGame Initiative · All rights reserved.</p>
-      <div><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></div>
+      <div><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a></div>
     </div>
   </div>
 </footer>
 
-<script src="/script.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/script.js"></script>
+</body>
 </html>

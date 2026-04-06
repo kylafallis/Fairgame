@@ -2,172 +2,446 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Science Fair Setup Guide — FairGame Initiative</title>
-  <meta name="description" content="Everything a teacher or school needs to launch a science fair from scratch — planning, judges, OAS registration, and funding." />
+  <title>Science Fair Setup Guide - FairGame Initiative</title>
+  <meta name="description" content="Everything a teacher or school needs to launch a science fair from scratch - planning, judges, registration, and funding." />
+  <link rel="icon" href="/Images/logo.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/style.css" />
+  <style>
+    /* ── SETUP GUIDE HERO ─────────────────────────────────────── */
+    .sg-hero {
+      background: var(--green-900);
+      padding: 64px 0 0;
+      overflow: hidden;
+    }
+    .sg-hero-inner {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 48px;
+      align-items: end;
+    }
+    @media (max-width: 760px) {
+      .sg-hero-inner { grid-template-columns: 1fr; }
+      .sg-hero-badges { display: none; }
+    }
+    .sg-hero .overline { color: rgba(255,255,255,0.5); }
+    .sg-hero h1 { color: var(--white); margin: 12px 0 16px; font-size: clamp(1.8rem, 4vw, 2.8rem); }
+    .sg-hero p { color: rgba(255,255,255,0.7); font-size: 1rem; max-width: 520px; line-height: 1.65; margin-bottom: 28px; }
+    .sg-hero-btns { display: flex; gap: 12px; flex-wrap: wrap; padding-bottom: 40px; }
+
+    .sg-hero-badges {
+      display: flex; flex-direction: column; gap: 12px;
+      padding-bottom: 40px; flex: none;
+    }
+    .sg-badge {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      padding: 14px 18px;
+      min-width: 160px;
+      text-align: center;
+    }
+    .sg-badge-num { font-family: var(--ff-serif); font-size: 1.6rem; font-weight: 700; color: var(--white); }
+    .sg-badge-label { font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 2px; }
+
+    .sg-hero-bar {
+      background: rgba(0,0,0,0.2);
+      border-top: 1px solid rgba(255,255,255,0.08);
+      padding: 14px 0;
+      display: flex; gap: 0; overflow-x: auto; scrollbar-width: none;
+    }
+    .sg-hero-bar::-webkit-scrollbar { display: none; }
+    .sg-toc-link {
+      flex: none;
+      font-size: 0.8rem; color: rgba(255,255,255,0.55);
+      padding: 4px 20px 4px 0;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: color 0.15s;
+    }
+    .sg-toc-link:hover { color: rgba(255,255,255,0.9); }
+    .sg-toc-link + .sg-toc-link { border-left: 1px solid rgba(255,255,255,0.12); padding-left: 20px; }
+
+    /* ── GUIDE BODY ──────────────────────────────────────────── */
+    .sg-body {
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 56px;
+      align-items: start;
+      padding: 56px 0 80px;
+    }
+    @media (max-width: 900px) {
+      .sg-body { grid-template-columns: 1fr; }
+      .sg-sidebar { display: none; }
+    }
+
+    .sg-sidebar {
+      position: sticky; top: calc(var(--nav-h) + 24px);
+    }
+    .sg-sidebar-label {
+      font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--gray-400); margin-bottom: 12px;
+    }
+    .sg-sidebar ul { list-style: none; padding: 0; margin: 0; }
+    .sg-sidebar ul li a {
+      display: block; padding: 7px 0 7px 12px;
+      font-size: 0.86rem; color: var(--gray-500);
+      border-left: 2px solid var(--gray-100);
+      text-decoration: none;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .sg-sidebar ul li a:hover,
+    .sg-sidebar ul li a.active {
+      color: var(--green-700);
+      border-left-color: var(--green-500);
+    }
+
+    .sg-section { margin-bottom: 56px; scroll-margin-top: calc(var(--nav-h) + 24px); }
+    .sg-section h2 {
+      font-family: var(--ff-serif); font-size: 1.6rem; color: var(--green-900);
+      margin-bottom: 16px; padding-bottom: 14px;
+      border-bottom: 2px solid var(--green-100);
+    }
+    .sg-section h3 {
+      font-family: var(--ff-sans); font-size: 0.95rem; font-weight: 600;
+      color: var(--gray-800); margin: 24px 0 10px;
+    }
+    .sg-section p { color: var(--gray-600); font-size: 0.95rem; line-height: 1.7; margin-bottom: 14px; }
+    .sg-section ul { padding-left: 0; margin-bottom: 14px; }
+    .sg-section ul li {
+      font-size: 0.93rem; color: var(--gray-600); padding: 5px 0 5px 22px;
+      position: relative; border-bottom: 1px solid var(--gray-50); line-height: 1.6;
+    }
+    .sg-section ul li::before {
+      content: ''; position: absolute; left: 0; top: 13px;
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green-400);
+    }
+
+    .pull-quote {
+      background: var(--green-50); border-left: 3px solid var(--green-500);
+      padding: 16px 20px; border-radius: 0 8px 8px 0;
+      font-size: 0.9rem; color: var(--green-900);
+      margin: 20px 0; line-height: 1.65;
+    }
+
+    /* Timeline */
+    .sg-timeline { margin-top: 16px; }
+    .sg-tl-row {
+      display: grid; grid-template-columns: 120px 1fr;
+      gap: 24px; padding: 20px 0;
+      border-bottom: 1px solid var(--gray-100);
+    }
+    .sg-tl-row:last-child { border-bottom: none; }
+    .sg-tl-period {
+      font-size: 0.78rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.07em; color: var(--green-600);
+      padding-top: 2px;
+    }
+    .sg-tl-content h4 { font-size: 0.97rem; color: var(--gray-900); margin-bottom: 4px; }
+    .sg-tl-content p { font-size: 0.88rem; color: var(--gray-500); margin: 0; line-height: 1.6; }
+
+    /* Format cards */
+    .format-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    @media (max-width: 600px) { .format-grid { grid-template-columns: 1fr; } }
+    .format-card {
+      border: 1px solid var(--gray-100); border-radius: 10px; padding: 20px;
+    }
+    .format-card h4 { font-size: 0.95rem; color: var(--green-900); margin-bottom: 8px; }
+    .format-card p { font-size: 0.86rem; color: var(--gray-500); margin-bottom: 8px; line-height: 1.6; }
+    .format-detail { font-size: 0.8rem !important; color: var(--green-600) !important; font-weight: 500; }
+
+    /* Downloads */
+    .dl-grid { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+    .dl-item {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 14px 16px; border-radius: 8px;
+      border: 1px solid var(--gray-100); gap: 16px;
+    }
+    .dl-item-name { font-size: 0.92rem; font-weight: 600; color: var(--gray-900); }
+    .dl-item-desc { font-size: 0.8rem; color: var(--gray-500); margin-top: 2px; }
+    .dl-btn {
+      flex: none; font-size: 0.78rem; font-weight: 600;
+      padding: 7px 14px; border-radius: 6px;
+      background: var(--green-600); color: var(--white);
+      border: none; cursor: pointer; text-decoration: none;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .dl-btn:hover { background: var(--green-700); }
+    .dl-btn.locked {
+      background: var(--gray-100); color: var(--gray-400); cursor: default;
+    }
+
+    /* FAQ */
+    .faq { margin-top: 16px; }
+    .faq-item { border-bottom: 1px solid var(--gray-100); }
+    .faq-q {
+      font-size: 0.93rem; font-weight: 600; color: var(--gray-900);
+      padding: 16px 0; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 16px;
+    }
+    .faq-q::after { content: '+'; font-size: 1.1rem; color: var(--gray-400); flex: none; }
+    .faq-item.open .faq-q::after { content: '-'; }
+    .faq-a {
+      font-size: 0.88rem; color: var(--gray-500); line-height: 1.7;
+      padding-bottom: 16px; display: none;
+    }
+    .faq-item.open .faq-a { display: block; }
+
+    .sg-cta-box {
+      background: var(--green-900); border-radius: 12px;
+      padding: 40px; margin-top: 40px;
+    }
+    .sg-cta-box h3 { color: var(--white); margin-bottom: 10px; }
+    .sg-cta-box p { color: rgba(255,255,255,0.6); font-size: 0.94rem; margin-bottom: 20px; }
+  </style>
 </head>
 <body>
-<nav>
+<nav class="scrolled">
   <div class="nav-inner">
-    <a href="/" class="nav-logo"><img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'" />FairGame</a>
-    <button class="nav-hamburger">☰</button>
+    <a href="/" class="nav-logo">
+      <img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'" />
+      FairGame
+    </a>
+    <div class="nav-spacer"></div>
+    <button class="nav-hamburger" aria-label="Menu">&#9776;</button>
     <ul class="nav-links">
-      <li class="dropdown"><a href="#">Resources ▾</a><div class="dropdown-menu"><a href="/starthere.html">Start Here</a><a href="/setupguide.html">Setup Guide</a><a href="/stateresources.html">State Resources</a><a href="/researchguide.html">Research Guide</a><a href="/teachers-professionals.html">For Teachers</a></div></li>
-      <li class="dropdown"><a href="#">Get Involved ▾</a><div class="dropdown-menu"><a href="/volunteer.html">Volunteer / Judge</a><a href="/donate.html">Donate</a><a href="/#portal">Ambassador Portal</a><a href="/#portal">Teacher Portal</a></div></li>
+      <li class="dropdown"><a href="#">Resources</a>
+        <div class="dropdown-menu">
+          <a href="/starthere.html">Start Here</a>
+          <a href="/setupguide.html">Setup Guide</a>
+          <a href="/stateresources.html">State Resources</a>
+          <a href="/researchguide.html">Research Guide</a>
+          <a href="/teachers-professionals.html">For Teachers</a>
+        </div>
+      </li>
+      <li class="dropdown"><a href="#">Get Involved</a>
+        <div class="dropdown-menu">
+          <a href="/volunteer.html">Volunteer / Judge</a>
+          <a href="/donate.html">Donate</a>
+          <a href="/login.html">Ambassador Portal</a>
+          <a href="/login.html">Teacher Portal</a>
+        </div>
+      </li>
       <li><a href="/successstories.html">Stories</a></li>
       <li><a href="/donate.html">Donate</a></li>
       <li><a href="/starthere.html" class="nav-cta">Get Started</a></li>
     </ul>
+    <a href="/login.html" class="nav-user-icon" id="navUserBtn" title="Sign in">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+    </a>
   </div>
 </nav>
 
-<div class="page-header">
+<!-- Full-width hero -->
+<section class="sg-hero">
   <div class="container">
-    <div class="breadcrumb"><a href="/">Home</a><span>/</span><a href="/starthere.html">Resources</a><span>/</span>Setup Guide</div>
-    <span class="overline">For Teachers &amp; Administrators</span>
-    <h1>Complete Science Fair Setup Guide</h1>
-    <p>Everything you need to start a successful science fair at your school — from planning and buy-in through awards day.</p>
-    <div style="display:flex;gap:12px;margin-top:24px;flex-wrap:wrap;">
-      <a href="/#portal" class="btn btn-white">Access Downloadable Templates &rarr;</a>
-      <a href="mailto:fairgameinitiative@outlook.com" class="btn btn-outline" style="border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.8);">Schedule a Consultation</a>
+    <div class="sg-hero-inner">
+      <div>
+        <span class="overline">For Teachers &amp; Administrators</span>
+        <h1>Complete Science Fair Setup Guide</h1>
+        <p>Everything you need to start a successful science fair at your school - from planning and buy-in through awards day. No prior experience required.</p>
+        <div class="sg-hero-btns">
+          <a href="/login.html" class="btn btn-white">Access Templates &rarr;</a>
+          <a href="mailto:fairgameinitiative@outlook.com" class="btn btn-outline" style="border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.8);">Free Consultation</a>
+        </div>
+      </div>
+      <div class="sg-hero-badges">
+        <div class="sg-badge"><div class="sg-badge-num">$300</div><div class="sg-badge-label">Typical first-year cost</div></div>
+        <div class="sg-badge"><div class="sg-badge-num">5-8h</div><div class="sg-badge-label">Per month for coordinator</div></div>
+        <div class="sg-badge"><div class="sg-badge-num">12</div><div class="sg-badge-label">Months to awards day</div></div>
+      </div>
     </div>
   </div>
-</div>
+  <div class="sg-hero-bar">
+    <div class="container" style="display:flex;gap:0;">
+      <a href="#buyin"     class="sg-toc-link">Getting Buy-In</a>
+      <a href="#committee" class="sg-toc-link">Committee</a>
+      <a href="#timeline"  class="sg-toc-link">12-Month Timeline</a>
+      <a href="#formats"   class="sg-toc-link">Format Options</a>
+      <a href="#pathway"   class="sg-toc-link">Registration &amp; Pathway</a>
+      <a href="#judges"    class="sg-toc-link">Recruiting Judges</a>
+      <a href="#funding"   class="sg-toc-link">Funding</a>
+      <a href="#logistics" class="sg-toc-link">Logistics</a>
+      <a href="#downloads" class="sg-toc-link">Downloads</a>
+      <a href="#faq"       class="sg-toc-link">FAQ</a>
+    </div>
+  </div>
+</section>
 
-<section class="section">
+<section>
   <div class="container">
-    <div class="guide-layout">
+    <div class="sg-body">
 
-      <!-- TOC -->
-      <nav class="guide-toc">
-        <div class="toc-label">On this page</div>
-        <ul class="toc-list">
+      <!-- Sticky sidebar TOC (desktop) -->
+      <aside class="sg-sidebar">
+        <div class="sg-sidebar-label">On this page</div>
+        <ul>
           <li><a href="#buyin">Getting Buy-In</a></li>
           <li><a href="#committee">Forming a Committee</a></li>
           <li><a href="#timeline">12-Month Timeline</a></li>
           <li><a href="#formats">Format Options</a></li>
-          <li><a href="#oas">OAS Partnership</a></li>
+          <li><a href="#pathway">Registration &amp; Pathway</a></li>
           <li><a href="#judges">Recruiting Judges</a></li>
-          <li><a href="#funding" id="funding-link">Finding Funding</a></li>
+          <li><a href="#funding">Finding Funding</a></li>
           <li><a href="#logistics">Logistics &amp; Venue</a></li>
           <li><a href="#downloads">Downloads</a></li>
           <li><a href="#faq">FAQ</a></li>
         </ul>
-      </nav>
+      </aside>
 
       <!-- Content -->
       <div>
 
-        <div class="guide-section reveal" id="buyin">
+        <div class="sg-section" id="buyin">
           <h2>Getting administrator buy-in</h2>
-          <p>The most common reason schools don't have science fairs isn't budget — it's that no one has made a clear case to administration. A one-page proposal addressing cost, time, and academic benefit gets a yes more often than any other approach.</p>
+          <p>The most common reason schools don't have science fairs isn't budget - it's that no one has made a clear case to administration. A one-page proposal addressing cost, time, and academic benefit gets a yes more often than any other approach.</p>
           <h3>The case to make</h3>
           <p>Science fairs develop critical thinking, research skills, and presentation confidence that directly align with state academic standards. They create positive school visibility, build community partnerships, and open scholarship and competition pathways for students who wouldn't otherwise have them.</p>
           <h3>Addressing common objections</h3>
           <ul>
-            <li><strong>Cost:</strong> A school fair can run on $500&ndash;$1,500. Local sponsors often cover most of it. See the funding section below.</li>
-            <li><strong>Teacher time:</strong> 5&ndash;8 hours per month with a committee. FairGame handles judge recruitment, OAS registration, and student support.</li>
+            <li><strong>Cost:</strong> A school fair can run on $300-$1,500. Local sponsors often cover most of it. See the funding section below.</li>
+            <li><strong>Teacher time:</strong> 5-8 hours per month with a committee. FairGame handles judge recruitment, fair registration, and student support.</li>
             <li><strong>Logistics:</strong> A gym or cafeteria works fine. We have a full day-of checklist.</li>
           </ul>
-          <div class="pull-quote">Download the administrator proposal template in the Teacher Portal — it's a one-page pitch with real cost numbers and ROI data already filled in.</div>
+          <div class="pull-quote">Download the administrator proposal template in the Teacher Portal - it's a one-page pitch with real cost numbers and ROI data already filled in.</div>
         </div>
 
-        <div class="guide-section reveal" id="committee">
+        <div class="sg-section" id="committee">
           <h2>Forming a committee</h2>
           <p>You don't have to run a science fair alone. A committee of three to five people splits the work into manageable pieces and distributes responsibility so no single teacher is overwhelmed.</p>
           <h3>Suggested roles</h3>
           <ul>
-            <li><strong>Fair Coordinator (you):</strong> Overall lead, communicates with OAS and FairGame, owns the timeline</li>
-            <li><strong>Judge Coordinator:</strong> Recruits and manages judges, sends OAS training materials</li>
+            <li><strong>Fair Coordinator (you):</strong> Overall lead, communicates with the affiliate fair and FairGame, owns the timeline</li>
+            <li><strong>Judge Coordinator:</strong> Recruits and manages judges, sends training materials</li>
             <li><strong>Student Support Lead:</strong> Runs workshop sessions, answers student questions during project development</li>
             <li><strong>Logistics Lead:</strong> Manages venue, tables, signage, check-in</li>
             <li><strong>Communications:</strong> Sends parent letters, promotes the fair, posts on social media</li>
           </ul>
-          <p>Time commitment: approximately 5&ndash;8 hours per month for the coordinator, 2&ndash;3 hours for other committee members during the active phase (months 7&ndash;12 of the timeline).</p>
+          <p>Time commitment: approximately 5-8 hours per month for the coordinator, 2-3 hours for other committee members during the active phase (months 7-12 of the timeline).</p>
         </div>
 
-        <div class="guide-section reveal" id="timeline">
+        <div class="sg-section" id="timeline">
           <h2>12-month timeline</h2>
           <p>This timeline assumes your fair happens in month 12. Adjust start dates based on your school calendar.</p>
-          <div class="timeline">
-            <div class="tl-row"><div class="tl-period">Months 1&ndash;2</div><div class="tl-content"><h4>Planning &amp; approval</h4><p>Submit administrator proposal, form committee, set fair date, notify OAS of intent to register</p></div></div>
-            <div class="tl-row"><div class="tl-period">Months 3&ndash;4</div><div class="tl-content"><h4>Registration &amp; structure</h4><p>Register with OAS, set up ProjectBoard, decide fair format (school-only vs. advancing to district), draft participation requirements</p></div></div>
-            <div class="tl-row"><div class="tl-period">Months 5&ndash;6</div><div class="tl-content"><h4>Recruitment &amp; funding</h4><p>Begin recruiting judges, apply for funding and sponsorships, send initial student announcement</p></div></div>
-            <div class="tl-row"><div class="tl-period">Months 7&ndash;9</div><div class="tl-content"><h4>Student support phase</h4><p>Student project proposals due, run topic selection and experimental design workshops, check in on project progress monthly</p></div></div>
-            <div class="tl-row"><div class="tl-period">Months 10&ndash;11</div><div class="tl-content"><h4>Final preparation</h4><p>Confirm judges and assignments, final student check-ins, display board prep, logistics finalization, parent communication</p></div></div>
-            <div class="tl-row"><div class="tl-period">Month 12</div><div class="tl-content"><h4>Fair &amp; follow-up</h4><p>Science fair day, awards, advance qualifying students to district, thank-you notes, post-event survey, begin planning year two</p></div></div>
+          <div class="sg-timeline">
+            <div class="sg-tl-row">
+              <div class="sg-tl-period">Months 1-2</div>
+              <div class="sg-tl-content"><h4>Planning &amp; approval</h4><p>Submit administrator proposal, form committee, set fair date, notify affiliate fair of intent to register</p></div>
+            </div>
+            <div class="sg-tl-row">
+              <div class="sg-tl-period">Months 3-4</div>
+              <div class="sg-tl-content"><h4>Registration &amp; structure</h4><p>Register with your state affiliate fair, set up ProjectBoard, decide fair format, draft participation requirements</p></div>
+            </div>
+            <div class="sg-tl-row">
+              <div class="sg-tl-period">Months 5-6</div>
+              <div class="sg-tl-content"><h4>Recruitment &amp; funding</h4><p>Begin recruiting judges, apply for funding and sponsorships, send initial student announcement</p></div>
+            </div>
+            <div class="sg-tl-row">
+              <div class="sg-tl-period">Months 7-9</div>
+              <div class="sg-tl-content"><h4>Student support phase</h4><p>Student project proposals due, run topic selection and experimental design workshops, check in on project progress monthly</p></div>
+            </div>
+            <div class="sg-tl-row">
+              <div class="sg-tl-period">Months 10-11</div>
+              <div class="sg-tl-content"><h4>Final preparation</h4><p>Confirm judges and assignments, final student check-ins, display board prep, logistics finalization, parent communication</p></div>
+            </div>
+            <div class="sg-tl-row">
+              <div class="sg-tl-period">Month 12</div>
+              <div class="sg-tl-content"><h4>Fair &amp; follow-up</h4><p>Science fair day, awards, advance qualifying students to district, thank-you notes, post-event survey, begin planning year two</p></div>
+            </div>
           </div>
         </div>
 
-        <div class="guide-section reveal" id="formats">
+        <div class="sg-section" id="formats">
           <h2>Format options</h2>
           <p>Choose the format that fits your school's size, resources, and goals. You can always start smaller and expand.</p>
           <div class="format-grid">
-            <div class="format-card"><h4>School Fair Only</h4><p>Internal competition with no advancement to district. Good for first-year programs or schools with limited capacity. Students compete for school-level recognition.</p><p class="format-detail">Typical size: 20&ndash;150 projects. Cost: $300&ndash;$1,500.</p></div>
-            <div class="format-card"><h4>OAS District Fair</h4><p>Winners advance from your school to the OAS district science day. Opens the ISEF pathway for your students. Requires OAS membership and ProjectBoard registration.</p><p class="format-detail">Typical size: 30&ndash;200 projects. Cost: $500&ndash;$3,000.</p></div>
-            <div class="format-card"><h4>Multi-School / District</h4><p>Collaborative fair across multiple schools in a district. Shared costs and judges, higher visibility. Ideal for rural areas where individual schools are small.</p><p class="format-detail">Requires district coordinator. Contact FairGame for setup support.</p></div>
-            <div class="format-card"><h4>Virtual / Hybrid</h4><p>Students submit research digitally, judges evaluate remotely or in person. Reduces venue and logistics overhead. ProjectBoard supports virtual submissions natively.</p><p class="format-detail">Minimal venue cost. Requires reliable student internet access.</p></div>
+            <div class="format-card">
+              <h4>School Fair Only</h4>
+              <p>Internal competition with no advancement to district. Good for first-year programs or schools with limited capacity. Students compete for school-level recognition.</p>
+              <p class="format-detail">Typical size: 20-150 projects. Cost: $300-$1,500.</p>
+            </div>
+            <div class="format-card">
+              <h4>District / Affiliate Fair</h4>
+              <p>Winners advance from your school to the district science day. Opens the ISEF pathway for your students. Requires state affiliate registration and ProjectBoard.</p>
+              <p class="format-detail">Typical size: 30-200 projects. Cost: $500-$3,000.</p>
+            </div>
+            <div class="format-card">
+              <h4>Multi-School / District</h4>
+              <p>Collaborative fair across multiple schools in a district. Shared costs and judges, higher visibility. Ideal for rural areas where individual schools are small.</p>
+              <p class="format-detail">Requires district coordinator. Contact FairGame for setup support.</p>
+            </div>
+            <div class="format-card">
+              <h4>Virtual / Hybrid</h4>
+              <p>Students submit research digitally, judges evaluate remotely or in person. Reduces venue and logistics overhead. ProjectBoard supports virtual submissions natively.</p>
+              <p class="format-detail">Minimal venue cost. Requires reliable student internet access.</p>
+            </div>
           </div>
         </div>
 
-        <div class="guide-section reveal" id="oas">
-          <h2>OAS partnership</h2>
-          <p>The Ohio Academy of Science (OAS) is the official governing body for science fairs in Ohio and the pathway to ISEF. Registering your fair with OAS is required to advance students to district and state competitions.</p>
-          <h3>What OAS membership gives you</h3>
+        <div class="sg-section" id="pathway">
+          <h2>Registration &amp; competition pathway</h2>
+          <p>To advance students beyond your school - to district, state, and ultimately ISEF - you'll need to register your fair with your state's affiliated science fair organization. This connects your fair to the official competition ladder and gives you access to judging platforms and materials.</p>
+          <h3>What affiliate registration gives you</h3>
           <ul>
-            <li>Access to ProjectBoard — the online project registration and judging platform</li>
-            <li>Your district Science Day invite — the step between school and state</li>
+            <li>Access to ProjectBoard - the online project registration and judging platform used at most affiliated fairs</li>
+            <li>Your district Science Day invite - the step between school and state</li>
             <li>Official judging materials and scoring rubrics</li>
-            <li>Path to OAS State Science Day, and ultimately to Regeneron ISEF</li>
+            <li>Path to State Science Day, and ultimately to Regeneron ISEF</li>
             <li>Training webinars for teachers and judges</li>
           </ul>
-          <h3>How to register</h3>
-          <p>Visit <a href="https://www.ohiosci.org" style="color:var(--green-600);">ohiosci.org</a> and click "Affiliate Fair Registration." FairGame can walk you through this step — contact us or access the Teacher Portal walkthrough guide.</p>
+          <h3>How to find your state affiliate</h3>
+          <p>Visit the <a href="/stateresources.html" style="color:var(--green-600);">State Resources page</a> to find your state's official science fair organization and registration link. FairGame can walk you through the process - contact us or access the Teacher Portal walkthrough guide.</p>
+          <div class="pull-quote">Ohio teachers: visit <a href="https://www.ohiosci.org" style="color:var(--green-700);">ohiosci.org</a> to register with the Ohio Academy of Science. Access the Teacher Portal for a step-by-step walkthrough.</div>
         </div>
 
-        <div class="guide-section reveal" id="judges">
+        <div class="sg-section" id="judges">
           <h2>Recruiting judges</h2>
-          <p>A good rule of thumb is one judge per 5&ndash;8 student projects. For a 50-project fair, you need 7&ndash;10 judges. Quality matters more than quantity.</p>
+          <p>A good rule of thumb is one judge per 5-8 student projects. For a 50-project fair, you need 7-10 judges. Quality matters more than quantity.</p>
           <h3>Where to find judges</h3>
           <ul>
             <li>Local colleges and universities (contact department chairs directly)</li>
-            <li>Industry professionals from regional companies — use our corporate volunteer program</li>
+            <li>Industry professionals from regional companies - use our corporate volunteer program</li>
             <li>Professional engineering and science organizations (IEEE, AIChE, ASCE chapters)</li>
             <li>Parent volunteers with STEM backgrounds (underutilized and very willing)</li>
             <li>Retired scientists and engineers in your community</li>
-            <li>FairGame's own judge network — submit a request and we'll match you</li>
+            <li>FairGame's own judge network - submit a request and we'll match you</li>
           </ul>
           <div class="pull-quote">Access the judge recruitment email template in the Teacher Portal. It's a two-paragraph cold email that gets a much higher response rate than generic ask letters.</div>
         </div>
 
-        <div class="guide-section reveal" id="funding">
+        <div class="sg-section" id="funding">
           <h2>Finding funding</h2>
           <p>Most school science fairs can be fully funded through a combination of school budget allocation, local business sponsorship, and small grants. You do not need a large grant to get started.</p>
           <h3>Estimated costs</h3>
           <ul>
-            <li>Trophies and ribbons: $100&ndash;$400</li>
-            <li>Printed materials and signage: $50&ndash;$200</li>
-            <li>Display board supplies (if not student-provided): $100&ndash;$300</li>
-            <li>Refreshments: $0&ndash;$200 (often donated)</li>
-            <li>OAS registration fee: varies by district</li>
-            <li><strong>Total typical range: $300&ndash;$2,000</strong></li>
+            <li>Trophies and ribbons: $100-$400</li>
+            <li>Printed materials and signage: $50-$200</li>
+            <li>Display board supplies (if not student-provided): $100-$300</li>
+            <li>Refreshments: $0-$200 (often donated)</li>
+            <li>State affiliate registration fee: varies by state</li>
+            <li><strong>Total typical range: $300-$2,000</strong></li>
           </ul>
           <h3>Funding sources</h3>
           <ul>
-            <li>School budget line item (ask for $500&ndash;$1,000 as a new program)</li>
+            <li>School budget line item (ask for $500-$1,000 as a new program)</li>
             <li>PTO/PTA sponsorship</li>
-            <li>Local business sponsorships — use the sponsorship letter template from the Teacher Portal</li>
-            <li>Community foundations (Toledo, Columbus, Cleveland, Akron, Dayton — all have small STEM grants)</li>
+            <li>Local business sponsorships - use the sponsorship letter template from the Teacher Portal</li>
+            <li>Community foundations - most regions have small STEM education grants available</li>
             <li>State Farm Youth Advisory Board Grants (small, quick turnaround)</li>
-            <li>Amazon Future Engineer &mdash; supports STEM education programs</li>
+            <li>Amazon Future Engineer - supports STEM education programs</li>
           </ul>
         </div>
 
-        <div class="guide-section reveal" id="logistics">
+        <div class="sg-section" id="logistics">
           <h2>Logistics &amp; venue</h2>
-          <p>A school gym or cafeteria works perfectly. You need table space for project displays (typically 30&rdquo;&times;48&rdquo; per project), a check-in area, a judges' workroom or corner, and a separate awards area.</p>
+          <p>A school gym or cafeteria works perfectly. You need table space for project displays (typically 30"x48" per project), a check-in area, a judges' workroom or corner, and a separate awards area.</p>
           <h3>Day-of checklist (key items)</h3>
           <ul>
             <li>Tables arranged and numbered before students arrive</li>
@@ -175,43 +449,61 @@
             <li>Judge packets ready (scoring rubrics, project list by category)</li>
             <li>Designated quiet room or corner for judges to deliberate</li>
             <li>Separate area for special awards judges if applicable</li>
-            <li>Photography plan — document the event for social media and the annual report</li>
-            <li>Emergency contact list (FairGame point of contact, OAS contact)</li>
+            <li>Photography plan - document the event for social media and the annual report</li>
+            <li>Emergency contact list (FairGame point of contact, state affiliate contact)</li>
           </ul>
-          <p>Download the complete day-of checklist from the Teacher Portal — it includes a setup hour timeline from arrival through awards ceremony.</p>
+          <p>Download the complete day-of checklist from the Teacher Portal - it includes a setup hour timeline from arrival through awards ceremony.</p>
         </div>
 
-        <div class="guide-section reveal" id="downloads">
+        <div class="sg-section" id="downloads">
           <h2>Downloads &amp; templates</h2>
           <p>Most templates below are available via the Teacher Portal. Public resources are available immediately.</p>
           <div class="dl-grid">
-            <div class="dl-item"><div><div class="dl-item-name">Administrator Proposal Template</div><div class="dl-item-desc">One-page pitch for your principal or board</div></div><button class="dl-btn locked">Download</button></div>
-            <div class="dl-item"><div><div class="dl-item-name">12-Month Planning Timeline</div><div class="dl-item-desc">Printable month-by-month checklist</div></div><button class="dl-btn locked">Download</button></div>
-            <div class="dl-item"><div><div class="dl-item-name">Judge Recruitment Email Template</div><div class="dl-item-desc">Tested cold email for recruiting judges</div></div><button class="dl-btn locked">Download</button></div>
-            <div class="dl-item"><div><div class="dl-item-name">Sponsorship Request Letter</div><div class="dl-item-desc">Template for local business outreach</div></div><button class="dl-btn locked">Download</button></div>
-            <div class="dl-item"><div><div class="dl-item-name">Day-of-Event Checklist</div><div class="dl-item-desc">Setup through awards ceremony</div></div><button class="dl-btn locked">Download</button></div>
-            <div class="dl-item"><div><div class="dl-item-name">Post-Event Survey Template</div><div class="dl-item-desc">Collect feedback from students and judges</div></div><button class="dl-btn locked">Download</button></div>
-            <div class="dl-item"><div><div class="dl-item-name">Judging Score Cards</div><div class="dl-item-desc">Official FairGame score cards (vertical &amp; horizontal)</div></div><a href="/Documents/2026-Judging-Score-Cards-Vertical-layout.pdf" class="dl-btn" target="_blank">Download</a></div>
-            <div class="dl-item"><div><div class="dl-item-name">Budget Template</div><div class="dl-item-desc">Full cost breakdown spreadsheet</div></div><button class="dl-btn locked">Download</button></div>
+            <div class="dl-item"><div><div class="dl-item-name">Administrator Proposal Template</div><div class="dl-item-desc">One-page pitch for your principal or board</div></div><button class="dl-btn locked">Portal Login</button></div>
+            <div class="dl-item"><div><div class="dl-item-name">12-Month Planning Timeline</div><div class="dl-item-desc">Printable month-by-month checklist</div></div><button class="dl-btn locked">Portal Login</button></div>
+            <div class="dl-item"><div><div class="dl-item-name">Judge Recruitment Email Template</div><div class="dl-item-desc">Tested cold email for recruiting judges</div></div><button class="dl-btn locked">Portal Login</button></div>
+            <div class="dl-item"><div><div class="dl-item-name">Sponsorship Request Letter</div><div class="dl-item-desc">Template for local business outreach</div></div><button class="dl-btn locked">Portal Login</button></div>
+            <div class="dl-item"><div><div class="dl-item-name">Day-of-Event Checklist</div><div class="dl-item-desc">Setup through awards ceremony</div></div><button class="dl-btn locked">Portal Login</button></div>
+            <div class="dl-item"><div><div class="dl-item-name">Post-Event Survey Template</div><div class="dl-item-desc">Collect feedback from students and judges</div></div><button class="dl-btn locked">Portal Login</button></div>
+            <div class="dl-item"><div><div class="dl-item-name">Judging Score Cards</div><div class="dl-item-desc">Official FairGame score cards (vertical layout)</div></div><a href="/Documents/2026-Judging-Score-Cards-Vertical-layout.pdf" class="dl-btn" target="_blank">Download</a></div>
+            <div class="dl-item"><div><div class="dl-item-name">Budget Template</div><div class="dl-item-desc">Full cost breakdown spreadsheet</div></div><button class="dl-btn locked">Portal Login</button></div>
           </div>
-          <p style="margin-top:16px;font-size:0.82rem;color:var(--gray-500);">Locked items require a <a href="/#portal" style="color:var(--green-600);">free Teacher Portal account</a>. Request access and receive your login within 24 hours.</p>
+          <p style="margin-top:16px;font-size:0.82rem;color:var(--gray-500);">Locked items require a <a href="/login.html" style="color:var(--green-600);">free Teacher Portal account</a>. Request access and receive your login within 24 hours.</p>
         </div>
 
-        <div class="guide-section reveal" id="faq">
+        <div class="sg-section" id="faq">
           <h2>Frequently asked questions</h2>
           <div class="faq">
-            <div class="faq-item"><div class="faq-q">How much does a school science fair actually cost?</div><div class="faq-a">Most first-year school fairs run $300&ndash;$1,500. Trophies, signage, and printed materials are the main costs. Refreshments are often donated by PTO or local businesses. FairGame can connect you with local sponsors to offset costs.</div></div>
-            <div class="faq-item"><div class="faq-q">How much time does it take for the coordinating teacher?</div><div class="faq-a">Roughly 5&ndash;8 hours per month for the fair coordinator during the active phase (months 7&ndash;11), and about 15&ndash;20 hours the month of the event. With a committee, this spreads across 3&ndash;5 people. FairGame's support reduces your load significantly — we handle judge coordination, OAS paperwork support, and student resource questions.</div></div>
-            <div class="faq-item"><div class="faq-q">What if we don't have any STEM teachers?</div><div class="faq-a">Science fairs can be organized by any motivated teacher with support from FairGame. We provide all the content knowledge through our resources — you provide the organizational energy. Many successful fairs are coordinated by non-STEM teachers.</div></div>
-            <div class="faq-item"><div class="faq-q">Can we do a virtual science fair?</div><div class="faq-a">Yes. ProjectBoard, our partner platform, fully supports virtual judging and project submission. We can help you set up a fully virtual fair if in-person logistics are a barrier. Virtual fairs are especially effective for rural schools where getting judges in-person is difficult.</div></div>
-            <div class="faq-item"><div class="faq-q">Do students need to advance to district to make the fair worthwhile?</div><div class="faq-a">Not at all. A school-only fair delivers enormous value — students develop research skills, practice public presentation, and build confidence. Many teachers run internal fairs for years before registering with OAS. Start where you can and expand from there.</div></div>
-            <div class="faq-item"><div class="faq-q">How do I handle safety concerns with student projects?</div><div class="faq-a">OAS has a clear set of safety guidelines, including rules for hazardous materials, animals, human subjects, and controlled substances. ProjectBoard enforces these during the registration process. We'll provide you with the current OAS safety documentation when you register.</div></div>
+            <div class="faq-item">
+              <div class="faq-q" onclick="toggleFaq(this)">How much does a school science fair actually cost?</div>
+              <div class="faq-a">Most first-year school fairs run $300-$1,500. Trophies, signage, and printed materials are the main costs. Refreshments are often donated by PTO or local businesses. FairGame can connect you with local sponsors to offset costs.</div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-q" onclick="toggleFaq(this)">How much time does it take for the coordinating teacher?</div>
+              <div class="faq-a">Roughly 5-8 hours per month for the fair coordinator during the active phase (months 7-11), and about 15-20 hours the month of the event. With a committee, this spreads across 3-5 people. FairGame's support reduces your load significantly.</div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-q" onclick="toggleFaq(this)">What if we don't have any STEM teachers?</div>
+              <div class="faq-a">Science fairs can be organized by any motivated teacher with support from FairGame. We provide all the content knowledge through our resources - you provide the organizational energy. Many successful fairs are coordinated by non-STEM teachers.</div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-q" onclick="toggleFaq(this)">Can we do a virtual science fair?</div>
+              <div class="faq-a">Yes. ProjectBoard fully supports virtual judging and project submission. We can help you set up a fully virtual fair if in-person logistics are a barrier. Virtual fairs are especially effective for rural schools where getting judges in-person is difficult.</div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-q" onclick="toggleFaq(this)">Do students need to advance to district to make the fair worthwhile?</div>
+              <div class="faq-a">Not at all. A school-only fair delivers enormous value - students develop research skills, practice public presentation, and build confidence. Many teachers run internal fairs for years before registering with their state affiliate. Start where you can and expand from there.</div>
+            </div>
+            <div class="faq-item">
+              <div class="faq-q" onclick="toggleFaq(this)">How do I handle safety concerns with student projects?</div>
+              <div class="faq-a">Your state affiliate fair has clear safety guidelines, including rules for hazardous materials, animals, human subjects, and controlled substances. ProjectBoard enforces these during the registration process. We'll provide you with the current safety documentation when you register.</div>
+            </div>
           </div>
         </div>
 
-        <div class="reveal" style="background:var(--green-900);padding:40px;margin-top:40px;">
-          <h3 style="color:var(--white);margin-bottom:10px;">Need help getting started?</h3>
-          <p style="color:rgba(255,255,255,0.6);margin-bottom:20px;font-size:0.94rem;">Schedule a free 30-minute consultation with the FairGame team. We'll walk through your school's situation and give you a specific action plan.</p>
+        <div class="sg-cta-box">
+          <h3>Need help getting started?</h3>
+          <p>Schedule a free 30-minute consultation with the FairGame team. We'll walk through your school's situation and give you a specific action plan.</p>
           <a href="mailto:fairgameinitiative@outlook.com" class="btn btn-white">Schedule a Consultation &rarr;</a>
         </div>
 
@@ -252,7 +544,7 @@
         <ul>
           <li><a href="/volunteer.html">Volunteer / Judge</a></li>
           <li><a href="/donate.html">Donate</a></li>
-          <li><a href="#portal">Ambassador Portal</a></li>
+          <li><a href="/login.html">Ambassador Portal</a></li>
           <li><a href="mailto:fairgameinitiative@outlook.com">Partner With Us</a></li>
         </ul>
       </div>
@@ -267,11 +559,34 @@
     </div>
     <div class="footer-bottom">
       <p>© 2026 FairGame Initiative · All rights reserved.</p>
-      <div><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></div>
+      <div><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a></div>
     </div>
   </div>
 </footer>
 
-<script src="/script.js"></script>
-
+<script>
+function toggleFaq(el) {
+  const item = el.closest('.faq-item');
+  item.classList.toggle('open');
+}
+
+// Highlight active TOC link on scroll
+(function() {
+  const links = document.querySelectorAll('.sg-sidebar a');
+  const sections = Array.from(links).map(l => document.querySelector(l.getAttribute('href'))).filter(Boolean);
+  function onScroll() {
+    const top = window.scrollY + 100;
+    let active = sections[0];
+    sections.forEach(s => { if (s.offsetTop <= top) active = s; });
+    links.forEach(l => l.classList.remove('active'));
+    const al = document.querySelector('.sg-sidebar a[href="#' + active.id + '"]');
+    if (al) al.classList.add('active');
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/script.js"></script>
+</body>
 </html>

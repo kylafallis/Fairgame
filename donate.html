@@ -2,23 +2,48 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Donate — FairGame Initiative</title>
+  <title>Donate - FairGame Initiative</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/style.css" />
 </head>
 <body>
-<nav>
+<nav class="scrolled">
   <div class="nav-inner">
-    <a href="/" class="nav-logo"><img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'" />FairGame</a>
-    <button class="nav-hamburger">☰</button>
+    <a href="/" class="nav-logo">
+      <img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'" />
+      FairGame
+    </a>
+    <div class="nav-spacer"></div>
+    <button class="nav-hamburger" aria-label="Menu">&#9776;</button>
     <ul class="nav-links">
-      <li class="dropdown"><a href="#">Resources ▾</a><div class="dropdown-menu"><a href="/starthere.html">Start Here</a><a href="/setupguide.html">Setup Guide</a><a href="/stateresources.html">State Resources</a><a href="/researchguide.html">Research Guide</a><a href="/teachers-professionals.html">For Teachers</a></div></li>
-      <li class="dropdown"><a href="#">Get Involved ▾</a><div class="dropdown-menu"><a href="/volunteer.html">Volunteer / Judge</a><a href="/donate.html">Donate</a><a href="/#portal">Ambassador Portal</a><a href="/#portal">Teacher Portal</a></div></li>
+      <li class="dropdown"><a href="#">Resources</a>
+        <div class="dropdown-menu">
+          <a href="/starthere.html">Start Here</a>
+          <a href="/setupguide.html">Setup Guide</a>
+          <a href="/stateresources.html">State Resources</a>
+          <a href="/researchguide.html">Research Guide</a>
+          <a href="/teachers-professionals.html">For Teachers</a>
+        </div>
+      </li>
+      <li class="dropdown"><a href="#">Get Involved</a>
+        <div class="dropdown-menu">
+          <a href="/volunteer.html">Volunteer / Judge</a>
+          <a href="/donate.html">Donate</a>
+          <a href="/login.html">Ambassador Portal</a>
+          <a href="/login.html">Teacher Portal</a>
+        </div>
+      </li>
       <li><a href="/successstories.html">Stories</a></li>
       <li><a href="/donate.html">Donate</a></li>
       <li><a href="/starthere.html" class="nav-cta">Get Started</a></li>
     </ul>
+    <a href="/login.html" class="nav-user-icon" id="navUserBtn" title="Sign in">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+    </a>
   </div>
 </nav>
 
@@ -27,7 +52,7 @@
     <div class="breadcrumb"><a href="/">Home</a><span>/</span>Donate</div>
     <span class="overline">Support Our Work</span>
     <h1>Fund a science fair program.</h1>
-    <p>Every dollar goes directly toward getting a school's science fair off the ground. FairGame is a 501(c)(3) nonprofit &mdash; all donations are tax-deductible.</p>
+    <p>Every dollar goes directly toward getting a school's science fair off the ground. FairGame is a 501(c)(3) nonprofit - all donations are tax-deductible.</p>
   </div>
 </div>
 
@@ -46,7 +71,7 @@
             <div class="amount-card"><div class="amount-num">$1,000</div><div class="amount-desc">Sponsors one complete school fair from planning to awards day</div></div>
             <div class="amount-card"><div class="amount-num">$5,000</div><div class="amount-desc">Funds an entire school's program for a full academic year</div></div>
           </div>
-          <p style="color:var(--gray-500);font-size:0.9rem;line-height:1.7;">FairGame operates with minimal overhead — we are a volunteer-led organization and we keep administrative costs below 10% of all donations. The majority of every dollar reaches students and schools directly.</p>
+          <p style="color:var(--gray-500);font-size:0.9rem;line-height:1.7;">FairGame operates with minimal overhead - we are a volunteer-led organization and we keep administrative costs below 10% of all donations. The majority of every dollar reaches students and schools directly.</p>
         </div>
 
         <div class="reveal" style="margin-top:48px;">
