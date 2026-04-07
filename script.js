@@ -237,12 +237,12 @@ const QD = {
       { l: 'Help choosing a project topic',           k: 'topic'      },
       { l: 'Designing my experiment',                 k: 'experiment' },
       { l: 'Building my display board',               k: 'display'    },
-      { l: 'Competition info — ISEF, state, local',   k: 'compete'    },
+      { l: 'Competition info: ISEF, state, local',   k: 'compete'    },
       { l: 'A mentor to guide me',                    k: 'mentor'     },
     ],
     results: {
       topic: {
-        role: 'Student — Project Planning',
+        role: 'Student: Project Planning',
         title: "Let's find your project idea",
         links: [
           { t: 'Research Guide: Choosing a Topic',  d: 'Step-by-step topic selection framework',      h: '/researchguide.html'          },
@@ -255,7 +255,7 @@ const QD = {
         ]
       },
       experiment: {
-        role: 'Student — Experimental Design',
+        role: 'Student: Experimental Design',
         title: 'Build a solid experiment',
         links: [
           { t: 'Experimental Design Guide',    d: 'Hypothesis, variables, controls explained',   h: '/researchguide.html#design' },
@@ -264,7 +264,7 @@ const QD = {
         cta: [{ t: 'Open Research Guide →', h: '/researchguide.html' }]
       },
       display: {
-        role: 'Student — Presentation',
+        role: 'Student: Presentation',
         title: 'Create a winning display',
         links: [
           { t: 'Display Board Template', d: 'Downloadable layout with all required sections', h: '/researchguide.html#display'  },
@@ -273,7 +273,7 @@ const QD = {
         cta: [{ t: 'Get Display Templates →', h: '/researchguide.html' }]
       },
       compete: {
-        role: 'Student — Competitions',
+        role: 'Student: Competitions',
         title: 'Navigate the competition path',
         links: [
           { t: 'Ohio Competition Pathway', d: 'School → District → State → ISEF',         h: '/stateresources.html'          },
@@ -286,7 +286,7 @@ const QD = {
         ]
       },
       mentor: {
-        role: 'Student — Mentorship',
+        role: 'Student: Mentorship',
         title: 'Get matched with a mentor',
         links: [
           { t: 'Ambassador Matching',       d: 'Apply for a personal student ambassador',    h: '#portal'          },
@@ -302,13 +302,12 @@ const QD = {
     opts: [
       { l: 'Starting a science fair from scratch', k: 'setup'      },
       { l: 'Improving an existing fair',           k: 'improve'    },
-      { l: 'Looking for curriculum materials',     k: 'curriculum' },
       { l: 'Recruiting judges',                    k: 'judges'     },
       { l: 'Finding funding & grants',             k: 'funding'    },
     ],
     results: {
       setup: {
-        role: 'Teacher — Fair Setup',
+        role: 'Teacher: Fair Setup',
         title: "Start your school's science fair",
         links: [
           { t: 'Complete Science Fair Setup Guide',   d: 'Month-by-month planning timeline',        h: '/setupguide.html'       },
@@ -321,26 +320,16 @@ const QD = {
         ]
       },
       improve: {
-        role: 'Teacher — Fair Improvement',
+        role: 'Teacher: Fair Improvement',
         title: 'Level up your fair',
         links: [
           { t: 'Best Practices from Top Schools', d: 'What high-participation fairs do differently', h: '/setupguide.html'      },
-          { t: 'OAS Partnership Guide',           d: 'Connect to district & state competitions',    h: '/setupguide.html#oas'  },
+          { t: 'Affiliate Registration Guide',      d: 'Connect to district & state competitions',    h: '/stateresources.html'  },
         ],
         cta: [{ t: 'Teacher Resources →', h: '/teachers-professionals.html' }]
       },
-      curriculum: {
-        role: 'Teacher — Curriculum',
-        title: 'Classroom resources for you',
-        links: [
-          { t: 'Lesson Plan Templates',  d: 'Grades 6–12, Ohio Standards-aligned',              h: '/#portal' },
-          { t: 'Student Worksheets',     d: 'Printable handouts for every project phase',       h: '/#portal' },
-          { t: 'Assessment Rubrics',     d: 'Proposal, progress, final, and presentation',      h: '/#portal' },
-        ],
-        cta: [{ t: 'Access Teacher Portal →', h: '/#portal' }]
-      },
       judges: {
-        role: 'Teacher — Judge Recruitment',
+        role: 'Teacher: Judge Recruitment',
         title: 'Build your judge roster',
         links: [
           { t: 'Judge Recruitment Email Template', d: 'Tested cold email that gets responses',    h: '/#portal'                      },
@@ -353,7 +342,7 @@ const QD = {
         ]
       },
       funding: {
-        role: 'Teacher — Funding',
+        role: 'Teacher: Funding',
         title: 'Find money for your fair',
         links: [
           { t: 'Ohio Science Fair Grant List',    d: 'Ohio-specific & national opportunities',          h: '/setupguide.html#funding' },
@@ -375,7 +364,7 @@ const QD = {
     ],
     results: {
       cost: {
-        role: 'Administrator — Budget',
+        role: 'Administrator: Budget',
         title: 'The numbers behind science fairs',
         links: [
           { t: 'Science Fair Cost Breakdown', d: 'Real numbers: $300–$5K by scale',       h: '/setupguide.html#cost'    },
@@ -384,16 +373,16 @@ const QD = {
         cta: [{ t: 'Full Setup Guide →', h: '/setupguide.html' }]
       },
       time: {
-        role: 'Administrator — Planning',
+        role: 'Administrator: Planning',
         title: 'Realistic time investment',
         links: [
-          { t: '12-Month Timeline',        d: 'Teacher hours by phase — avg 5 hrs/month',      h: '/setupguide.html'            },
+          { t: '12-Month Timeline',        d: 'Teacher hours by phase (avg 5 hrs/month)',      h: '/setupguide.html'            },
           { t: 'Committee Structure Guide',d: 'Distribute the load across multiple teachers',  h: '/setupguide.html#committee'  },
         ],
         cta: [{ t: 'Contact Us →', h: 'mailto:fairgameinitiative@outlook.com' }]
       },
       impact: {
-        role: 'Administrator — Outcomes',
+        role: 'Administrator: Outcomes',
         title: 'Academic impact evidence',
         links: [
           { t: 'Research on Science Fair Benefits', d: 'College prep, critical thinking, STEM identity', h: '/setupguide.html'          },
@@ -402,11 +391,11 @@ const QD = {
         cta: [{ t: 'Read Success Stories →', h: '/successstories.html' }]
       },
       start: {
-        role: 'Administrator — Getting Started',
+        role: 'Administrator: Getting Started',
         title: 'Pilot program options',
         links: [
           { t: 'One-Grade Pilot Guide',    d: 'Start with 8th grade, expand from there',  h: '/setupguide.html'                          },
-          { t: 'Schedule a Consultation', d: '30-min call with our team — completely free', h: 'mailto:fairgameinitiative@outlook.com' },
+          { t: 'Schedule a Consultation', d: '30-min free call with our team', h: 'mailto:fairgameinitiative@outlook.com' },
         ],
         cta: [{ t: 'Schedule Consultation →', h: 'mailto:fairgameinitiative@outlook.com' }]
       },
@@ -422,7 +411,7 @@ const QD = {
     ],
     results: {
       judge: {
-        role: 'STEM Professional — Judging',
+        role: 'STEM Professional: Judging',
         title: 'Sign up to judge',
         links: [
           { t: 'Judge Application Form', d: 'Register your expertise & availability', h: '/volunteer.html' },
@@ -431,7 +420,7 @@ const QD = {
         cta: [{ t: 'Sign Up to Judge →', h: '/volunteer.html' }]
       },
       mentor: {
-        role: 'STEM Professional — Mentorship',
+        role: 'STEM Professional: Mentorship',
         title: 'Become a student mentor',
         links: [
           { t: 'Mentor Program Overview',   d: 'What the commitment looks like',         h: '/volunteer.html' },
@@ -440,7 +429,7 @@ const QD = {
         cta: [{ t: 'Apply to Mentor →', h: '/volunteer.html' }]
       },
       speak: {
-        role: 'STEM Professional — Outreach',
+        role: 'STEM Professional: Outreach',
         title: 'Share your expertise',
         links: [
           { t: 'Speaking Request Form', d: 'Tell us your topic and availability', h: 'mailto:fairgameinitiative@outlook.com' },
@@ -459,7 +448,7 @@ const QD = {
     ],
     results: {
       sponsor: {
-        role: 'Corporate — Sponsorship',
+        role: 'Corporate: Sponsorship',
         title: 'Sponsor a school program',
         links: [
           { t: 'Sponsorship Tiers Overview', d: 'What your contribution funds',               h: 'mailto:fairgameinitiative@outlook.com' },
@@ -468,7 +457,7 @@ const QD = {
         cta: [{ t: 'Contact Us →', h: 'mailto:fairgameinitiative@outlook.com' }]
       },
       volunteers: {
-        role: 'Corporate — Volunteers',
+        role: 'Corporate: Volunteers',
         title: 'Employee volunteer program',
         links: [
           { t: 'Corporate Judge Program', d: 'Counts toward employee volunteer hours', h: '/volunteer.html' },
@@ -477,7 +466,7 @@ const QD = {
         cta: [{ t: 'Explore Volunteer Program →', h: '/volunteer.html' }]
       },
       partner: {
-        role: 'Corporate — Partnership',
+        role: 'Corporate: Partnership',
         title: 'Formal organizational partnership',
         links: [
           { t: 'Partnership Overview Deck', d: 'Full overview of FairGame and our impact', h: 'mailto:fairgameinitiative@outlook.com' },

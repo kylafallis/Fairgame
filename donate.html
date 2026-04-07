@@ -3,9 +3,168 @@
 <head>
   <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Donate - FairGame Initiative</title>
+  <link rel="icon" href="/Images/logo.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/style.css" />
+  <style>
+    /* ── HERO ────────────────────────────────────────────────── */
+    .don-hero {
+      background: var(--green-900);
+      width: 100%;
+    }
+    .don-hero-split {
+      display: grid;
+      grid-template-columns: 1fr 420px;
+      min-height: 380px;
+    }
+    @media (max-width: 860px) {
+      .don-hero-split { grid-template-columns: 1fr; min-height: auto; }
+      .don-hero-right { display: none; }
+    }
+    .don-hero-left {
+      padding: 72px 56px 56px;
+      display: flex; flex-direction: column; justify-content: flex-end;
+    }
+    @media (max-width: 600px) { .don-hero-left { padding: 48px 24px 40px; } }
+    .don-hero-left .overline { color: rgba(255,255,255,0.5); margin-bottom: 14px; }
+    .don-hero-left h1 {
+      color: var(--white);
+      font-size: clamp(2rem, 4.5vw, 3.2rem);
+      line-height: 1.1; margin: 0 0 18px;
+    }
+    .don-hero-left p {
+      color: rgba(255,255,255,0.65);
+      font-size: 1.05rem; line-height: 1.65;
+      max-width: 500px; margin: 0;
+    }
+    .don-hero-right {
+      border-left: 1px solid rgba(255,255,255,0.08);
+      padding: 56px 44px;
+      display: flex; flex-direction: column; justify-content: center; gap: 0;
+    }
+    .don-hero-fact {
+      padding: 18px 0; border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+    .don-hero-fact:last-child { border-bottom: none; }
+    .don-hero-fact-num {
+      font-family: var(--ff-serif); font-size: 1.8rem; font-weight: 700;
+      color: var(--white); line-height: 1;
+    }
+    .don-hero-fact-label {
+      font-size: 0.8rem; color: rgba(255,255,255,0.45);
+      margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em;
+    }
+
+    /* ── BODY LAYOUT ─────────────────────────────────────────── */
+    .donate-grid {
+      display: grid; grid-template-columns: 1fr 380px;
+      gap: 56px; align-items: start;
+      padding: 64px 0 80px;
+    }
+    @media (max-width: 900px) {
+      .donate-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── IMPACT AMOUNTS ──────────────────────────────────────── */
+    .impact-amounts {
+      display: flex; flex-direction: column; gap: 0;
+      margin: 24px 0 32px;
+      border: 1px solid var(--gray-100); border-radius: 10px; overflow: hidden;
+    }
+    .amount-card {
+      display: flex; align-items: baseline; gap: 20px;
+      padding: 16px 20px; border-bottom: 1px solid var(--gray-100);
+      transition: background 0.15s;
+    }
+    .amount-card:last-child { border-bottom: none; }
+    .amount-card:hover { background: var(--green-50); }
+    .amount-num {
+      font-family: var(--ff-serif); font-size: 1.3rem; font-weight: 700;
+      color: var(--green-700); flex: none; min-width: 72px;
+    }
+    .amount-desc {
+      font-size: 0.88rem; color: var(--gray-600); line-height: 1.55;
+    }
+
+    /* ── PARTNER TIERS ───────────────────────────────────────── */
+    .partner-tiers { margin: 24px 0 16px; }
+    .tier-row {
+      display: flex; align-items: flex-start; gap: 20px;
+      padding: 18px 0; border-bottom: 1px solid var(--gray-100);
+    }
+    .tier-row:last-child { border-bottom: none; }
+    .tier-amt {
+      font-family: var(--ff-serif); font-size: 1rem; font-weight: 700;
+      color: var(--green-700); flex: none; min-width: 72px; padding-top: 2px;
+    }
+    .tier-name { font-size: 0.93rem; font-weight: 700; color: var(--green-900); margin-bottom: 3px; }
+    .tier-desc { font-size: 0.84rem; color: var(--gray-500); line-height: 1.55; }
+
+    /* ── SECTION HEAD ────────────────────────────────────────── */
+    .don-section-head { margin: 48px 0 0; }
+    .don-section-head h2 { margin: 8px 0 0; }
+
+    /* ── DONATE BOX ──────────────────────────────────────────── */
+    .donate-box {
+      background: var(--white);
+      border: 1px solid var(--gray-100);
+      border-radius: 14px; padding: 32px;
+      position: sticky; top: calc(var(--nav-h) + 24px);
+    }
+    .donate-box h3 {
+      font-family: var(--ff-serif); font-size: 1.3rem;
+      color: var(--green-900); margin: 0 0 8px;
+    }
+    .donate-box > p {
+      font-size: 0.88rem; color: var(--gray-500); line-height: 1.6; margin: 0 0 24px;
+    }
+
+    .amount-btns {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 8px; margin-bottom: 16px;
+    }
+    .amt-btn {
+      padding: 10px 6px; border-radius: 7px;
+      font-size: 0.9rem; font-weight: 600;
+      background: var(--gray-50); color: var(--gray-700);
+      border: 1px solid var(--gray-100); cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .amt-btn:hover { background: var(--green-50); border-color: var(--green-300); color: var(--green-800); }
+    .amt-btn.active { background: var(--green-900); border-color: var(--green-900); color: var(--white); }
+
+    .custom-amount {
+      display: flex; align-items: center; gap: 8px;
+      border: 1px solid var(--gray-200); border-radius: 7px;
+      padding: 0 14px; margin-bottom: 16px;
+      background: var(--white);
+      transition: border-color 0.15s;
+    }
+    .custom-amount:focus-within { border-color: var(--green-500); box-shadow: 0 0 0 3px rgba(74,144,74,0.1); }
+    .custom-amount span { font-size: 1rem; color: var(--gray-400); }
+    .custom-amount input {
+      flex: 1; border: none; outline: none; padding: 12px 0;
+      font-size: 1rem; font-family: var(--ff-sans); color: var(--gray-900);
+      background: transparent;
+    }
+
+    .freq-toggle {
+      display: flex; gap: 8px; margin-bottom: 20px;
+    }
+    .freq-btn {
+      flex: 1; padding: 10px; border-radius: 7px; font-size: 0.88rem; font-weight: 600;
+      background: var(--gray-50); color: var(--gray-600);
+      border: 1px solid var(--gray-100); cursor: pointer;
+      transition: background 0.15s, border-color 0.15s, color 0.15s;
+    }
+    .freq-btn.active { background: var(--green-900); border-color: var(--green-900); color: var(--white); }
+
+    .donate-note {
+      font-size: 0.77rem; color: var(--gray-400); line-height: 1.6;
+      margin: 14px 0 0; text-align: center;
+    }
+  </style>
 </head>
 <body>
 <nav class="scrolled">
@@ -47,49 +206,87 @@
   </div>
 </nav>
 
-<div class="page-header">
-  <div class="container">
-    <div class="breadcrumb"><a href="/">Home</a><span>/</span>Donate</div>
-    <span class="overline">Support Our Work</span>
-    <h1>Fund a science fair program.</h1>
-    <p>Every dollar goes directly toward getting a school's science fair off the ground. FairGame is a 501(c)(3) nonprofit - all donations are tax-deductible.</p>
+<!-- HERO -->
+<div class="don-hero">
+  <div class="don-hero-split">
+    <div class="don-hero-left">
+      <span class="overline">Support Our Work</span>
+      <h1>Fund a science<br>fair <em>program.</em></h1>
+      <p>Every dollar goes directly toward getting a school's science fair off the ground. FairGame is a 501(c)(3) nonprofit &mdash; all donations are tax-deductible.</p>
+    </div>
+    <div class="don-hero-right">
+      <div class="don-hero-fact">
+        <div class="don-hero-fact-num">&lt;10%</div>
+        <div class="don-hero-fact-label">Administrative overhead</div>
+      </div>
+      <div class="don-hero-fact">
+        <div class="don-hero-fact-num">$300</div>
+        <div class="don-hero-fact-label">Sponsors a school fair</div>
+      </div>
+      <div class="don-hero-fact">
+        <div class="don-hero-fact-num">$25</div>
+        <div class="don-hero-fact-label">Covers one student's materials</div>
+      </div>
+      <div class="don-hero-fact">
+        <div class="don-hero-fact-num">100%</div>
+        <div class="don-hero-fact-label">Of students served for free</div>
+      </div>
+    </div>
   </div>
 </div>
 
-<section class="section">
+<section>
   <div class="container">
     <div class="donate-grid">
+
+      <!-- Left: impact + tiers -->
       <div>
         <div class="reveal">
           <span class="overline">Your Impact</span>
-          <h2 style="margin-bottom:20px;">What your donation funds</h2>
+          <h2 style="margin:8px 0 0;">What your donation funds</h2>
+
           <div class="impact-amounts">
             <div class="amount-card"><div class="amount-num">$25</div><div class="amount-desc">Covers display board materials for one student who can't afford them</div></div>
-            <div class="amount-card"><div class="amount-num">$100</div><div class="amount-desc">Pays for OAS district registration for a school with limited budget</div></div>
+            <div class="amount-card"><div class="amount-num">$100</div><div class="amount-desc">Pays for district registration for a school with a limited budget</div></div>
             <div class="amount-card"><div class="amount-num">$250</div><div class="amount-desc">Funds a full classroom workshop session for 30 students</div></div>
             <div class="amount-card"><div class="amount-num">$500</div><div class="amount-desc">Covers trophies and recognition materials for a school fair</div></div>
             <div class="amount-card"><div class="amount-num">$1,000</div><div class="amount-desc">Sponsors one complete school fair from planning to awards day</div></div>
             <div class="amount-card"><div class="amount-num">$5,000</div><div class="amount-desc">Funds an entire school's program for a full academic year</div></div>
           </div>
-          <p style="color:var(--gray-500);font-size:0.9rem;line-height:1.7;">FairGame operates with minimal overhead - we are a volunteer-led organization and we keep administrative costs below 10% of all donations. The majority of every dollar reaches students and schools directly.</p>
+
+          <p style="color:var(--gray-500);font-size:0.9rem;line-height:1.7;">FairGame operates with minimal overhead. We are a volunteer-led organization and we keep administrative costs below 10% of all donations. The majority of every dollar reaches students and schools directly.</p>
         </div>
 
-        <div class="reveal" style="margin-top:48px;">
+        <div class="don-section-head reveal">
           <span class="overline">Corporate &amp; Organizational Giving</span>
-          <h2 style="margin-bottom:20px;">Partnership tiers</h2>
+          <h2>Partnership tiers</h2>
           <div class="partner-tiers">
-            <div class="tier-row"><div class="tier-amt">$500</div><div><div class="tier-name">Friend of FairGame</div><div class="tier-desc">Acknowledged on website and in annual report. One student's full display materials funded.</div></div></div>
-            <div class="tier-row"><div class="tier-amt">$1,500</div><div><div class="tier-name">School Sponsor</div><div class="tier-desc">Named sponsor of one school's science fair program. Logo on printed materials. Social media recognition.</div></div></div>
-            <div class="tier-row"><div class="tier-amt">$5,000</div><div><div class="tier-name">Program Partner</div><div class="tier-desc">Funds a full school-year program. Named in all program materials, press releases, and the annual report. Employee volunteer priority access.</div></div></div>
-            <div class="tier-row"><div class="tier-amt">$10,000+</div><div><div class="tier-name">Founding Sponsor</div><div class="tier-desc">Major program funding. Naming rights to a district program. Board engagement opportunity. Full annual impact report.</div></div></div>
+            <div class="tier-row">
+              <div class="tier-amt">$500</div>
+              <div><div class="tier-name">Friend of FairGame</div><div class="tier-desc">Acknowledged on website and in annual report. One student's full display materials funded.</div></div>
+            </div>
+            <div class="tier-row">
+              <div class="tier-amt">$1,500</div>
+              <div><div class="tier-name">School Sponsor</div><div class="tier-desc">Named sponsor of one school's science fair program. Logo on printed materials. Social media recognition.</div></div>
+            </div>
+            <div class="tier-row">
+              <div class="tier-amt">$5,000</div>
+              <div><div class="tier-name">Program Partner</div><div class="tier-desc">Funds a full school-year program. Named in all program materials, press releases, and the annual report. Employee volunteer priority access.</div></div>
+            </div>
+            <div class="tier-row">
+              <div class="tier-amt">$10,000+</div>
+              <div><div class="tier-name">Founding Sponsor</div><div class="tier-desc">Major program funding. Naming rights to a district program. Board engagement opportunity. Full annual impact report.</div></div>
+            </div>
           </div>
-          <p style="margin-top:16px;font-size:0.86rem;color:var(--gray-500);">For corporate or major gifts, please contact us directly: <a href="mailto:fairgameinitiative@outlook.com" style="color:var(--green-600);">fairgameinitiative@outlook.com</a></p>
+          <p style="font-size:0.86rem;color:var(--gray-500);">For corporate or major gifts, contact us directly: <a href="mailto:fairgameinitiative@outlook.com" style="color:var(--green-600);">fairgameinitiative@outlook.com</a></p>
         </div>
       </div>
 
+      <!-- Right: donation widget -->
       <div class="donate-box reveal">
         <h3>Make a Donation</h3>
         <p>Secure online donation via our giving platform. Tax receipt emailed automatically.</p>
+
         <div class="amount-btns">
           <button class="amt-btn" onclick="setAmt(this,'25')">$25</button>
           <button class="amt-btn active" onclick="setAmt(this,'50')">$50</button>
@@ -98,21 +295,78 @@
           <button class="amt-btn" onclick="setAmt(this,'500')">$500</button>
           <button class="amt-btn" onclick="setAmt(this,'other')">Other</button>
         </div>
-        <div class="custom-amount"><span>$</span><input type="number" id="customAmt" value="50" min="1" placeholder="Amount" /></div>
-        <div style="margin-bottom:16px;">
-          <label class="form-label" style="margin-bottom:8px;display:block;">Frequency</label>
-          <div style="display:flex;gap:8px;">
-            <button class="amt-btn active" id="freqOnce" onclick="setFreq('once',this)" style="flex:1;">One-time</button>
-            <button class="amt-btn" id="freqMonthly" onclick="setFreq('monthly',this)" style="flex:1;">Monthly</button>
-          </div>
+
+        <div class="custom-amount">
+          <span>$</span>
+          <input type="number" id="customAmt" value="50" min="1" placeholder="Amount" />
         </div>
+
+        <div class="freq-toggle">
+          <button class="freq-btn active" id="freqOnce"    onclick="setFreq('once',this)">One-time</button>
+          <button class="freq-btn"        id="freqMonthly" onclick="setFreq('monthly',this)">Monthly</button>
+        </div>
+
         <button class="btn btn-primary" style="width:100%;justify-content:center;padding:15px;" onclick="goToDonate()">Donate $<span id="btnAmt">50</span> &rarr;</button>
+
         <p class="donate-note">FairGame Initiative is a 501(c)(3) nonprofit organization. EIN available upon request. All donations are tax-deductible to the extent permitted by law.</p>
       </div>
+
     </div>
   </div>
 </section>
 
+<footer>
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <div class="f-brand-name">FairGame Initiative</div>
+        <p class="f-brand-desc">Bringing competitive STEM opportunities to rural and low-income schools. Advised by Forbes 30 Under 30 founders and nationwide STEM education experts.</p>
+        &nbsp;&middot;&nbsp;
+        <a href="/privacy.html" style="color:rgba(255,255,255,.6);">Privacy Policy</a>
+        &nbsp;&middot;&nbsp;
+        <a href="/terms.html" style="color:rgba(255,255,255,.6);">Terms of Service</a>
+        <div class="f-social">
+          <a href="#" title="Instagram">IG</a>
+          <a href="#" title="Twitter / X">X</a>
+          <a href="#" title="LinkedIn">in</a>
+          <a href="#" title="TikTok">TK</a>
+        </div>
+      </div>
+      <div class="f-col">
+        <h5>Resources</h5>
+        <ul>
+          <li><a href="/starthere.html">Start Here</a></li>
+          <li><a href="/setupguide.html">Setup Guide</a></li>
+          <li><a href="/stateresources.html">State Resources</a></li>
+          <li><a href="/researchguide.html">Research Guide</a></li>
+          <li><a href="/teachers-professionals.html">For Teachers</a></li>
+        </ul>
+      </div>
+      <div class="f-col">
+        <h5>Get Involved</h5>
+        <ul>
+          <li><a href="/volunteer.html">Volunteer / Judge</a></li>
+          <li><a href="/donate.html">Donate</a></li>
+          <li><a href="/login.html">Ambassador Portal</a></li>
+          <li><a href="mailto:fairgameinitiative@outlook.com">Partner With Us</a></li>
+        </ul>
+      </div>
+      <div class="f-col">
+        <h5>Organization</h5>
+        <ul>
+          <li><a href="/successstories.html">Success Stories</a></li>
+          <li><a href="mailto:fairgameinitiative@outlook.com">Contact Us</a></li>
+          <li><a href="https://fairgameinitiative.org">fairgameinitiative.org</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>&copy; 2026 FairGame Initiative &middot; All rights reserved.</p>
+      <div><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a></div>
+    </div>
+  </div>
+</footer>
+
 <script src="/script.js"></script>
-
+</body>
 </html>
