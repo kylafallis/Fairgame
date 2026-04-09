@@ -34,11 +34,19 @@ async function doSignOut() {
 }
 /* ── Auth guard ──────────────────────────────────────────────── */
 function requireAuth(expectedRole, onReady) {
-  if (!sb) {
-    currentUser = { id: 'dev', email: 'dev@fairgame.dev', user_metadata: { role: expectedRole, name: 'Dev User' } };
+  const isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
+  if (!sb || isDemo) {
+    currentUser = { id: 'demo', email: 'demo@fairgame.dev', user_metadata: { role: expectedRole, name: 'Preview Mode' } };
     currentRole = expectedRole;
     document.body.classList.add('ready');
     _populateNav();
+    // Show a banner so it's clear this is a preview
+    if (isDemo) {
+      const banner = document.createElement('div');
+      banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#1a3a1a;color:rgba(255,255,255,0.8);text-align:center;padding:10px 16px;font-size:0.82rem;z-index:9999;border-top:1px solid rgba(255,255,255,0.1);';
+      banner.textContent = 'Preview mode — data shown is sample only. Not connected to live database.';
+      document.body.appendChild(banner);
+    }
     if (typeof onReady === 'function') onReady(currentUser);
     return;
   }
@@ -49,6 +57,12 @@ function requireAuth(expectedRole, onReady) {
     const user = refreshed?.session?.user || session.user;
     const role = user.user_metadata?.role || user.app_metadata?.role || 'ambassador';
     if (role === 'admin' || role === expectedRole) {
+      // Teacher and Ambassador accounts require admin approval before portal access
+      if ((role === 'teacher' || role === 'ambassador') && role !== 'admin') {
+        const { data: req } = await sb.from('portal_requests').select('status').eq('email', user.email).maybeSingle();
+        if (!req || req.status === 'pending') { _showPortalPending(user.email, role); return; }
+        if (req.status === 'rejected')        { _showPortalRejected(user.email);      return; }
+      }
       currentUser = user; currentRole = role;
       document.body.classList.add('ready');
       _populateNav();
@@ -57,6 +71,35 @@ function requireAuth(expectedRole, onReady) {
       window.location.replace(ROLE_ROUTES[role] || '/login.html');
     }
   });
+}
+
+function _showPortalPending(email, role) {
+  document.body.innerHTML = `
+    <div style="font-family:'DM Sans',system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f1faf2;padding:24px;">
+      <div style="max-width:440px;width:100%;background:#fff;padding:36px 40px;border-top:3px solid #357a38;box-shadow:0 4px 20px rgba(0,0,0,.1);">
+        <div style="font-size:1.3rem;font-family:'Playfair Display',serif;font-weight:600;color:#1a1e1a;margin-bottom:8px;">Account Under Review</div>
+        <p style="font-size:.84rem;color:#6b756b;margin-bottom:20px;">Signed in as <strong>${email}</strong></p>
+        <div style="background:#fff8e1;border:1.5px solid #f59e0b;border-radius:4px;padding:14px 16px;font-size:.84rem;color:#78350f;line-height:1.6;margin-bottom:20px;">
+          <strong style="display:block;margin-bottom:4px;">Your ${role} account is pending approval.</strong>
+          We review all ${role} accounts personally. You'll receive an email at <strong>${email}</strong> once approved — typically within 1–3 business days.
+        </div>
+        <button onclick="portalLogout()" style="width:100%;padding:10px;background:none;border:1.5px solid #c8cec8;border-radius:3px;font-size:.82rem;color:#6b756b;cursor:pointer;">Sign out</button>
+      </div>
+    </div>`;
+}
+
+function _showPortalRejected(email) {
+  document.body.innerHTML = `
+    <div style="font-family:'DM Sans',system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f1faf2;padding:24px;">
+      <div style="max-width:440px;width:100%;background:#fff;padding:36px 40px;border-top:3px solid #dc2626;box-shadow:0 4px 20px rgba(0,0,0,.1);">
+        <div style="font-size:1.3rem;font-family:'Playfair Display',serif;font-weight:600;color:#1a1e1a;margin-bottom:8px;">Account Not Approved</div>
+        <p style="font-size:.84rem;color:#6b756b;margin-bottom:20px;">Signed in as <strong>${email}</strong></p>
+        <div style="background:#fef2f2;border:1.5px solid #dc2626;border-radius:4px;padding:14px 16px;font-size:.84rem;color:#7f1d1d;line-height:1.6;margin-bottom:20px;">
+          Your account request was not approved. If you believe this is an error, please <a href="/#contact" style="color:#7f1d1d;">contact us</a>.
+        </div>
+        <button onclick="portalLogout()" style="width:100%;padding:10px;background:none;border:1.5px solid #c8cec8;border-radius:3px;font-size:.82rem;color:#6b756b;cursor:pointer;">Sign out</button>
+      </div>
+    </div>`;
 }
 
 function _populateNav() {

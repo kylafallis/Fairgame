@@ -5,43 +5,86 @@ try { if (SB_URL !== 'YOUR_SUPABASE_URL') sb = window.supabase.createClient(SB_U
 
 const ROUTES = { teacher:'/portal-teacher.html', ambassador:'/portal-ambassador.html', student:'/portal-student.html', judge:'/portal-judge.html', admin:'/portal-admin.html' };
 
+// Roles that require admin approval before portal access
+const APPROVAL_ROLES = ['teacher', 'ambassador'];
+
+// Set to true during signup to prevent the onAuthStateChange listener from auto-redirecting
+let suppressAutoRedirect = false;
+
+/* ── Already signed-in check ──────────────────────────────────── */
 if (sb) sb.auth.getSession().then(async ({ data: { session } }) => {
   if (session?.user) {
-    // Refresh the token so user_metadata reflects any changes made in the dashboard
     const { data: refreshed } = await sb.auth.refreshSession();
     const user = refreshed?.session?.user || session.user;
-    const role = user.user_metadata?.role || user.app_metadata?.role || 'ambassador';
-    const card = document.querySelector('.login-card');
-    card.innerHTML = `
-      <h2>You're signed in</h2>
-      <p class="login-sub" style="margin-bottom:20px;">
-        Signed in as <strong>${user.email}</strong> (${role})
-      </p>
-      <a href="${ROUTES[role] || '/portal-ambassador.html'}"
-         class="btn-main" style="display:block;text-align:center;padding:12px;
-         background:#357a38;color:#fff;font-family:'Playfair Display',serif;
-         font-style:italic;font-size:.96rem;text-decoration:none;">
-        Go to my portal →
-      </a>
-      <div style="margin-top:14px;text-align:center;">
-        <button onclick="doSignOut()" style="background:none;border:none;
-          font-size:.78rem;color:#a0a8a0;cursor:pointer;text-decoration:underline;">
-          Sign out and switch accounts
-        </button>
-      </div>
-    `;
+    await go(user);
   }
 });
 
-if (sb) sb.auth.onAuthStateChange((event, session) => {
-  if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) go(session.user);
+/* ── Auth state listener ──────────────────────────────────────── */
+if (sb) sb.auth.onAuthStateChange(async (event, session) => {
+  if (suppressAutoRedirect) return;
+  if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
+    await go(session.user);
+  }
 });
 
-function go(user) {
-  const role = user.user_metadata?.role || user.app_metadata?.role || 'ambassador';
-  window.location.replace(ROUTES[role] || '/portal-ambassador.html');
+/* ── Route after login ───────────────────────────────────────── */
+async function go(user) {
+  const role = user.user_metadata?.role || user.app_metadata?.role || 'student';
+
+  // Admin always goes straight through
+  if (role === 'admin') {
+    window.location.replace(ROUTES.admin);
+    return;
+  }
+
+  // Teacher / Ambassador: check approval status in portal_requests
+  if (APPROVAL_ROLES.includes(role) && sb) {
+    const { data: req } = await sb.from('portal_requests').select('status').eq('email', user.email).maybeSingle();
+    if (!req || req.status === 'pending') {
+      showPendingScreen(user.email, role);
+      return;
+    }
+    if (req.status === 'rejected') {
+      showRejectedScreen(user.email);
+      return;
+    }
+    // status === 'active' → fall through to redirect
+  }
+
+  window.location.replace(ROUTES[role] || '/portal-student.html');
 }
 
+function showPendingScreen(email, role) {
+  const card = document.querySelector('.login-card');
+  card.innerHTML = `
+    <h2>Account Under Review</h2>
+    <p class="login-sub" style="margin-bottom:18px;">Signed in as <strong>${email}</strong></p>
+    <div style="background:#fff8e1;border:1.5px solid #f59e0b;border-radius:4px;padding:14px 16px;font-size:.84rem;color:#78350f;line-height:1.6;margin-bottom:18px;">
+      <strong style="display:block;margin-bottom:4px;">Your ${role} account is pending approval.</strong>
+      We review all ${role} accounts personally to ensure a safe environment for students. You'll receive an email at <strong>${email}</strong> once your account is approved — typically within 1–3 business days.
+    </div>
+    <button onclick="doSignOut()" style="width:100%;padding:10px;background:none;border:1.5px solid var(--gray-200);border-radius:3px;font-size:.82rem;color:var(--gray-500);cursor:pointer;">
+      Sign out and switch accounts
+    </button>
+  `;
+}
+
+function showRejectedScreen(email) {
+  const card = document.querySelector('.login-card');
+  card.innerHTML = `
+    <h2>Account Not Approved</h2>
+    <p class="login-sub" style="margin-bottom:18px;">Signed in as <strong>${email}</strong></p>
+    <div style="background:#fef2f2;border:1.5px solid #dc2626;border-radius:4px;padding:14px 16px;font-size:.84rem;color:#7f1d1d;line-height:1.6;margin-bottom:18px;">
+      Your account request was not approved at this time. If you believe this is an error or would like to discuss further, please <a href="/#contact" style="color:#7f1d1d;">contact us</a>.
+    </div>
+    <button onclick="doSignOut()" style="width:100%;padding:10px;background:none;border:1.5px solid var(--gray-200);border-radius:3px;font-size:.82rem;color:var(--gray-500);cursor:pointer;">
+      Sign out
+    </button>
+  `;
+}
+
+/* ── Tab switcher ─────────────────────────────────────────────── */
 function switchTab(tab, btn) {
   document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
@@ -49,113 +92,152 @@ function switchTab(tab, btn) {
   document.getElementById('panel-' + tab).classList.add('active');
 }
 
+/* ── Role selection ───────────────────────────────────────────── */
+let selectedRole = null;
+
+function selectRole(role, el) {
+  selectedRole = role;
+  document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+
+  const approvalNotice = document.getElementById('approvalNotice');
+  const judgeRedirect  = document.getElementById('judgeRedirect');
+  const formFields     = document.getElementById('signupFormFields');
+
+  approvalNotice.style.display = APPROVAL_ROLES.includes(role) ? 'block' : 'none';
+  judgeRedirect.style.display  = role === 'judge' ? 'block' : 'none';
+  formFields.style.display     = role === 'judge' ? 'none' : 'block';
+}
+window.selectRole = selectRole;
+
+/* ── Message helpers ──────────────────────────────────────────── */
 function msg(id, text, type) {
   const el = document.getElementById(id);
+  if (!el) return;
   el.textContent = text; el.className = 'msg ' + type;
 }
 
 function setLoading(btnId, loading) {
   const btn = document.getElementById(btnId);
+  if (!btn) return;
   btn.disabled = loading;
   btn.textContent = loading ? 'Please wait…' : (btnId === 'loginBtn' ? 'Sign in →' : 'Create Account →');
 }
 
-// ─── Age checkbox handler ───────────────────────────────────────────────────
-// The checkbox is checked = "I am 13 or older."
-// If user unchecks it, show the parental consent panel.
+/* ── Age checkbox ─────────────────────────────────────────────── */
 function handleAgeCheck(checkbox) {
   const panel = document.getElementById('under13Panel');
   if (!checkbox.checked) {
     panel.style.display = 'block';
   } else {
     panel.style.display = 'none';
-    document.getElementById('guardianEmail').value = '';
+    const ge = document.getElementById('guardianEmail');
+    if (ge) ge.value = '';
   }
 }
 
+/* ── Sign In ──────────────────────────────────────────────────── */
 async function doLogin() {
   const email = document.getElementById('loginEmail').value.trim();
   const pw = document.getElementById('loginPw').value;
   if (!email || !pw) { msg('loginMsg','Please fill in both fields.','err'); return; }
-  if (!sb) { msg('loginMsg','Auth not configured — add your Supabase credentials to login.html','err'); return; }
+  if (!sb) { msg('loginMsg','Auth not configured.','err'); return; }
   setLoading('loginBtn', true);
   const { error } = await sb.auth.signInWithPassword({ email, password: pw });
   setLoading('loginBtn', false);
   if (error) msg('loginMsg', error.message, 'err');
+  // On success, onAuthStateChange fires and calls go()
 }
 
+/* ── Sign Up ──────────────────────────────────────────────────── */
 async function doSignup() {
-  const name = document.getElementById('signupName').value.trim();
-  const email = document.getElementById('signupEmail').value.trim();
-  const pw = document.getElementById('signupPw').value;
-  const ageChecked = document.getElementById('ageCheck').checked;
-  const termsChecked = document.getElementById('termsCheck').checked;
-  const guardianEmail = document.getElementById('guardianEmail').value.trim();
+  if (!selectedRole) { msg('signupMsg','Please select your role above.','err'); return; }
+  if (selectedRole === 'judge') { msg('signupMsg','Please use the volunteer registration form to create a judge account.','err'); return; }
 
-  // Validate basic fields
+  const name         = document.getElementById('signupName').value.trim();
+  const email        = document.getElementById('signupEmail').value.trim();
+  const pw           = document.getElementById('signupPw').value;
+  const ageChecked   = document.getElementById('ageCheck').checked;
+  const termsChecked = document.getElementById('termsCheck').checked;
+  const guardianEmail= document.getElementById('guardianEmail')?.value.trim() || '';
+
   if (!name || !email || !pw) { msg('signupMsg','All fields are required.','err'); return; }
   if (pw.length < 8) { msg('signupMsg','Password must be at least 8 characters.','err'); return; }
+  if (!termsChecked) { msg('signupMsg','You must agree to the Terms of Service and Privacy Policy.','err'); return; }
 
-  // Validate legal consent
-  if (!termsChecked) {
-    msg('signupMsg','You must agree to the Terms of Service and Privacy Policy to create an account.','err');
-    return;
-  }
-
-  // Under-13 flow: if age checkbox is unchecked, require guardian email
   const isUnder13 = !ageChecked;
   if (isUnder13) {
-    if (!guardianEmail) {
-      msg('signupMsg','Please provide a parent or guardian email address. Accounts for users under 13 require parental consent before activation.','err');
-      return;
-    }
-    if (!guardianEmail.includes('@')) {
-      msg('signupMsg','Please provide a valid parent or guardian email address.','err');
-      return;
-    }
+    if (!guardianEmail) { msg('signupMsg','Please provide a parent or guardian email address.','err'); return; }
+    if (!guardianEmail.includes('@')) { msg('signupMsg','Please provide a valid parent or guardian email address.','err'); return; }
   }
 
   if (!sb) { msg('signupMsg','Auth not configured.','err'); return; }
+
+  // Suppress the auto-redirect listener while we handle this manually
+  suppressAutoRedirect = true;
   setLoading('signupBtn', true);
+
+  const needsApproval = APPROVAL_ROLES.includes(selectedRole);
 
   const metadata = {
     name,
-    role: 'ambassador',         // default role; admin upgrades after approval
-    age_confirmed: ageChecked,  // stored for audit trail
+    role: selectedRole,
+    age_confirmed: ageChecked,
     terms_accepted: true,
-    terms_accepted_at: new Date().toISOString()
+    terms_accepted_at: new Date().toISOString(),
+    ...(needsApproval ? { account_status: 'pending_approval' } : {}),
+    ...(isUnder13 ? { guardian_consent_required: true, guardian_email: guardianEmail, account_status: 'pending_parental_consent' } : {})
   };
-  if (isUnder13) {
-    metadata.guardian_consent_required = true;
-    metadata.guardian_email = guardianEmail;
-    metadata.account_status = 'pending_parental_consent';
-  }
 
-  const { error } = await sb.auth.signUp({
+  const { data, error } = await sb.auth.signUp({
     email, password: pw,
     options: { data: metadata }
   });
-  setLoading('signupBtn', false);
 
   if (error) {
+    setLoading('signupBtn', false);
+    suppressAutoRedirect = false;
     msg('signupMsg', error.message, 'err');
+    return;
+  }
+
+  // For teacher/ambassador: insert a portal_requests row so admin can review
+  if (needsApproval && data?.user) {
+    await sb.from('portal_requests').insert([{
+      name,
+      email,
+      school: '',
+      type:   selectedRole,
+      status: 'pending'
+    }]).then(() => {}).catch(() => {}); // non-fatal if insert fails
+  }
+
+  setLoading('signupBtn', false);
+  suppressAutoRedirect = false;
+
+  if (needsApproval) {
+    msg('signupMsg',
+      'Account created! Your request is now under review. We will contact you at ' + email + ' once your account has been approved — typically within 1–3 business days. Please also confirm your email address from the message we just sent.',
+      'ok');
   } else if (isUnder13) {
     msg('signupMsg',
-      'Account created! Because you indicated you are under 13, we have sent a consent request to your parent or guardian at ' + guardianEmail + '. Your account will be activated once they approve. Please also check your own email to confirm your address.',
+      'Account created! A consent request has been sent to your parent or guardian at ' + guardianEmail + '. Please also check ' + email + ' to confirm your email address.',
       'ok');
   } else {
-    msg('signupMsg', 'Account created! Check your email to confirm, then sign in.', 'ok');
+    msg('signupMsg', 'Account created! Check your email to confirm your address, then sign in.', 'ok');
   }
 }
 
+/* ── Google OAuth ─────────────────────────────────────────────── */
 async function doGoogle() {
-  if (!sb) { alert('Google OAuth not configured — add Supabase credentials first.'); return; }
+  if (!sb) { alert('Google OAuth not configured.'); return; }
   await sb.auth.signInWithOAuth({
     provider: 'google',
     options: { redirectTo: window.location.origin + '/login.html' }
   });
 }
 
+/* ── Forgot password ──────────────────────────────────────────── */
 async function showForgot(e) {
   e.preventDefault();
   const email = document.getElementById('loginEmail').value.trim();
@@ -166,6 +248,14 @@ async function showForgot(e) {
   else msg('loginMsg', 'Password reset email sent — check your inbox.', 'ok');
 }
 
+/* ── Sign Out ─────────────────────────────────────────────────── */
+async function doSignOut() {
+  if (sb) await sb.auth.signOut();
+  window.location.reload();
+}
+window.doSignOut = doSignOut;
+
+/* ── Utilities ────────────────────────────────────────────────── */
 function togglePw(inputId, btn) {
   const inp = document.getElementById(inputId);
   const show = inp.type === 'password';

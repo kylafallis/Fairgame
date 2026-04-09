@@ -53,7 +53,7 @@ async function loadAllData() {
       sb.from('mentorships').select('id',{count:'exact',head:true}).eq('status','active'),
       sb.from('resource_downloads').select('id',{count:'exact',head:true}),
       sb.from('email_subscribers').select('id',{count:'exact',head:true}),
-      sb.from('portal_requests').select('id',{count:'exact',head:true}).neq('status','pending'),
+      sb.from('portal_requests').select('id',{count:'exact',head:true}).eq('status','active'),
       sb.from('judge_requests').select('id',{count:'exact',head:true}),
     ]);
     document.getElementById('kSchools').textContent    = schools||0;
@@ -118,9 +118,10 @@ function renderApprovals() {
 }
 
 async function approveUser(id, email, type) {
-  if (!confirm(`Approve ${email} as ${type}?\n\nYou'll still need to send them a portal invite from Supabase → Authentication → Users → Invite User.`)) return;
+  if (!confirm(`Approve ${email} as ${type}? They will be able to sign in to their portal immediately.`)) return;
   if (sb) await sb.from('portal_requests').update({ status:'active' }).eq('id', id);
   await loadApprovals();
+  await loadAllData();
 }
 async function rejectUser(id) {
   if (!confirm('Reject this request?')) return;

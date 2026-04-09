@@ -716,13 +716,13 @@ function getExpertise() {
 }
 
 async function submitJudge() {
-  const name     = document.getElementById('jName')?.value.trim();
-  const email    = document.getElementById('jEmail')?.value.trim();
-  const org      = document.getElementById('jOrg')?.value.trim();
-  const level    = document.getElementById('jLevel')?.value;
-  const notes    = document.getElementById('jNotes')?.value.trim();
+  const name      = document.getElementById('jName')?.value.trim();
+  const email     = document.getElementById('jEmail')?.value.trim();
+  const org       = document.getElementById('jOrg')?.value.trim();
+  const level     = document.getElementById('jLevel')?.value;
+  const notes     = document.getElementById('jNotes')?.value.trim();
   const expertise = getExpertise();
-  const msgEl    = document.getElementById('judgeMsg');
+  const msgEl     = document.getElementById('judgeMsg');
   if (!msgEl) return;
 
   if (!name || !email) {
@@ -731,26 +731,61 @@ async function submitJudge() {
     return;
   }
 
-  msgEl.textContent = 'Submitting...';
+  msgEl.textContent = 'Submitting…';
   msgEl.className   = '';
 
+  // Generate judge code using same logic as portal-shared.js generateJudgeCode
+  const P = { Biology:'BI', Chemistry:'CH', Physics:'PH', Environmental:'EN', Computer:'CS', Medicine:'ME' };
+  const first  = expertise[0] || '';
+  const prefix = Object.entries(P).find(([k]) => first.includes(k))?.[1] || 'GN';
+  const fips   = String(Math.floor(Math.random() * 90) + 10);
+  const rnd    = Math.random().toString(36).slice(2, 4).toUpperCase();
+  const code   = `${prefix}-${fips}-${rnd}`;
+
   if (sb) {
-    const { error } = await sb.from('portal_requests').insert([{
-      name, email,
-      school: org,
-      type:   'judge',
-      data:   { expertise, level, notes }
+    // 1. Store judge record in judges table
+    const { error: judgeErr } = await sb.from('judges').insert([{
+      code,
+      name,
+      email,
+      expertise,
+      city:            org || '',
+      available_level: level || 'Any level',
+      notes:           notes || '',
+      status:          'unverified',
+      created_at:      new Date().toISOString()
     }]);
-    if (error) {
-      msgEl.textContent = 'Error — please email fairgameinitiative@outlook.com';
+
+    if (judgeErr) {
+      console.warn('[submitJudge] judges insert:', judgeErr.message);
+      // Non-fatal — continue to send the magic link
+    }
+
+    // 2. Send a magic link that creates (or signs in) their judge account
+    const { error: otpErr } = await sb.auth.signInWithOtp({
+      email,
+      options: {
+        data: { name, role: 'judge' },
+        emailRedirectTo: window.location.origin + '/portal-judge.html'
+      }
+    });
+
+    if (otpErr) {
+      msgEl.textContent = 'Application saved but email error: ' + otpErr.message + '. Contact fairgameinitiative@outlook.com';
       msgEl.className   = 'msg-err';
+      logEvent('judge_application', { level, expertise, error: otpErr.message });
       return;
     }
   }
 
-  msgEl.textContent = "Application received! We'll be in touch within 48 hours.";
+  // Clear form
+  ['jName','jEmail','jOrg','jNotes'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['je1','je2','je3','je4','je5','je6'].forEach(id => { const el = document.getElementById(id); if (el) el.checked = false; });
+  const lvl = document.getElementById('jLevel'); if (lvl) lvl.value = '';
+
+  msgEl.textContent = "Application received! Check your email for a sign-in link to access your judge portal. Your judge code is: " + code;
   msgEl.className   = 'msg-ok';
-  logEvent('judge_application', { level, expertise });
+  logEvent('judge_application', { level, expertise, code });
 }
 
 async function submitMentor() {

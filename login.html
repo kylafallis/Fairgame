@@ -70,79 +70,111 @@
     <!-- CREATE ACCOUNT panel                      -->
     <!-- ══════════════════════════════════════════ -->
     <div class="auth-panel" id="panel-signup">
-      <div class="form-group">
-        <label class="form-label">Full name</label>
-        <input type="text" id="signupName" placeholder="Your name" autocomplete="name"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Email address</label>
-        <input type="email" id="signupEmail" placeholder="you@school.edu" autocomplete="email"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Password (min 8 characters)</label>
-        <div class="pw-wrap">
-          <input type="password" id="signupPw" placeholder="Create a password" autocomplete="new-password"/>
-          <button class="pw-toggle" onclick="togglePw('signupPw',this)" type="button">Show</button>
+
+      <!-- ─── STEP 1: ROLE SELECTION ─── -->
+      <div class="role-select-group">
+        <div class="role-select-label">I am a…</div>
+        <div class="role-grid">
+          <button type="button" class="role-card" data-role="student" onclick="selectRole('student',this)">
+            <span class="role-card-title">Student</span>
+            <span class="role-card-desc">Science fair participant</span>
+          </button>
+          <button type="button" class="role-card" data-role="ambassador" onclick="selectRole('ambassador',this)">
+            <span class="role-card-title">Student Ambassador</span>
+            <span class="role-card-desc">Lead science fair at your school</span>
+          </button>
+          <button type="button" class="role-card" data-role="teacher" onclick="selectRole('teacher',this)">
+            <span class="role-card-title">Teacher</span>
+            <span class="role-card-desc">Organize a school science fair</span>
+          </button>
+          <button type="button" class="role-card" data-role="judge" onclick="selectRole('judge',this)">
+            <span class="role-card-title">Judge / Mentor</span>
+            <span class="role-card-desc">Review student projects</span>
+          </button>
         </div>
       </div>
 
-      <!-- ─── AGE CONFIRMATION (COPPA) ─── -->
-      <div class="age-confirm" id="ageConfirmBox">
-        <div class="age-confirm-row">
-          <input type="checkbox" id="ageCheck" onchange="handleAgeCheck(this)"/>
-          <label for="ageCheck">
-            I confirm that I am <strong>13 years of age or older</strong>.
-          </label>
+      <!-- Approval warning — shown for teacher / ambassador -->
+      <div class="approval-notice" id="approvalNotice" style="display:none;">
+        <strong>No immediate access — approval required.</strong>
+        Teacher and Student Ambassador accounts are personally reviewed before portal access is granted. After submitting, your account will enter a review queue. We will contact you once approved — typically within 1–3 business days.
+      </div>
+
+      <!-- Judge redirect — shown when judge is selected -->
+      <div class="judge-redirect" id="judgeRedirect" style="display:none;">
+        <p>Judge and mentor accounts are created through our volunteer registration form, not through this page.</p>
+        <a href="/volunteer.html" class="btn-main" style="display:block;text-align:center;margin-top:10px;padding:12px;text-decoration:none;">Go to Volunteer Registration →</a>
+      </div>
+
+      <!-- ─── STEP 2: ACCOUNT DETAILS (hidden until role selected) ─── -->
+      <div id="signupFormFields" style="display:none;">
+
+        <div class="form-group">
+          <label class="form-label">Full name</label>
+          <input type="text" id="signupName" placeholder="Your name" autocomplete="name"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email address</label>
+          <input type="email" id="signupEmail" placeholder="you@school.edu" autocomplete="email"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password (min 8 characters)</label>
+          <div class="pw-wrap">
+            <input type="password" id="signupPw" placeholder="Create a password" autocomplete="new-password"/>
+            <button class="pw-toggle" onclick="togglePw('signupPw',this)" type="button">Show</button>
+          </div>
         </div>
 
-        <!-- Under-13 guardian panel - shown if checkbox is unchecked after interaction -->
-        <div class="under13-panel" id="under13Panel">
-          <p>
-            <strong>Parental consent required.</strong> Because you are under 13, we need a parent or guardian to authorize your account before it is activated. Please enter a parent or guardian's email address below. We will send them a consent request - your account will not be active until they approve.
-          </p>
-          <input type="email" id="guardianEmail" placeholder="Parent / Guardian email address" autocomplete="off"/>
+        <!-- ─── AGE CONFIRMATION (COPPA) ─── -->
+        <div class="age-confirm" id="ageConfirmBox">
+          <div class="age-confirm-row">
+            <input type="checkbox" id="ageCheck" onchange="handleAgeCheck(this)"/>
+            <label for="ageCheck">
+              I confirm that I am <strong>13 years of age or older</strong>.
+            </label>
+          </div>
+          <div class="under13-panel" id="under13Panel">
+            <p>
+              <strong>Parental consent required.</strong> Because you are under 13, we need a parent or guardian to authorize your account. Please enter their email — your account will not be active until they approve.
+            </p>
+            <input type="email" id="guardianEmail" placeholder="Parent / Guardian email address" autocomplete="off"/>
+          </div>
         </div>
-      </div>
-      <!-- ─── END AGE CONFIRMATION ─── -->
 
-      <!-- ─── TERMS ACCEPTANCE ─── -->
-      <div class="age-confirm" style="background:#f8f9fa;border-color:var(--gray-300);">
-        <div class="age-confirm-row">
-          <input type="checkbox" id="termsCheck"/>
-          <label for="termsCheck">
-            I have read and agree to FairGame's
-            <a href="/terms.html" target="_blank">Terms of Service</a> and
-            <a href="/privacy.html" target="_blank">Privacy Policy</a>,
-            including the collection and use of my information as described therein.
-          </label>
+        <!-- ─── TERMS ACCEPTANCE ─── -->
+        <div class="age-confirm" style="background:#f8f9fa;border-color:var(--gray-300);">
+          <div class="age-confirm-row">
+            <input type="checkbox" id="termsCheck"/>
+            <label for="termsCheck">
+              I have read and agree to FairGame's
+              <a href="/terms.html" target="_blank">Terms of Service</a> and
+              <a href="/privacy.html" target="_blank">Privacy Policy</a>.
+            </label>
+          </div>
         </div>
-      </div>
-      <!-- ─── END TERMS ACCEPTANCE ─── -->
 
-      <button class="btn-main" id="signupBtn" onclick="doSignup()">Create Account →</button>
-      <div class="msg" id="signupMsg"></div>
+        <button class="btn-main" id="signupBtn" onclick="doSignup()">Create Account →</button>
+        <div class="msg" id="signupMsg"></div>
 
-      <p style="font-size:.74rem;color:var(--gray-400);margin-top:12px;line-height:1.6;">
-        Accounts are invite-only. If you don't have an approved account,
-        <a href="/#contact" style="color:var(--g600);">reach out to us first →</a>
-      </p>
+        <div class="divider">or</div>
+        <button class="btn-google" onclick="doGoogle()">
+          <svg class="google-icon" viewBox="0 0 24 24">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          Continue with Google
+        </button>
 
-      <div class="divider">or</div>
-      <button class="btn-google" onclick="doGoogle()">
-        <svg class="google-icon" viewBox="0 0 24 24">
-          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
-          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
-        </svg>
-        Continue with Google
-      </button>
+        <!-- Privacy assurance badge -->
+        <div class="legal-badge">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Student data is protected. We never sell or share your information.
+        </div>
 
-      <!-- Privacy assurance badge -->
-      <div class="legal-badge">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        Student data is protected. We never sell or share your information.
-      </div>
+      </div><!-- /#signupFormFields -->
+
     </div>
 
   </div><!-- /.login-card -->
