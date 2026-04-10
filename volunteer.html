@@ -264,6 +264,21 @@
         <div class="form-row"><label class="form-label">Full name *</label><input type="text" id="jName" placeholder="Dr. Jane Smith" /></div>
         <div class="form-row"><label class="form-label">Email address *</label><input type="email" id="jEmail" placeholder="jsmith@company.com" /></div>
         <div class="form-row"><label class="form-label">Organization / Employer</label><input type="text" id="jOrg" placeholder="University or Company" /></div>
+        <div class="form-row"><label class="form-label">City *</label><input type="text" id="jCity" placeholder="Columbus" /></div>
+        <div class="form-row"><label class="form-label">County *</label><input type="text" id="jCounty" placeholder="Franklin County" /></div>
+        <div class="form-row">
+          <label class="form-label">How far are you willing to travel to a fair? *</label>
+          <select id="jTravel" onchange="handleJTravelOther(this)">
+            <option value="">Select...</option>
+            <option value="10">Within 10 miles</option>
+            <option value="20">10–20 miles</option>
+            <option value="30">20–30 miles</option>
+            <option value="40">30–40 miles</option>
+            <option value="statewide">Statewide (anywhere)</option>
+            <option value="other">Other — I'll specify</option>
+          </select>
+          <input type="number" id="jTravelOther" placeholder="Miles (e.g. 50)" min="1" max="500" style="display:none;margin-top:8px;width:100%;padding:9px 12px;border:1.5px solid var(--gray-300);border-radius:3px;font-size:.9rem;"/>
+        </div>
         <div class="form-row">
           <label class="form-label">Area(s) of expertise *</label>
           <div class="checkbox-row"><input type="checkbox" id="je1"><label for="je1">Biology / Life Sciences</label></div>
@@ -277,14 +292,18 @@
           <label class="form-label">Preferred level</label>
           <select id="jLevel"><option value="">Select...</option><option>School fair</option><option>District fair</option><option>State fair</option><option>Any level</option></select>
         </div>
-        <div class="form-row"><label class="form-label">Notes (availability, travel constraints, etc.)</label><textarea id="jNotes" rows="3" placeholder="e.g. Available weekdays only, or can travel within 30 miles"></textarea></div>
+        <div class="form-row"><label class="form-label">Notes (availability, etc.)</label><textarea id="jNotes" rows="2" placeholder="e.g. Available weekdays only"></textarea></div>
         <button class="btn btn-primary" onclick="submitJudge()" style="width:100%;justify-content:center;">Submit Judge Application &rarr;</button>
         <div id="judgeMsg" class="form-msg"></div>
       </div>
 
       <div class="form-box">
         <h3>Mentor Application</h3>
-        <p>Apply to be matched with a student for the current science fair cycle. Mentorship runs from project proposal through competition day.</p>
+        <p>Apply to mentor a student through their science fair project. Mentorship runs from project proposal through competition day.</p>
+        <div style="background:#fff8e1;border:1.5px solid #f59e0b;border-radius:4px;padding:11px 13px;margin-bottom:14px;font-size:0.82rem;color:#78350f;line-height:1.55;">
+          <strong style="display:block;margin-bottom:3px;">Applications are reviewed before matching.</strong>
+          Because students are minors, all mentor applications are personally reviewed by the FairGame team before any student connection is made. If approved, you'll receive an invite link to our moderated Discord community.
+        </div>
         <div class="form-row"><label class="form-label">Full name *</label><input type="text" id="mName" placeholder="Dr. Jane Smith" /></div>
         <div class="form-row"><label class="form-label">Email address *</label><input type="email" id="mEmail" placeholder="jsmith@company.com" /></div>
         <div class="form-row"><label class="form-label">Current role / title</label><input type="text" id="mRole" placeholder="Research Scientist, Environmental Engineer, etc." /></div>
@@ -297,7 +316,7 @@
           <label class="form-label">Format preference</label>
           <select id="mFormat"><option value="">Select...</option><option>Virtual only</option><option>In-person (local)</option><option>Either works</option></select>
         </div>
-        <div class="form-row"><label class="form-label">Brief bio / relevant background</label><textarea id="mBio" rows="4" placeholder="Tell us a bit about your background and why you want to mentor a student..."></textarea></div>
+        <div class="form-row"><label class="form-label">Brief bio / relevant background *</label><textarea id="mBio" rows="4" placeholder="Tell us about your background and why you want to mentor a student. This helps us with our review."></textarea></div>
         <button class="btn btn-primary" onclick="submitMentor()" style="width:100%;justify-content:center;">Submit Mentor Application &rarr;</button>
         <div id="mentorMsg" class="form-msg"></div>
       </div>

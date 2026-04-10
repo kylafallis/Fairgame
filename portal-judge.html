@@ -65,10 +65,10 @@
         <div class="card-header"><h3>Judge Code</h3></div>
         <div class="card-body">
           <div class="judge-code-display" id="profileCode">—</div>
-          <p class="text-sm text-muted mt-4 mb-16">Share this code with teachers. It encodes your expertise, OAS district, and county.</p>
-          <label class="check-item gap-8 mb-16">
-            <input type="checkbox" id="pActive" onchange="updateActiveLabel()" style="width:15px;height:15px;accent-color:var(--g600);flex-shrink:0;"/>
-            <span class="text-sm">Visible on judge map (uncheck to hide yourself temporarily)</span>
+          <p class="text-sm text-muted mt-4 mb-16">Share this code with teachers. It encodes your expertise and region.</p>
+          <label class="check-item gap-8 mb-16" style="cursor:pointer;">
+            <input type="checkbox" id="pActive" onchange="saveVisibility()" style="width:15px;height:15px;accent-color:var(--g600);flex-shrink:0;"/>
+            <span class="text-sm">Visible on judge map — checked means teachers can find and request you</span>
           </label>
         </div>
       </div>
@@ -78,7 +78,19 @@
           <div class="form-grid">
             <div class="form-group"><label class="form-label">Full name</label><input type="text" id="pName" placeholder="Dr. Jane Smith"/></div>
             <div class="form-group"><label class="form-label">Organization</label><input type="text" id="pOrg" placeholder="Ohio State University"/></div>
-            <div class="form-group"><label class="form-label">City / County</label><input type="text" id="pCity" placeholder="Columbus, Franklin County"/></div>
+            <div class="form-group"><label class="form-label">City</label><input type="text" id="pCity" placeholder="Columbus"/></div>
+            <div class="form-group"><label class="form-label">County</label><input type="text" id="pCounty" placeholder="Franklin County"/></div>
+            <div class="form-group"><label class="form-label">Willing to travel</label>
+              <select id="pTravel" onchange="handlePTravelOther(this)">
+                <option value="10">Within 10 miles</option>
+                <option value="20">10–20 miles</option>
+                <option value="30">20–30 miles</option>
+                <option value="40">30–40 miles</option>
+                <option value="statewide">Statewide</option>
+                <option value="other">Other</option>
+              </select>
+              <input type="number" id="pTravelOther" placeholder="Miles" min="1" max="500" style="display:none;margin-top:6px;width:100%;padding:9px;border:1.5px solid var(--gray-200);border-radius:3px;font-size:.85rem;"/>
+            </div>
             <div class="form-group"><label class="form-label">Available for</label>
               <select id="pLevel"><option>School fair</option><option>District fair</option><option>State fair</option><option>Any level</option></select>
             </div>
@@ -95,6 +107,18 @@
             </div>
           </div>
           <div class="msg-strip" id="profileMsg"></div>
+        </div>
+      </div>
+      <div class="card" style="max-width:620px;">
+        <div class="card-header"><h3>Set / Change Password</h3></div>
+        <div class="card-body">
+          <p class="text-sm text-muted mb-16">If you signed in via a magic link, set a password here so you can sign in with email and password in the future.</p>
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label">New password (min 8 characters)</label><input type="password" id="newPw" placeholder="Create a password" autocomplete="new-password"/></div>
+            <div class="form-group"><label class="form-label">Confirm password</label><input type="password" id="newPwConfirm" placeholder="Repeat password" autocomplete="new-password"/></div>
+          </div>
+          <button class="btn-primary" onclick="setPassword()" style="font-size:.78rem;padding:8px 16px;">Set Password</button>
+          <div class="msg-strip" id="pwMsg"></div>
         </div>
       </div>
     </div>

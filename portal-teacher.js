@@ -87,39 +87,99 @@ window.saveFair = saveFair;
 
 async function loadJudgeSection() {
   const grid = document.getElementById('judgeMatchGrid');
-  if (!savedCounty) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><p>Register your fair and enter your county to see nearby judges.</p></div>'; return; }
+  if (!savedCounty) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><p>Register your fair and enter your county to see nearby judges.</p></div>';
+    return;
+  }
   grid.innerHTML = '<div style="grid-column:1/-1;"><div class="spinner-wrap"><div class="spinner"></div></div></div>';
+
+  const schoolCity   = (document.getElementById('fCity')?.value.trim() || '').toLowerCase();
+  const schoolCounty = savedCounty.toLowerCase();
+
   let judges = DEMO_JUDGES;
   if (sb) {
-    const word = savedCounty.split(' ')[0];
-    const { data } = await sb.from('judges').select('*').eq('status','active').ilike('city', `%${word}%`);
-    if (data?.length) judges = data;
+    // Fetch all active judges — we'll filter by travel range client-side
+    const { data } = await sb.from('judges').select('*').eq('status','active');
+    if (data) judges = data;
   }
-  if (!judges.length) { grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><p>No judges in your county yet. Use the custom invitation below.</p></div>'; return; }
+
+  // Filter: judge must be willing to travel to the school's county, OR be statewide
+  judges = judges.filter(j => {
+    if (!j.county && !j.city) return true; // no location data — show anyway
+    const jCounty = (j.county || '').toLowerCase();
+    const jCity   = (j.city   || '').toLowerCase();
+    if (j.travel_miles >= 9999 || j.travel_range === 'statewide') return true; // statewide
+    // Same county is always fine
+    if (schoolCounty && jCounty && jCounty.includes(schoolCounty.split(' ')[0])) return true;
+    if (schoolCounty && jCity.includes(schoolCounty.split(' ')[0]))              return true;
+    // Otherwise require travel_miles to be meaningful (>= 20) as a generous fallback
+    return (j.travel_miles || 10) >= 20;
+  });
+
+  if (!judges.length) {
+    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><p>No judges have specified they can travel to your area yet. Try the custom invitation below to reach out directly.</p></div>';
+    return;
+  }
+
+  const travelLabel = m => {
+    if (!m || m >= 9999) return 'Statewide';
+    if (m <= 10) return 'Within 10 mi';
+    if (m <= 20) return '10–20 mi';
+    if (m <= 30) return '20–30 mi';
+    if (m <= 40) return '30–40 mi';
+    return `Up to ${m} mi`;
+  };
+
   grid.innerHTML = judges.map(j => `
     <div class="card" style="margin:0;">
       <div class="card-body">
         <div class="col-mono mb-4">${j.code || '—'}</div>
         <div class="fw-500" style="font-size:.88rem;color:var(--g900);margin-bottom:2px;">${j.name}</div>
         <div class="text-sm text-muted mb-4">${(j.expertise||[]).join(', ')}</div>
-        <div class="text-xs text-muted mb-16">${j.city || 'Ohio'} · ${j.available_level || 'Any level'}</div>
+        <div class="text-xs text-muted mb-4">${j.city || '—'}</div>
+        <div class="text-xs text-muted mb-16" style="color:var(--g600);">Travels: ${travelLabel(j.travel_miles)} · ${j.available_level || 'Any level'}</div>
         <button class="btn-primary w-full" onclick="requestJudge('${j.id}','${(j.name||'').replace(/'/g,"\\'")}','${j.email||''}')" style="justify-content:center;font-size:.78rem;padding:8px;">Request →</button>
       </div>
     </div>`).join('');
 }
 
 async function requestJudge(judgeId, judgeName, judgeEmail) {
-  const school   = document.getElementById('fSchool').value.trim() || 'our school';
-  const date     = document.getElementById('fDate').value || 'TBD';
-  const teacher  = document.getElementById('fTeacher').value.trim();
-  const tEmail   = document.getElementById('fEmail').value.trim();
-  if (sb) await sb.from('judge_requests').insert([{ judge_id: judgeId, judge_email: judgeEmail, judge_name: judgeName, teacher_name: teacher, teacher_email: tEmail, school, fair_date: date, status: 'pending', fair_id: currentFair?.id || null }]).catch(()=>{});
+  const school  = document.getElementById('fSchool').value.trim() || 'our school';
+  const date    = document.getElementById('fDate').value || 'TBD';
+  const teacher = document.getElementById('fTeacher').value.trim();
+  const tEmail  = document.getElementById('fEmail').value.trim();
+
+  // Save to Supabase
+  if (sb) await sb.from('judge_requests').insert([{
+    judge_id:      judgeId,
+    judge_email:   judgeEmail,
+    judge_name:    judgeName,
+    teacher_name:  teacher,
+    teacher_email: tEmail,
+    school,
+    fair_date:     date,
+    status:        'pending',
+    fair_id:       currentFair?.id || null
+  }]).catch(()=>{});
+
+  // Open pre-filled email to judge
   if (judgeEmail) {
     const sub  = encodeURIComponent(`Science Fair Judge Request — ${school}`);
-    const body = encodeURIComponent(`Hi ${judgeName},\n\nI'm coordinating the science fair at ${school} on ${date} and would love to have you join us as a judge.\n\nPlease reply to confirm your availability.\n\nThank you,\n${teacher}\n${tEmail}`);
+    const body = encodeURIComponent(
+`Hi ${judgeName},
+
+I'm coordinating the science fair at ${school}${date !== 'TBD' ? ' on ' + date : ''} and would love to have you as a judge.
+
+Please sign in to your FairGame judge portal to accept or decline this request, or simply reply to this email.
+
+Thank you,
+${teacher}
+${tEmail}`);
     window.open(`mailto:${judgeEmail}?subject=${sub}&body=${body}`);
   }
+
   portalLog('judge_request', { judgeId, school });
+  showMsg('customInviteMsg', `Request sent to ${judgeName}! They'll receive a notification in their judge portal.`, 'ok');
 }
 window.requestJudge = requestJudge;
 

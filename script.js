@@ -715,18 +715,32 @@ function getExpertise() {
     .map(([, label]) => label);
 }
 
+function handleJTravelOther(sel) {
+  const other = document.getElementById('jTravelOther');
+  if (other) other.style.display = sel.value === 'other' ? 'block' : 'none';
+}
+window.handleJTravelOther = handleJTravelOther;
+
 async function submitJudge() {
   const name      = document.getElementById('jName')?.value.trim();
   const email     = document.getElementById('jEmail')?.value.trim();
   const org       = document.getElementById('jOrg')?.value.trim();
+  const city      = document.getElementById('jCity')?.value.trim();
+  const county    = document.getElementById('jCounty')?.value.trim();
+  const travelSel = document.getElementById('jTravel')?.value;
+  const travelNum = document.getElementById('jTravelOther')?.value;
+  const travel_range = travelSel === 'other' ? (travelNum || 'other') : travelSel;
+  const travel_miles = travelSel === 'statewide' ? 9999
+    : travelSel === 'other' ? (parseInt(travelNum) || 50)
+    : (parseInt(travelSel) || 10);
   const level     = document.getElementById('jLevel')?.value;
   const notes     = document.getElementById('jNotes')?.value.trim();
   const expertise = getExpertise();
   const msgEl     = document.getElementById('judgeMsg');
   if (!msgEl) return;
 
-  if (!name || !email) {
-    msgEl.textContent = 'Please fill out all required fields.';
+  if (!name || !email || !city || !county || !travelSel) {
+    msgEl.textContent = 'Please fill out all required fields (name, email, city, county, and travel range).';
     msgEl.className   = 'msg-err';
     return;
   }
@@ -748,8 +762,12 @@ async function submitJudge() {
       code,
       name,
       email,
+      org:             org || '',
+      city:            city + ', ' + county,
+      county,
+      travel_range,
+      travel_miles,
       expertise,
-      city:            org || '',
       available_level: level || 'Any level',
       notes:           notes || '',
       status:          'unverified',
@@ -779,9 +797,11 @@ async function submitJudge() {
   }
 
   // Clear form
-  ['jName','jEmail','jOrg','jNotes'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['jName','jEmail','jOrg','jCity','jCounty','jNotes','jTravelOther'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   ['je1','je2','je3','je4','je5','je6'].forEach(id => { const el = document.getElementById(id); if (el) el.checked = false; });
   const lvl = document.getElementById('jLevel'); if (lvl) lvl.value = '';
+  const trv = document.getElementById('jTravel'); if (trv) trv.value = '';
+  const trvOther = document.getElementById('jTravelOther'); if (trvOther) trvOther.style.display = 'none';
 
   msgEl.textContent = "Application received! Check your email for a sign-in link to access your judge portal. Your judge code is: " + code;
   msgEl.className   = 'msg-ok';
