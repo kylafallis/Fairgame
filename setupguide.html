@@ -71,8 +71,8 @@
 
     /* ── TOC BAR ─────────────────────────────────────────────── */
     .sg-toc-bar {
-      background: rgba(0,0,0,0.25);
-      border-top: 1px solid rgba(255,255,255,0.08);
+      background: var(--green-900);
+      border-bottom: 1px solid rgba(255,255,255,0.1);
       width: 100%;
       overflow-x: auto;
       scrollbar-width: none;
@@ -413,7 +413,7 @@
       <h1>Complete Science Fair<br><em>Setup Guide</em></h1>
       <p>Everything you need to start a successful science fair at your school — from first proposal through awards day. No prior experience required.</p>
       <div class="sg-hero-btns">
-        <a href="/login.html" class="btn btn-white">Access Templates &rarr;</a>
+        <a href="/templates.html" class="btn btn-white">Access Templates &rarr;</a>
         <a href="mailto:fairgameinitiative@outlook.com" class="btn btn-outline" style="border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.8);">Free Consultation</a>
       </div>
     </div>
@@ -437,22 +437,23 @@
     </div>
   </div>
 
-  <!-- Inline TOC bar, full-bleed -->
-  <nav class="sg-toc-bar" aria-label="Page sections">
-    <div class="sg-toc-inner">
-      <a href="#buyin"     class="sg-toc-link">Getting Buy-In</a>
-      <a href="#committee" class="sg-toc-link">Committee</a>
-      <a href="#timeline"  class="sg-toc-link">12-Month Timeline</a>
-      <a href="#formats"   class="sg-toc-link">Format Options</a>
-      <a href="#pathway"   class="sg-toc-link">Registration &amp; Pathway</a>
-      <a href="#judges"    class="sg-toc-link">Recruiting Judges</a>
-      <a href="#funding"   class="sg-toc-link">Funding</a>
-      <a href="#logistics" class="sg-toc-link">Logistics</a>
-      <a href="#downloads" class="sg-toc-link">Downloads</a>
-      <a href="#faq"       class="sg-toc-link">FAQ</a>
-    </div>
-  </nav>
 </div>
+
+<!-- TOC bar lives OUTSIDE hero so it scrolls away, not over the site nav -->
+<nav class="sg-toc-bar" aria-label="Page sections">
+  <div class="sg-toc-inner">
+    <a href="#buyin"     class="sg-toc-link">Getting Buy-In</a>
+    <a href="#committee" class="sg-toc-link">Committee</a>
+    <a href="#timeline"  class="sg-toc-link">12-Month Timeline</a>
+    <a href="#formats"   class="sg-toc-link">Format Options</a>
+    <a href="#pathway"   class="sg-toc-link">Registration &amp; Pathway</a>
+    <a href="#judges"    class="sg-toc-link">Recruiting Judges</a>
+    <a href="#funding"   class="sg-toc-link">Funding</a>
+    <a href="#logistics" class="sg-toc-link">Logistics</a>
+    <a href="#downloads" class="sg-toc-link">Downloads</a>
+    <a href="#faq"       class="sg-toc-link">FAQ</a>
+  </div>
+</nav>
 
 <!-- BODY -->
 <section>

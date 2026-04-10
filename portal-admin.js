@@ -118,8 +118,29 @@ function renderApprovals() {
 }
 
 async function approveUser(id, email, type) {
-  if (!confirm(`Approve ${email} as ${type}? They will be able to sign in to their portal immediately.`)) return;
+  if (!confirm(`Approve ${email} as ${type}? They will be able to sign in immediately.`)) return;
   if (sb) await sb.from('portal_requests').update({ status:'active' }).eq('id', id);
+
+  // For mentors: open a pre-filled email with the Discord invite link
+  if (type === 'mentor') {
+    const discordLink = document.getElementById('discordLink')?.value.trim() || '[paste Discord invite link here]';
+    const sub  = encodeURIComponent('Welcome to the FairGame Community!');
+    const body = encodeURIComponent(
+`Hi,
+
+Great news — your FairGame mentor application has been approved!
+
+You're now part of our family. Here's your invite to the FairGame Discord, where students and teachers post questions and mentors like you help answer them. It's a low time commitment — just jump in whenever you have a few minutes.
+
+Discord invite: ${discordLink}
+
+Thank you for giving back. We're so glad to have you.
+
+— FairGame Initiative
+fairgameinitiative@outlook.com`);
+    window.open(`mailto:${email}?subject=${sub}&body=${body}`);
+  }
+
   await loadApprovals();
   await loadAllData();
 }

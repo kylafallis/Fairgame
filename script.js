@@ -819,30 +819,37 @@ async function submitMentor() {
   const msgEl  = document.getElementById('mentorMsg');
   if (!msgEl) return;
 
-  if (!name || !email || !field) {
-    msgEl.textContent = 'Please fill out all required fields.';
+  if (!name || !email || !field || !bio) {
+    msgEl.textContent = 'Please fill out all required fields including your bio.';
     msgEl.className   = 'msg-err';
     return;
   }
 
-  msgEl.textContent = 'Submitting...';
+  msgEl.textContent = 'Submitting…';
   msgEl.className   = '';
 
   if (sb) {
+    // Store in portal_requests so admin sees it in the approvals queue
     const { error } = await sb.from('portal_requests').insert([{
       name, email,
-      school: role,
+      school: role || '',
       type:   'mentor',
-      data:   { field, hours, format, bio }
+      status: 'pending',
+      data:   { field, hours, format, bio, source: 'volunteer_form' }
     }]);
     if (error) {
-      msgEl.textContent = 'Error — please email fairgameinitiative@outlook.com';
+      msgEl.textContent = 'Error submitting — please email fairgameinitiative@outlook.com';
       msgEl.className   = 'msg-err';
       return;
     }
   }
 
-  msgEl.textContent = "Application received! We'll match you with a student within a week.";
+  // Clear form
+  ['mName','mEmail','mRole','mField','mBio'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  const mh = document.getElementById('mHours'); if (mh) mh.value = '';
+  const mf = document.getElementById('mFormat'); if (mf) mf.value = '';
+
+  msgEl.textContent = "Application received! Because mentors work with students, we personally review every application. If approved, you'll receive an invite to our moderated FairGame Discord — typically within 3–5 business days.";
   msgEl.className   = 'msg-ok';
   logEvent('mentor_application', { field, hours });
 }

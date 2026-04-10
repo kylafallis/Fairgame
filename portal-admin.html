@@ -96,9 +96,9 @@
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
             <button class="btn-xs active" onclick="filterApp('all',this)">All</button>
             <button class="btn-xs" onclick="filterApp('pending',this)">Pending</button>
-            <button class="btn-xs" onclick="filterApp('interest',this)">Interest</button>
             <button class="btn-xs" onclick="filterApp('teacher',this)">Teachers</button>
             <button class="btn-xs" onclick="filterApp('ambassador',this)">Ambassadors</button>
+            <button class="btn-xs" onclick="filterApp('mentor',this)">Mentors</button>
           </div>
         </div>
         <div class="card-body-flush" style="overflow-x:auto;">
@@ -110,13 +110,16 @@
       </div>
       <div class="card mt-16">
         <div class="card-body">
-          <h3 class="text-serif fw-600 mb-16" style="font-size:.96rem;color:var(--g900);">How to approve a user</h3>
+          <h3 class="text-serif fw-600 mb-16" style="font-size:.96rem;color:var(--g900);">How approvals work</h3>
           <p class="text-sm text-muted" style="line-height:1.7;">
-            1. Click "Approve" to mark their request as active.<br>
-            2. Go to <strong>Supabase → Authentication → Users → Invite User</strong>.<br>
-            3. Enter their email and set user metadata: <code style="background:var(--gray-100);padding:1px 5px;font-size:.8rem;">{"role": "teacher", "name": "Their Name"}</code><br>
-            4. They receive a sign-in link. Once they log in, they land on their role dashboard automatically.
+            <strong>Teachers &amp; Ambassadors:</strong> Click Approve. Their account unlocks immediately — they can sign in to their portal right away with the password they set during signup.<br><br>
+            <strong>Mentors:</strong> Click Approve, then send them the Discord invite link from the field below. They will be welcomed into the moderated FairGame community where they can answer questions from students and teachers.<br><br>
+            <strong>Rejections</strong> are also immediate — the user sees a "not approved" message when they try to sign in.
           </p>
+          <div class="form-group" style="margin-top:16px;max-width:420px;">
+            <label class="form-label">Discord invite link (sent to approved mentors)</label>
+            <input type="text" id="discordLink" placeholder="https://discord.gg/your-invite" style="width:100%;"/>
+          </div>
         </div>
       </div>
     </div>

@@ -2,371 +2,189 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Donate - FairGame Initiative</title>
+  <title>Support FairGame - Coming Soon</title>
   <link rel="icon" href="/Images/logo.png" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/style.css" />
   <style>
-    /* ── HERO ────────────────────────────────────────────────── */
-    .don-hero {
-      background: var(--green-900);
+    body { background: var(--green-900); }
+    .cs-wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px 60px;
+      text-align: center;
+    }
+    .cs-logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 48px;
+    }
+    .cs-logo img { height: 44px; }
+    .cs-logo-name {
+      font-family: var(--ff-serif);
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--white);
+    }
+    .cs-overline {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--green-400);
+      margin-bottom: 18px;
+    }
+    .cs-heading {
+      font-family: var(--ff-serif);
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      color: var(--white);
+      line-height: 1.12;
+      margin: 0 0 20px;
+      max-width: 600px;
+    }
+    .cs-heading em { color: var(--green-400); }
+    .cs-body {
+      font-size: 1.05rem;
+      color: rgba(255,255,255,0.65);
+      line-height: 1.75;
+      max-width: 480px;
+      margin: 0 auto 36px;
+    }
+    .cs-heart {
+      font-size: 2.4rem;
+      margin-bottom: 24px;
+      display: block;
+      opacity: 0.85;
+    }
+    .cs-cta-row {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 48px;
+    }
+    .cs-notify {
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 10px;
+      padding: 24px 28px;
+      max-width: 420px;
       width: 100%;
     }
-    .don-hero-split {
-      display: grid;
-      grid-template-columns: 1fr 420px;
-      min-height: 380px;
+    .cs-notify p {
+      font-size: 0.88rem;
+      color: rgba(255,255,255,0.55);
+      margin: 0 0 14px;
+      line-height: 1.6;
     }
-    @media (max-width: 860px) {
-      .don-hero-split { grid-template-columns: 1fr; min-height: auto; }
-      .don-hero-right { display: none; }
+    .cs-notify-row {
+      display: flex;
+      gap: 8px;
     }
-    .don-hero-left {
-      padding: 72px 56px 56px;
-      display: flex; flex-direction: column; justify-content: flex-end;
-    }
-    @media (max-width: 600px) { .don-hero-left { padding: 48px 24px 40px; } }
-    .don-hero-left .overline { color: rgba(255,255,255,0.5); margin-bottom: 14px; }
-    .don-hero-left h1 {
+    .cs-notify-row input {
+      flex: 1;
+      padding: 10px 14px;
+      border: 1.5px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.08);
+      border-radius: 4px;
+      font-family: var(--ff-sans);
+      font-size: 0.88rem;
       color: var(--white);
-      font-size: clamp(2rem, 4.5vw, 3.2rem);
-      line-height: 1.1; margin: 0 0 18px;
+      outline: none;
     }
-    .don-hero-left p {
-      color: rgba(255,255,255,0.65);
-      font-size: 1.05rem; line-height: 1.65;
-      max-width: 500px; margin: 0;
-    }
-    .don-hero-right {
-      border-left: 1px solid rgba(255,255,255,0.08);
-      padding: 56px 44px;
-      display: flex; flex-direction: column; justify-content: center; gap: 0;
-    }
-    .don-hero-fact {
-      padding: 18px 0; border-bottom: 1px solid rgba(255,255,255,0.08);
-    }
-    .don-hero-fact:last-child { border-bottom: none; }
-    .don-hero-fact-num {
-      font-family: var(--ff-serif); font-size: 1.8rem; font-weight: 700;
-      color: var(--white); line-height: 1;
-    }
-    .don-hero-fact-label {
-      font-size: 0.8rem; color: rgba(255,255,255,0.45);
-      margin-top: 4px; text-transform: uppercase; letter-spacing: 0.06em;
-    }
-
-    /* ── BODY LAYOUT ─────────────────────────────────────────── */
-    .donate-grid {
-      display: grid; grid-template-columns: 1fr 380px;
-      gap: 56px; align-items: start;
-      padding: 64px 0 80px;
-    }
-    @media (max-width: 900px) {
-      .donate-grid { grid-template-columns: 1fr; }
-    }
-
-    /* ── IMPACT AMOUNTS ──────────────────────────────────────── */
-    .impact-amounts {
-      display: flex; flex-direction: column; gap: 0;
-      margin: 24px 0 32px;
-      border: 1px solid var(--gray-100); border-radius: 10px; overflow: hidden;
-    }
-    .amount-card {
-      display: flex; align-items: baseline; gap: 20px;
-      padding: 16px 20px; border-bottom: 1px solid var(--gray-100);
+    .cs-notify-row input::placeholder { color: rgba(255,255,255,0.3); }
+    .cs-notify-row input:focus { border-color: var(--green-400); }
+    .cs-notify-row button {
+      padding: 10px 18px;
+      background: var(--green-600);
+      border: none;
+      border-radius: 4px;
+      font-family: var(--ff-serif);
+      font-size: 0.88rem;
+      font-style: italic;
+      color: var(--white);
+      cursor: pointer;
+      white-space: nowrap;
       transition: background 0.15s;
     }
-    .amount-card:last-child { border-bottom: none; }
-    .amount-card:hover { background: var(--green-50); }
-    .amount-num {
-      font-family: var(--ff-serif); font-size: 1.3rem; font-weight: 700;
-      color: var(--green-700); flex: none; min-width: 72px;
+    .cs-notify-row button:hover { background: var(--green-700); }
+    .cs-notify-msg { font-size: 0.8rem; margin-top: 8px; color: var(--green-400); min-height: 18px; }
+    .cs-back {
+      margin-top: 40px;
+      font-size: 0.82rem;
+      color: rgba(255,255,255,0.35);
     }
-    .amount-desc {
-      font-size: 0.88rem; color: var(--gray-600); line-height: 1.55;
-    }
-
-    /* ── PARTNER TIERS ───────────────────────────────────────── */
-    .partner-tiers { margin: 24px 0 16px; }
-    .tier-row {
-      display: flex; align-items: flex-start; gap: 20px;
-      padding: 18px 0; border-bottom: 1px solid var(--gray-100);
-    }
-    .tier-row:last-child { border-bottom: none; }
-    .tier-amt {
-      font-family: var(--ff-serif); font-size: 1rem; font-weight: 700;
-      color: var(--green-700); flex: none; min-width: 72px; padding-top: 2px;
-    }
-    .tier-name { font-size: 0.93rem; font-weight: 700; color: var(--green-900); margin-bottom: 3px; }
-    .tier-desc { font-size: 0.84rem; color: var(--gray-500); line-height: 1.55; }
-
-    /* ── SECTION HEAD ────────────────────────────────────────── */
-    .don-section-head { margin: 48px 0 0; }
-    .don-section-head h2 { margin: 8px 0 0; }
-
-    /* ── DONATE BOX ──────────────────────────────────────────── */
-    .donate-box {
-      background: var(--white);
-      border: 1px solid var(--gray-100);
-      border-radius: 14px; padding: 32px;
-      position: sticky; top: calc(var(--nav-h) + 24px);
-    }
-    .donate-box h3 {
-      font-family: var(--ff-serif); font-size: 1.3rem;
-      color: var(--green-900); margin: 0 0 8px;
-    }
-    .donate-box > p {
-      font-size: 0.88rem; color: var(--gray-500); line-height: 1.6; margin: 0 0 24px;
-    }
-
-    .amount-btns {
-      display: grid; grid-template-columns: repeat(3, 1fr);
-      gap: 8px; margin-bottom: 16px;
-    }
-    .amt-btn {
-      padding: 10px 6px; border-radius: 7px;
-      font-size: 0.9rem; font-weight: 600;
-      background: var(--gray-50); color: var(--gray-700);
-      border: 1px solid var(--gray-100); cursor: pointer;
-      transition: background 0.15s, border-color 0.15s, color 0.15s;
-    }
-    .amt-btn:hover { background: var(--green-50); border-color: var(--green-300); color: var(--green-800); }
-    .amt-btn.active { background: var(--green-900); border-color: var(--green-900); color: var(--white); }
-
-    .custom-amount {
-      display: flex; align-items: center; gap: 8px;
-      border: 1px solid var(--gray-200); border-radius: 7px;
-      padding: 0 14px; margin-bottom: 16px;
-      background: var(--white);
-      transition: border-color 0.15s;
-    }
-    .custom-amount:focus-within { border-color: var(--green-500); box-shadow: 0 0 0 3px rgba(74,144,74,0.1); }
-    .custom-amount span { font-size: 1rem; color: var(--gray-400); }
-    .custom-amount input {
-      flex: 1; border: none; outline: none; padding: 12px 0;
-      font-size: 1rem; font-family: var(--ff-sans); color: var(--gray-900);
-      background: transparent;
-    }
-
-    .freq-toggle {
-      display: flex; gap: 8px; margin-bottom: 20px;
-    }
-    .freq-btn {
-      flex: 1; padding: 10px; border-radius: 7px; font-size: 0.88rem; font-weight: 600;
-      background: var(--gray-50); color: var(--gray-600);
-      border: 1px solid var(--gray-100); cursor: pointer;
-      transition: background 0.15s, border-color 0.15s, color 0.15s;
-    }
-    .freq-btn.active { background: var(--green-900); border-color: var(--green-900); color: var(--white); }
-
-    .donate-note {
-      font-size: 0.77rem; color: var(--gray-400); line-height: 1.6;
-      margin: 14px 0 0; text-align: center;
-    }
+    .cs-back a { color: rgba(255,255,255,0.55); transition: color 0.15s; }
+    .cs-back a:hover { color: rgba(255,255,255,0.85); }
   </style>
 </head>
 <body>
-<nav class="scrolled">
-  <div class="nav-inner">
-    <a href="/" class="nav-logo">
-      <img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'" />
-      FairGame
-    </a>
-    <div class="nav-spacer"></div>
-    <button class="nav-hamburger" aria-label="Menu">&#9776;</button>
-    <ul class="nav-links">
-      <li class="dropdown"><a href="#">Resources</a>
-        <div class="dropdown-menu">
-          <a href="/starthere.html">Start Here</a>
-          <a href="/setupguide.html">Setup Guide</a>
-          <a href="/stateresources.html">State Resources</a>
-          <a href="/researchguide.html">Research Guide</a>
-          <a href="/teachers-professionals.html">For Teachers</a>
-        </div>
-      </li>
-      <li class="dropdown"><a href="#">Get Involved</a>
-        <div class="dropdown-menu">
-          <a href="/volunteer.html">Volunteer / Judge</a>
-          <a href="/donate.html">Donate</a>
-          <a href="/login.html">Ambassador Portal</a>
-          <a href="/login.html">Teacher Portal</a>
-        </div>
-      </li>
-      <li><a href="/successstories.html">Stories</a></li>
-      <li><a href="/donate.html">Donate</a></li>
-      <li><a href="/starthere.html" class="nav-cta">Get Started</a></li>
-    </ul>
-    <a href="/login.html" class="nav-user-icon" id="navUserBtn" title="Sign in">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-        <circle cx="12" cy="7" r="4"/>
-      </svg>
-    </a>
-  </div>
-</nav>
+<div class="cs-wrap">
 
-<!-- HERO -->
-<div class="don-hero">
-  <div class="don-hero-split">
-    <div class="don-hero-left">
-      <span class="overline">Support Our Work</span>
-      <h1>Fund a science<br>fair <em>program.</em></h1>
-      <p>Every dollar goes directly toward getting a school's science fair off the ground. FairGame is a 501(c)(3) nonprofit &mdash; all donations are tax-deductible.</p>
-    </div>
-    <div class="don-hero-right">
-      <div class="don-hero-fact">
-        <div class="don-hero-fact-num">&lt;10%</div>
-        <div class="don-hero-fact-label">Administrative overhead</div>
-      </div>
-      <div class="don-hero-fact">
-        <div class="don-hero-fact-num">$300</div>
-        <div class="don-hero-fact-label">Sponsors a school fair</div>
-      </div>
-      <div class="don-hero-fact">
-        <div class="don-hero-fact-num">$25</div>
-        <div class="don-hero-fact-label">Covers one student's materials</div>
-      </div>
-      <div class="don-hero-fact">
-        <div class="don-hero-fact-num">100%</div>
-        <div class="don-hero-fact-label">Of students served for free</div>
-      </div>
-    </div>
+  <div class="cs-logo">
+    <img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'" />
+    <span class="cs-logo-name">FairGame</span>
   </div>
+
+  <span class="cs-heart">&#9829;</span>
+  <div class="cs-overline">Support FairGame</div>
+  <h1 class="cs-heading">Your generosity<br><em>changes everything.</em></h1>
+  <p class="cs-body">
+    Our donation page is almost ready. Every dollar goes directly to supporting students and schools — covering fair registration, materials, and the program infrastructure that makes competitive science fair accessible to every student, regardless of zip code.
+  </p>
+  <p class="cs-body" style="margin-top:-16px;">
+    Check back soon, or leave your email and we'll let you know the moment it's live.
+  </p>
+
+  <div class="cs-cta-row">
+    <a href="/volunteer.html" class="btn btn-white">Volunteer Instead →</a>
+    <a href="mailto:fairgameinitiative@outlook.com?subject=Donation%20Interest" class="btn btn-outline" style="border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.8);">Email Us Directly</a>
+  </div>
+
+  <div class="cs-notify">
+    <p>Get notified when our donation page goes live:</p>
+    <div class="cs-notify-row">
+      <input type="email" id="notifyEmail" placeholder="your@email.com" />
+      <button onclick="notifyMe()">Notify me</button>
+    </div>
+    <div class="cs-notify-msg" id="notifyMsg"></div>
+  </div>
+
+  <div class="cs-back">
+    <a href="/">← Back to FairGame Initiative</a>
+    &nbsp;·&nbsp;
+    <a href="/volunteer.html">Volunteer</a>
+    &nbsp;·&nbsp;
+    <a href="/starthere.html">Get Started</a>
+  </div>
+
 </div>
 
-<section>
-  <div class="container">
-    <div class="donate-grid">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  const SB_URL = 'https://buzcxrbjutexiofetgvn.supabase.co';
+  const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1emN4cmJqdXRleGlvZmV0Z3ZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Nzc1NTEsImV4cCI6MjA4OTM1MzU1MX0.ifMup4fCcfHaf7Q4TYfi1X1V-J8tQpu2JwaqvjBcsBQ';
+  let sb = null;
+  try { sb = window.supabase.createClient(SB_URL, SB_KEY); } catch(e) {}
 
-      <!-- Left: impact + tiers -->
-      <div>
-        <div class="reveal">
-          <span class="overline">Your Impact</span>
-          <h2 style="margin:8px 0 0;">What your donation funds</h2>
+  async function notifyMe() {
+    const email = document.getElementById('notifyEmail').value.trim();
+    const msgEl = document.getElementById('notifyMsg');
+    if (!email || !email.includes('@')) { msgEl.textContent = 'Please enter a valid email.'; msgEl.style.color = '#f59e0b'; return; }
+    if (sb) {
+      await sb.from('email_subscribers').insert([{ email, role: 'donor_notify', source: 'donate_coming_soon' }]).catch(()=>{});
+    }
+    msgEl.textContent = "Got it — we'll let you know!";
+    msgEl.style.color = 'var(--green-400)';
+    document.getElementById('notifyEmail').value = '';
+  }
 
-          <div class="impact-amounts">
-            <div class="amount-card"><div class="amount-num">$25</div><div class="amount-desc">Covers display board materials for one student who can't afford them</div></div>
-            <div class="amount-card"><div class="amount-num">$100</div><div class="amount-desc">Pays for district registration for a school with a limited budget</div></div>
-            <div class="amount-card"><div class="amount-num">$250</div><div class="amount-desc">Funds a full classroom workshop session for 30 students</div></div>
-            <div class="amount-card"><div class="amount-num">$500</div><div class="amount-desc">Covers trophies and recognition materials for a school fair</div></div>
-            <div class="amount-card"><div class="amount-num">$1,000</div><div class="amount-desc">Sponsors one complete school fair from planning to awards day</div></div>
-            <div class="amount-card"><div class="amount-num">$5,000</div><div class="amount-desc">Funds an entire school's program for a full academic year</div></div>
-          </div>
-
-          <p style="color:var(--gray-500);font-size:0.9rem;line-height:1.7;">FairGame operates with minimal overhead. We are a volunteer-led organization and we keep administrative costs below 10% of all donations. The majority of every dollar reaches students and schools directly.</p>
-        </div>
-
-        <div class="don-section-head reveal">
-          <span class="overline">Corporate &amp; Organizational Giving</span>
-          <h2>Partnership tiers</h2>
-          <div class="partner-tiers">
-            <div class="tier-row">
-              <div class="tier-amt">$500</div>
-              <div><div class="tier-name">Friend of FairGame</div><div class="tier-desc">Acknowledged on website and in annual report. One student's full display materials funded.</div></div>
-            </div>
-            <div class="tier-row">
-              <div class="tier-amt">$1,500</div>
-              <div><div class="tier-name">School Sponsor</div><div class="tier-desc">Named sponsor of one school's science fair program. Logo on printed materials. Social media recognition.</div></div>
-            </div>
-            <div class="tier-row">
-              <div class="tier-amt">$5,000</div>
-              <div><div class="tier-name">Program Partner</div><div class="tier-desc">Funds a full school-year program. Named in all program materials, press releases, and the annual report. Employee volunteer priority access.</div></div>
-            </div>
-            <div class="tier-row">
-              <div class="tier-amt">$10,000+</div>
-              <div><div class="tier-name">Founding Sponsor</div><div class="tier-desc">Major program funding. Naming rights to a district program. Board engagement opportunity. Full annual impact report.</div></div>
-            </div>
-          </div>
-          <p style="font-size:0.86rem;color:var(--gray-500);">For corporate or major gifts, contact us directly: <a href="mailto:fairgameinitiative@outlook.com" style="color:var(--green-600);">fairgameinitiative@outlook.com</a></p>
-        </div>
-      </div>
-
-      <!-- Right: donation widget -->
-      <div class="donate-box reveal">
-        <h3>Make a Donation</h3>
-        <p>Secure online donation via our giving platform. Tax receipt emailed automatically.</p>
-
-        <div class="amount-btns">
-          <button class="amt-btn" onclick="setAmt(this,'25')">$25</button>
-          <button class="amt-btn active" onclick="setAmt(this,'50')">$50</button>
-          <button class="amt-btn" onclick="setAmt(this,'100')">$100</button>
-          <button class="amt-btn" onclick="setAmt(this,'250')">$250</button>
-          <button class="amt-btn" onclick="setAmt(this,'500')">$500</button>
-          <button class="amt-btn" onclick="setAmt(this,'other')">Other</button>
-        </div>
-
-        <div class="custom-amount">
-          <span>$</span>
-          <input type="number" id="customAmt" value="50" min="1" placeholder="Amount" />
-        </div>
-
-        <div class="freq-toggle">
-          <button class="freq-btn active" id="freqOnce"    onclick="setFreq('once',this)">One-time</button>
-          <button class="freq-btn"        id="freqMonthly" onclick="setFreq('monthly',this)">Monthly</button>
-        </div>
-
-        <button class="btn btn-primary" style="width:100%;justify-content:center;padding:15px;" onclick="goToDonate()">Donate $<span id="btnAmt">50</span> &rarr;</button>
-
-        <p class="donate-note">FairGame Initiative is a 501(c)(3) nonprofit organization. EIN available upon request. All donations are tax-deductible to the extent permitted by law.</p>
-      </div>
-
-    </div>
-  </div>
-</section>
-
-<footer>
-  <div class="container">
-    <div class="footer-grid">
-      <div>
-        <div class="f-brand-name">FairGame Initiative</div>
-        <p class="f-brand-desc">Bringing competitive STEM opportunities to rural and low-income schools. Advised by Forbes 30 Under 30 founders and nationwide STEM education experts.</p>
-        &nbsp;&middot;&nbsp;
-        <a href="/privacy.html" style="color:rgba(255,255,255,.6);">Privacy Policy</a>
-        &nbsp;&middot;&nbsp;
-        <a href="/terms.html" style="color:rgba(255,255,255,.6);">Terms of Service</a>
-        <div class="f-social">
-          <a href="#" title="Instagram">IG</a>
-          <a href="#" title="Twitter / X">X</a>
-          <a href="#" title="LinkedIn">in</a>
-          <a href="#" title="TikTok">TK</a>
-        </div>
-      </div>
-      <div class="f-col">
-        <h5>Resources</h5>
-        <ul>
-          <li><a href="/starthere.html">Start Here</a></li>
-          <li><a href="/setupguide.html">Setup Guide</a></li>
-          <li><a href="/stateresources.html">State Resources</a></li>
-          <li><a href="/researchguide.html">Research Guide</a></li>
-          <li><a href="/teachers-professionals.html">For Teachers</a></li>
-        </ul>
-      </div>
-      <div class="f-col">
-        <h5>Get Involved</h5>
-        <ul>
-          <li><a href="/volunteer.html">Volunteer / Judge</a></li>
-          <li><a href="/donate.html">Donate</a></li>
-          <li><a href="/login.html">Ambassador Portal</a></li>
-          <li><a href="mailto:fairgameinitiative@outlook.com">Partner With Us</a></li>
-        </ul>
-      </div>
-      <div class="f-col">
-        <h5>Organization</h5>
-        <ul>
-          <li><a href="/successstories.html">Success Stories</a></li>
-          <li><a href="mailto:fairgameinitiative@outlook.com">Contact Us</a></li>
-          <li><a href="https://fairgameinitiative.org">fairgameinitiative.org</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>&copy; 2026 FairGame Initiative &middot; All rights reserved.</p>
-      <div><a href="/privacy.html">Privacy Policy</a><a href="/terms.html">Terms of Service</a></div>
-    </div>
-  </div>
-</footer>
-
-<script src="/script.js"></script>
+  document.getElementById('notifyEmail')?.addEventListener('keydown', e => { if (e.key === 'Enter') notifyMe(); });
+</script>
 </body>
 </html>
