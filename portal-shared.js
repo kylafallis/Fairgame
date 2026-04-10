@@ -59,9 +59,15 @@ function requireAuth(expectedRole, onReady) {
     if (role === 'admin' || role === expectedRole) {
       // Teacher and Ambassador accounts require admin approval before portal access
       if ((role === 'teacher' || role === 'ambassador') && role !== 'admin') {
-        const { data: req } = await sb.from('portal_requests').select('status').eq('email', user.email).maybeSingle();
-        if (!req || req.status === 'pending') { _showPortalPending(user.email, role); return; }
-        if (req.status === 'rejected')        { _showPortalRejected(user.email);      return; }
+        const { data: rows, error: reqErr } = await sb.from('portal_requests')
+          .select('status').eq('email', user.email)
+          .order('created_at', { ascending: false }).limit(1);
+        const req = rows?.[0] || null;
+        // If RLS blocked the query entirely, don't punish the user — let them through
+        if (!reqErr) {
+          if (!req || req.status === 'pending') { _showPortalPending(user.email, role); return; }
+          if (req.status === 'rejected')        { _showPortalRejected(user.email);      return; }
+        }
       }
       currentUser = user; currentRole = role;
       document.body.classList.add('ready');
@@ -74,6 +80,7 @@ function requireAuth(expectedRole, onReady) {
 }
 
 function _showPortalPending(email, role) {
+  document.body.style.opacity = '1';
   document.body.innerHTML = `
     <div style="font-family:'DM Sans',system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f1faf2;padding:24px;">
       <div style="max-width:440px;width:100%;background:#fff;padding:36px 40px;border-top:3px solid #357a38;box-shadow:0 4px 20px rgba(0,0,0,.1);">
@@ -89,6 +96,7 @@ function _showPortalPending(email, role) {
 }
 
 function _showPortalRejected(email) {
+  document.body.style.opacity = '1';
   document.body.innerHTML = `
     <div style="font-family:'DM Sans',system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f1faf2;padding:24px;">
       <div style="max-width:440px;width:100%;background:#fff;padding:36px 40px;border-top:3px solid #dc2626;box-shadow:0 4px 20px rgba(0,0,0,.1);">

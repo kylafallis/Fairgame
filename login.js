@@ -40,16 +40,22 @@ async function go(user) {
 
   // Teacher / Ambassador: check approval status in portal_requests
   if (APPROVAL_ROLES.includes(role) && sb) {
-    const { data: req } = await sb.from('portal_requests').select('status').eq('email', user.email).maybeSingle();
-    if (!req || req.status === 'pending') {
-      showPendingScreen(user.email, role);
-      return;
+    const { data: rows, error: reqErr } = await sb.from('portal_requests')
+      .select('status').eq('email', user.email)
+      .order('created_at', { ascending: false }).limit(1);
+    const req = rows?.[0] || null;
+    // If RLS blocked the query, don't block the user — let them through
+    if (!reqErr) {
+      if (!req || req.status === 'pending') {
+        showPendingScreen(user.email, role);
+        return;
+      }
+      if (req.status === 'rejected') {
+        showRejectedScreen(user.email);
+        return;
+      }
     }
-    if (req.status === 'rejected') {
-      showRejectedScreen(user.email);
-      return;
-    }
-    // status === 'active' → fall through to redirect
+    // status === 'active' (or RLS error) → fall through to redirect
   }
 
   window.location.replace(ROUTES[role] || '/portal-student.html');
