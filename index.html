@@ -309,6 +309,40 @@
   </div>
 </section>
 
+<!-- CURRICULUM BANNER  -->
+<section style="background:var(--green-50);border-top:1px solid var(--gray-200);border-bottom:1px solid var(--gray-200);padding:48px 0;" id="curriculum">
+  <div class="container">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start;" class="reveal contact-grid">
+
+      <!-- Left: curriculum info + download -->
+      <div>
+        <span class="overline">Curriculum</span>
+        <h2 style="margin-bottom:12px;">Our Curriculum Outline</h2>
+        <p style="color:var(--gray-500);margin-bottom:24px;line-height:1.75;">We've developed a Grades 5–8 curriculum outline to guide schools through the science fair process — from forming a hypothesis to presenting results. Download the PDF and take a look.</p>
+        <a href="/files/FairGame_Curriculum_Gr5-8.pdf" target="_blank" rel="noopener"
+           class="btn btn-primary" style="display:inline-flex;align-items:center;gap:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download Curriculum (PDF)
+        </a>
+      </div>
+
+      <!-- Right: feedback form -->
+      <div>
+        <h4 style="margin-bottom:4px;font-size:1rem;">Share your thoughts</h4>
+        <p style="font-size:0.84rem;color:var(--gray-500);margin-bottom:16px;">Have a recommendation or feedback on the curriculum? We'd love to hear from educators, experts, and parents.</p>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <input type="text" id="currName" placeholder="Your name" style="padding:9px 12px;border:var(--border);font-family:var(--ff-sans);font-size:0.84rem;border-radius:3px;width:100%;" />
+          <input type="email" id="currEmail" placeholder="your@email.com" style="padding:9px 12px;border:var(--border);font-family:var(--ff-sans);font-size:0.84rem;border-radius:3px;width:100%;" />
+          <textarea id="currMsg" rows="3" placeholder="Your recommendation or thoughts on the curriculum..." style="padding:9px 12px;border:var(--border);font-family:var(--ff-sans);font-size:0.84rem;border-radius:3px;width:100%;resize:vertical;"></textarea>
+          <button class="btn btn-primary" onclick="submitCurriculumFeedback()" style="align-self:flex-start;">Submit Feedback →</button>
+          <div id="currMsg-status" style="font-size:0.8rem;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
 <!-- CONTACT / GET IN TOUCH  -->
 <section class="section contact-section" id="contact" style="background:var(--green-900);">
   <div class="container">
@@ -463,5 +497,25 @@
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <!-- FairGame site scripts -->
   <script src="/script.js"></script>
+  <script>
+    async function submitCurriculumFeedback() {
+      const name    = document.getElementById('currName')?.value.trim();
+      const email   = document.getElementById('currEmail')?.value.trim();
+      const message = document.getElementById('currMsg')?.value.trim();
+      const statusEl = document.getElementById('currMsg-status');
+      if (!name || !email) { statusEl.textContent = 'Name and email are required.'; statusEl.style.color = '#c0392b'; return; }
+      if (!message)        { statusEl.textContent = 'Please enter your feedback.';  statusEl.style.color = '#c0392b'; return; }
+      statusEl.textContent = 'Sending...'; statusEl.style.color = 'var(--gray-500)';
+      if (typeof sb !== 'undefined' && sb) {
+        const { error } = await sb.from('curriculum_feedback').insert([{ name, email, message, source: 'home_banner' }]);
+        if (error) { statusEl.textContent = 'Something went wrong — email us at fairgameinitiative@outlook.com'; statusEl.style.color = '#c0392b'; return; }
+      }
+      statusEl.textContent = 'Thank you! Your feedback has been received.';
+      statusEl.style.color = 'var(--green-600)';
+      document.getElementById('currName').value  = '';
+      document.getElementById('currEmail').value = '';
+      document.getElementById('currMsg').value   = '';
+    }
+  </script>
 </body>
 </html>
