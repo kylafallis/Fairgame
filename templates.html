@@ -10,18 +10,11 @@
   <link rel="stylesheet" href="/style.css" />
   <style>
     /* ── HERO ──────────────────────────────────────────────────── */
-    .tpl-hero {
-      background: var(--green-900);
-      padding: 72px 0 0;
-    }
+    .tpl-hero { background: var(--green-900); padding: 72px 0 0; }
     .tpl-hero-inner {
-      max-width: 1180px;
-      margin: 0 auto;
+      max-width: 1180px; margin: 0 auto;
       padding: 0 56px 56px;
-      display: grid;
-      grid-template-columns: 1fr 360px;
-      gap: 48px;
-      align-items: end;
+      display: grid; grid-template-columns: 1fr 360px; gap: 48px; align-items: end;
     }
     @media (max-width: 860px) { .tpl-hero-inner { grid-template-columns: 1fr; padding: 0 24px 40px; } }
     .tpl-hero-inner .overline { color: rgba(255,255,255,.5); margin-bottom: 14px; }
@@ -29,10 +22,8 @@
     .tpl-hero-inner p  { color: rgba(255,255,255,.62); font-size:.97rem; line-height:1.7; margin:0; }
     .tpl-hero-stats {
       display: flex; flex-direction: column; gap: 14px;
-      padding: 28px 30px;
-      background: rgba(255,255,255,.05);
-      border: 1px solid rgba(255,255,255,.08);
-      border-radius: 10px;
+      padding: 28px 30px; background: rgba(255,255,255,.05);
+      border: 1px solid rgba(255,255,255,.08); border-radius: 10px;
     }
     .tpl-stat-row { display: flex; justify-content: space-between; align-items: baseline; }
     .tpl-stat-n { font-family: var(--ff-serif); font-size: 1.8rem; font-weight:700; color:var(--white); }
@@ -40,114 +31,90 @@
 
     /* ── FILTER BAR ────────────────────────────────────────────── */
     .tpl-filter-bar {
-      background: var(--white);
-      border-bottom: 1.5px solid var(--gray-100);
-      position: sticky;
-      top: var(--nav-h);
-      z-index: 90;
+      background: var(--white); border-bottom: 1.5px solid var(--gray-100);
+      position: sticky; top: var(--nav-h); z-index: 90;
     }
     .tpl-filter-inner {
-      max-width: 1180px; margin: 0 auto;
-      padding: 0 56px;
+      max-width: 1180px; margin: 0 auto; padding: 0 56px;
       display: flex; gap: 0; overflow-x: auto; scrollbar-width: none;
     }
     .tpl-filter-inner::-webkit-scrollbar { display:none; }
     @media (max-width: 600px) { .tpl-filter-inner { padding: 0 16px; } }
     .tpl-filter-btn {
-      flex-shrink: 0;
-      padding: 14px 20px;
-      font-size: .8rem; font-weight: 600;
-      color: var(--gray-400);
+      flex-shrink: 0; padding: 14px 20px;
+      font-size: .8rem; font-weight: 600; color: var(--gray-400);
       background: none; border: none; border-bottom: 2.5px solid transparent;
-      cursor: pointer; transition: all .15s; white-space: nowrap;
-      font-family: var(--ff-sans);
+      cursor: pointer; transition: all .15s; white-space: nowrap; font-family: var(--ff-sans);
     }
     .tpl-filter-btn.active { color: var(--green-700); border-bottom-color: var(--green-600); }
     .tpl-filter-btn:hover:not(.active) { color: var(--gray-700); }
 
     /* ── PAGE BODY ─────────────────────────────────────────────── */
-    .tpl-body {
-      max-width: 1180px; margin: 0 auto;
-      padding: 56px 56px 96px;
-    }
+    .tpl-body { max-width: 1180px; margin: 0 auto; padding: 56px 56px 96px; }
     @media (max-width: 600px) { .tpl-body { padding: 32px 20px 64px; } }
 
     .tpl-section { margin-bottom: 56px; }
     .tpl-section[data-cat].hidden { display: none; }
 
     .tpl-section-head {
-      display: flex; align-items: baseline; gap: 14px;
-      margin-bottom: 20px;
-      padding-bottom: 14px;
-      border-bottom: 2px solid var(--green-100);
+      display: flex; align-items: baseline; gap: 14px; margin-bottom: 20px;
+      padding-bottom: 14px; border-bottom: 2px solid var(--green-100);
     }
-    .tpl-section-head h2 {
-      font-family: var(--ff-serif);
-      font-size: 1.3rem; color: var(--green-900); margin: 0;
-    }
-    .tpl-section-count {
-      font-size: .72rem; font-weight: 700; letter-spacing: .08em;
-      text-transform: uppercase; color: var(--gray-400);
-    }
+    .tpl-section-head h2 { font-family: var(--ff-serif); font-size: 1.3rem; color: var(--green-900); margin: 0; }
+    .tpl-section-count { font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gray-400); }
 
     /* ── RESOURCE GRID ─────────────────────────────────────────── */
-    .tpl-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 16px;
-    }
+    .tpl-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; }
     .tpl-card {
-      background: var(--white);
-      border: 1.5px solid var(--gray-100);
-      border-radius: 10px;
-      padding: 20px 20px 16px;
+      background: var(--white); border: 1.5px solid var(--gray-100);
+      border-radius: 10px; padding: 20px 20px 16px;
       display: flex; flex-direction: column; gap: 8px;
       transition: box-shadow .18s, border-color .18s;
     }
     .tpl-card:hover { box-shadow: 0 4px 18px rgba(0,0,0,.07); border-color: var(--green-200); }
     .tpl-card-type {
-      font-size: .65rem; font-weight: 700; letter-spacing: .1em;
-      text-transform: uppercase; color: var(--green-600);
-      display: flex; align-items: center; gap: 5px;
+      font-size: .65rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--green-600); display: flex; align-items: center; gap: 5px;
     }
-    .tpl-card-title {
-      font-family: var(--ff-serif); font-size: .95rem;
-      font-weight: 600; color: var(--green-900); line-height: 1.3;
-    }
-    .tpl-card-desc {
-      font-size: .82rem; color: var(--gray-500); line-height: 1.55; flex: 1;
-    }
+    .tpl-card-title { font-family: var(--ff-serif); font-size: .95rem; font-weight: 600; color: var(--green-900); line-height: 1.3; }
+    .tpl-card-desc  { font-size: .82rem; color: var(--gray-500); line-height: 1.55; flex: 1; }
     .tpl-card-footer {
       display: flex; align-items: center; justify-content: space-between;
-      padding-top: 10px; border-top: 1px solid var(--gray-100);
-      margin-top: 4px;
+      padding-top: 10px; border-top: 1px solid var(--gray-100); margin-top: 4px;
     }
-    .tpl-card-for {
-      font-size: .68rem; color: var(--gray-400); font-weight: 500;
-    }
+    .tpl-card-for { font-size: .68rem; color: var(--gray-400); font-weight: 500; }
     .tpl-dl-btn {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 7px 14px;
+      display: inline-flex; align-items: center; gap: 5px; padding: 7px 14px;
       background: var(--green-600); color: var(--white);
-      border: none; border-radius: 4px;
-      font-family: var(--ff-sans); font-size: .76rem; font-weight: 600;
-      cursor: pointer; text-decoration: none; transition: background .15s;
-      white-space: nowrap;
+      border: none; border-radius: 4px; font-family: var(--ff-sans);
+      font-size: .76rem; font-weight: 600; cursor: pointer; text-decoration: none;
+      transition: background .15s; white-space: nowrap;
     }
     .tpl-dl-btn:hover { background: var(--green-700); }
     .tpl-dl-btn.canva { background: #8B5CF6; }
     .tpl-dl-btn.canva:hover { background: #7C3AED; }
+    .tpl-dl-btn.canva-soon { background: var(--gray-300); color: var(--gray-600); cursor: default; }
     .tpl-dl-btn.external { background: var(--gray-500); }
     .tpl-dl-btn.external:hover { background: var(--gray-700); }
-
-    /* type icons */
     .type-icon { width:14px; height:14px; }
+    .tpl-dl-count { font-size: .68rem; color: var(--gray-300); font-weight: 500; margin-left: 2px; }
 
-    /* Download counter badge */
-    .tpl-dl-count {
-      font-size: .68rem; color: var(--gray-300);
-      font-weight: 500; margin-left: 2px;
+    /* ── CANVA BANNER ──────────────────────────────────────────── */
+    .canva-banner {
+      background: linear-gradient(135deg, #5B21B6 0%, #8B5CF6 100%);
+      border-radius: 12px; padding: 32px 40px; margin-bottom: 56px;
+      display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center;
     }
+    @media (max-width: 600px) { .canva-banner { grid-template-columns: 1fr; padding: 24px; } }
+    .canva-banner h3 { font-family: var(--ff-serif); font-size: 1.3rem; color: #fff; margin: 0 0 6px; }
+    .canva-banner p  { font-size: .88rem; color: rgba(255,255,255,.75); line-height: 1.6; margin: 0; }
+    .canva-banner-btn {
+      flex-shrink: 0; padding: 11px 22px; background: #fff;
+      color: #5B21B6; border: none; border-radius: 6px;
+      font-family: var(--ff-sans); font-size: .84rem; font-weight: 700;
+      cursor: pointer; text-decoration: none; white-space: nowrap; transition: opacity .15s;
+    }
+    .canva-banner-btn:hover { opacity: .9; }
   </style>
 </head>
 <body>
@@ -194,11 +161,11 @@
     <div>
       <span class="overline">Free for everyone</span>
       <h1>Templates &amp;<br><em>Downloads</em></h1>
-      <p>Every form, template, and editable resource FairGame offers — organized by type. Everything is free. Downloads are tracked anonymously to help us improve.</p>
+      <p>Every form, template, and editable resource FairGame offers — organized by type. Everything is free. Downloads are tracked anonymously to help us improve and report to funders.</p>
     </div>
     <div class="tpl-hero-stats">
       <div class="tpl-stat-row"><span class="tpl-stat-n" id="heroTotalDl">—</span><span class="tpl-stat-l">Total Downloads</span></div>
-      <div class="tpl-stat-row"><span class="tpl-stat-n">18</span><span class="tpl-stat-l">Resources Available</span></div>
+      <div class="tpl-stat-row"><span class="tpl-stat-n">40</span><span class="tpl-stat-l">Resources Available</span></div>
       <div class="tpl-stat-row"><span class="tpl-stat-n">Free</span><span class="tpl-stat-l">Always, forever</span></div>
     </div>
   </div>
@@ -209,7 +176,10 @@
   <div class="tpl-filter-inner">
     <button class="tpl-filter-btn active" onclick="filterCat('all',this)">All Resources</button>
     <button class="tpl-filter-btn" onclick="filterCat('student',this)">For Students</button>
-    <button class="tpl-filter-btn" onclick="filterCat('teacher',this)">For Teachers</button>
+    <button class="tpl-filter-btn" onclick="filterCat('teacher',this)">Teacher Setup</button>
+    <button class="tpl-filter-btn" onclick="filterCat('curriculum',this)">Curriculum</button>
+    <button class="tpl-filter-btn" onclick="filterCat('parent',this)">Parent Comms</button>
+    <button class="tpl-filter-btn" onclick="filterCat('recruitment',this)">Judge Recruitment</button>
     <button class="tpl-filter-btn" onclick="filterCat('judge',this)">For Judges</button>
     <button class="tpl-filter-btn" onclick="filterCat('forms',this)">Forms</button>
     <button class="tpl-filter-btn" onclick="filterCat('canva',this)">Canva Templates</button>
@@ -219,11 +189,20 @@
 <!-- BODY -->
 <div class="tpl-body">
 
-  <!-- ── STUDENT TEMPLATES ──────────────────────────────────── -->
+  <!-- ── CANVA BANNER ───────────────────────────────────────────── -->
+  <div class="canva-banner" id="canva-library-banner">
+    <div>
+      <h3>Editable Canva Library</h3>
+      <p>Social media posts, letters, flyers, and display boards — all pre-designed and editable. Click any "Open in Canva" button below, or browse the full library. No design skills needed.</p>
+    </div>
+    <a href="CANVA_PLACEHOLDER" class="canva-banner-btn" onclick="openCanvaLibrary(event)">Browse Full Library →</a>
+  </div>
+
+  <!-- ── STUDENT RESOURCES ──────────────────────────────────────── -->
   <div class="tpl-section" data-cat="student">
     <div class="tpl-section-head">
-      <h2>Student Templates</h2>
-      <span class="tpl-section-count">6 resources</span>
+      <h2>Student Resources</h2>
+      <span class="tpl-section-count">9 resources</span>
     </div>
     <div class="tpl-grid">
 
@@ -233,12 +212,10 @@
           PDF Form
         </div>
         <div class="tpl-card-title">Project Proposal Form</div>
-        <div class="tpl-card-desc">Lay out your hypothesis, experimental variables, safety considerations, and materials list. Required by most fairs before you begin.</div>
+        <div class="tpl-card-desc">Student-facing proposal form: project title, hypothesis, independent and dependent variables, control group, safety considerations, and materials list. Fillable PDF.</div>
         <div class="tpl-card-footer">
           <span class="tpl-card-for">Students</span>
-          <button class="tpl-dl-btn" onclick="trackDownload('student/project-proposal-form.pdf','Project Proposal Form')">
-            Download
-          </button>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/student/project-proposal-form.pdf','Project Proposal Form')">Download</button>
         </div>
       </div>
 
@@ -248,12 +225,10 @@
           Word Doc
         </div>
         <div class="tpl-card-title">Research Paper Template</div>
-        <div class="tpl-card-desc">Pre-structured document with all required sections: abstract, introduction, methods, results, discussion, and references.</div>
+        <div class="tpl-card-desc">Standard science fair research paper format: Abstract, Introduction, Literature Review, Methods, Results, Discussion, Conclusion, References. Guidance notes in each section.</div>
         <div class="tpl-card-footer">
           <span class="tpl-card-for">Students</span>
-          <button class="tpl-dl-btn" onclick="trackDownload('student/research-paper-template.docx','Research Paper Template')">
-            Download
-          </button>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/student/research-paper-template.docx','Research Paper Template')">Download</button>
         </div>
       </div>
 
@@ -263,12 +238,10 @@
           Canva Template
         </div>
         <div class="tpl-card-title">Display Board Template</div>
-        <div class="tpl-card-desc">Pre-sized Canva design with all required display board sections. Customize with your project data and images — no design skills needed.</div>
+        <div class="tpl-card-desc">Pre-sized display board layout (48"x36") with all required sections labeled: Title, Abstract, Introduction, Methods, Results, Conclusion, Bibliography. Export from Canva as PDF.</div>
         <div class="tpl-card-footer">
           <span class="tpl-card-for">Students</span>
-          <button class="tpl-dl-btn canva" onclick="trackDownload('student/display-board-template.pdf','Display Board Template')">
-            Open in Canva
-          </button>
+          <button class="tpl-dl-btn canva" onclick="trackDownload('CANVA_PLACEHOLDER','Display Board Template')">Open in Canva</button>
         </div>
       </div>
 
@@ -277,13 +250,11 @@
           <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           PDF
         </div>
-        <div class="tpl-card-title">Science Fair Research Guide</div>
-        <div class="tpl-card-desc">Step-by-step guide through all six phases of a science fair project — from choosing a topic to presenting your results.</div>
+        <div class="tpl-card-title">Display Board Checklist</div>
+        <div class="tpl-card-desc">Student checklist of everything a display board must include for OAS compliance. Printable, one page. Use before fair day to self-review.</div>
         <div class="tpl-card-footer">
           <span class="tpl-card-for">Students</span>
-          <button class="tpl-dl-btn" onclick="trackDownload('student/research-guide.pdf','Research Guide')">
-            Download
-          </button>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/student/display-board-checklist.pdf','Display Board Checklist')">Download</button>
         </div>
       </div>
 
@@ -296,9 +267,7 @@
         <div class="tpl-card-desc">Guided worksheet for writing a competition-ready 250-word abstract. Includes a checklist of required elements and a sample abstract.</div>
         <div class="tpl-card-footer">
           <span class="tpl-card-for">Students</span>
-          <button class="tpl-dl-btn" onclick="trackDownload('student/abstract-worksheet.pdf','Abstract Writing Worksheet')">
-            Download
-          </button>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/student/abstract-worksheet.pdf','Abstract Writing Worksheet')">Download</button>
         </div>
       </div>
 
@@ -311,22 +280,72 @@
         <div class="tpl-card-desc">Structured daily log pages for recording observations, data, calculations, and reflections throughout your experiment.</div>
         <div class="tpl-card-footer">
           <span class="tpl-card-for">Students</span>
-          <button class="tpl-dl-btn" onclick="trackDownload('student/lab-notebook-template.pdf','Lab Notebook Template')">
-            Download
-          </button>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/student/lab-notebook-template.pdf','Lab Notebook Template')">Download</button>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          PDF
+        </div>
+        <div class="tpl-card-title">Lab Notebook Data Table</div>
+        <div class="tpl-card-desc">Printable blank data tables and observation log in multiple formats: single-variable, two-variable, and free-form observation. One per lesson.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Students</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/student/lab-notebook-data-table.pdf','Lab Notebook Data Table')">Download</button>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          PDF
+        </div>
+        <div class="tpl-card-title">ISEF Category Guide</div>
+        <div class="tpl-card-desc">Explanation of all 21 ISEF subject categories with examples of qualifying projects. Helps students choose where to enter their project.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Students</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/student/isef-category-guide.pdf','ISEF Category Guide')">Download</button>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          PDF
+        </div>
+        <div class="tpl-card-title">Science Fair Research Guide</div>
+        <div class="tpl-card-desc">Step-by-step guide through all six phases of a science fair project — from choosing a topic to presenting your results.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Students</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/student/research-guide.pdf','Research Guide')">Download</button>
         </div>
       </div>
 
     </div>
   </div>
 
-  <!-- ── TEACHER TEMPLATES ──────────────────────────────────── -->
+  <!-- ── TEACHER SETUP & PLANNING ──────────────────────────────── -->
   <div class="tpl-section" data-cat="teacher">
     <div class="tpl-section-head">
-      <h2>Teacher &amp; Administrator Templates</h2>
-      <span class="tpl-section-count">6 resources</span>
+      <h2>Teacher Setup &amp; Planning</h2>
+      <span class="tpl-section-count">12 resources</span>
     </div>
     <div class="tpl-grid">
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Word Doc
+        </div>
+        <div class="tpl-card-title">Administrator Buy-In Proposal</div>
+        <div class="tpl-card-desc">One-page pitch for principals and school boards. Includes cost range $300–$2K, teacher time commitment (~5 hrs/month), academic outcomes, OAS pathway overview, and contact information.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Teachers / Admins</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/setup-guide/administrator-proposal-template.docx','Administrator Buy-In Proposal')">Download</button>
+        </div>
+      </div>
 
       <div class="tpl-card">
         <div class="tpl-card-type">
@@ -337,9 +356,33 @@
         <div class="tpl-card-desc">12-month countdown with monthly tasks for the fair coordinator. Covers buy-in, registration, student recruitment, judges, and fair day.</div>
         <div class="tpl-card-footer">
           <span class="tpl-card-for">Teachers / Admins</span>
-          <button class="tpl-dl-btn" onclick="trackDownload('teacher/planning-timeline.docx','Planning Timeline')">
-            Download
-          </button>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/planning-timeline.docx','Planning Timeline')">Download</button>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          PDF
+        </div>
+        <div class="tpl-card-title">12-Month Planning Checklist</div>
+        <div class="tpl-card-desc">Month-by-month action items from administrator approval through post-event follow-up. Designed to be printed and checked off as you go.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Teachers / Admins</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/setup-guide/12-month-planning-checklist.pdf','12-Month Planning Checklist')">Download</button>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          PDF
+        </div>
+        <div class="tpl-card-title">Day-of-Event Checklist</div>
+        <div class="tpl-card-desc">Setup through awards ceremony — 25–30 line items covering setup, judge check-in, student registration, awards, and cleanup. Print and use fair day.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Teachers / Coordinators</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/setup-guide/day-of-event-checklist.pdf','Day-of-Event Checklist')">Download</button>
         </div>
       </div>
 
@@ -348,28 +391,11 @@
           <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           Word Doc
         </div>
-        <div class="tpl-card-title">Parent Permission Letter</div>
-        <div class="tpl-card-desc">Ready-to-customize permission and information letter for parents and guardians. Covers fair dates, rules, and student participation requirements.</div>
+        <div class="tpl-card-title">Post-Event Survey Template</div>
+        <div class="tpl-card-desc">One-page survey for students and teachers to evaluate the fair. Used for program improvement and grant reporting.</div>
         <div class="tpl-card-footer">
           <span class="tpl-card-for">Teachers</span>
-          <button class="tpl-dl-btn" onclick="trackDownload('teacher/parent-permission-letter.docx','Parent Permission Letter')">
-            Download
-          </button>
-        </div>
-      </div>
-
-      <div class="tpl-card">
-        <div class="tpl-card-type">
-          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          Word Doc
-        </div>
-        <div class="tpl-card-title">Judge Recruitment Email</div>
-        <div class="tpl-card-desc">Tested cold-email template for recruiting community professionals as science fair judges. Customizable with your school name and fair date.</div>
-        <div class="tpl-card-footer">
-          <span class="tpl-card-for">Teachers</span>
-          <button class="tpl-dl-btn" onclick="trackDownload('teacher/judge-recruitment/judge-recruitment-email-template.docx','Judge Recruitment Email')">
-            Download
-          </button>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/setup-guide/post-event-survey-template.docx','Post-Event Survey Template')">Download</button>
         </div>
       </div>
 
@@ -378,13 +404,37 @@
           <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
           Spreadsheet
         </div>
-        <div class="tpl-card-title">Student Project Tracker</div>
-        <div class="tpl-card-desc">Spreadsheet to track all students' project topics, status, submission dates, and scores. Includes conditional formatting for at-a-glance status.</div>
+        <div class="tpl-card-title">Science Fair Budget Template</div>
+        <div class="tpl-card-desc">Line items: trophies/medals, printing, OAS registration fees, refreshments, display board materials, judge gifts. Scales from $300 to $5K fairs.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Teachers / Admins</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/setup-guide/budget-template.xlsx','Budget Template')">Download</button>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          PDF
+        </div>
+        <div class="tpl-card-title">OAS ProjectBoard Walkthrough</div>
+        <div class="tpl-card-desc">Screenshot-based guide to the ProjectBoard registration process. Step-by-step with arrows and annotations. Distribute to students at project kickoff.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Teachers / Students</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/setup-guide/oas-projectboard-walkthrough.pdf','OAS ProjectBoard Walkthrough')">Download</button>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Canva Template
+        </div>
+        <div class="tpl-card-title">Science Fair Timeline Poster</div>
+        <div class="tpl-card-desc">Classroom-printable 11x17 poster showing the full school-year timeline for science fair. Visual and student-facing — hang in your classroom.</div>
         <div class="tpl-card-footer">
           <span class="tpl-card-for">Teachers</span>
-          <button class="tpl-dl-btn" onclick="trackDownload('teacher/student-project-tracker.xlsx','Student Project Tracker')">
-            Download
-          </button>
+          <button class="tpl-dl-btn canva" onclick="trackDownload('CANVA_PLACEHOLDER','Science Fair Timeline Poster')">Open in Canva</button>
         </div>
       </div>
 
@@ -397,9 +447,33 @@
         <div class="tpl-card-desc">Editable Canva flyer to announce your school's science fair to students and parents. Customizable text, dates, and school branding.</div>
         <div class="tpl-card-footer">
           <span class="tpl-card-for">Teachers</span>
-          <button class="tpl-dl-btn canva" onclick="trackDownload('teacher/announcement-flyer-canva','Announcement Flyer')">
-            Open in Canva
-          </button>
+          <button class="tpl-dl-btn canva" onclick="trackDownload('CANVA_PLACEHOLDER','Announcement Flyer')">Open in Canva</button>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Spreadsheet
+        </div>
+        <div class="tpl-card-title">Student Project Tracker</div>
+        <div class="tpl-card-desc">Spreadsheet to track all students' project topics, status, submission dates, and scores. Includes conditional formatting for at-a-glance status.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Teachers</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/student-project-tracker.xlsx','Student Project Tracker')">Download</button>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          PDF
+        </div>
+        <div class="tpl-card-title">Science Fair Timeline Poster (Print)</div>
+        <div class="tpl-card-desc">Printable PDF version of the school-year science fair timeline. No Canva account needed — print directly.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Teachers</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/setup-guide/science-fair-timeline-poster.pdf','Science Fair Timeline Poster')">Download</button>
         </div>
       </div>
 
@@ -408,24 +482,22 @@
           <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           Word Doc
         </div>
-        <div class="tpl-card-title">Administrator Buy-In Proposal</div>
-        <div class="tpl-card-desc">One-page proposal template to present to your principal or administration when launching a new science fair program. Includes cost breakdown and timeline.</div>
+        <div class="tpl-card-title">Parent Permission Letter</div>
+        <div class="tpl-card-desc">Permission for student to participate and for photos to be taken at the fair. Includes emergency contact field. Customizable with your school name.</div>
         <div class="tpl-card-footer">
-          <span class="tpl-card-for">Teachers / Admins</span>
-          <button class="tpl-dl-btn" onclick="trackDownload('teacher/admin-buyin-proposal.docx','Admin Buy-In Proposal')">
-            Download
-          </button>
+          <span class="tpl-card-for">Teachers</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/communication/parent-permission-slip.docx','Parent Permission Letter')">Download</button>
         </div>
       </div>
 
     </div>
   </div>
 
-  <!-- ── JUDGE RESOURCES ──────────────────────────────────────── -->
-  <div class="tpl-section" data-cat="judge">
+  <!-- ── CURRICULUM RESOURCES ───────────────────────────────────── -->
+  <div class="tpl-section" data-cat="curriculum">
     <div class="tpl-section-head">
-      <h2>Judging Resources</h2>
-      <span class="tpl-section-count">3 resources</span>
+      <h2>Curriculum Resources</h2>
+      <span class="tpl-section-count">4 resources</span>
     </div>
     <div class="tpl-grid">
 
@@ -434,13 +506,213 @@
           <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
           PDF
         </div>
-        <div class="tpl-card-title">2026 Judging Score Cards</div>
+        <div class="tpl-card-title">Lesson Plans — Grades 6–8</div>
+        <div class="tpl-card-desc">4–6 classroom lessons: scientific method, hypothesis writing, experimental design, data collection, and presentation skills. Ohio Learning Standards aligned.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Teachers</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/curriculum/lesson-plans-grades-6-8.pdf','Lesson Plans Grades 6-8')">Download</button>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          PDF
+        </div>
+        <div class="tpl-card-title">Lesson Plans — Grades 9–12</div>
+        <div class="tpl-card-desc">Same 4–6 lessons adapted for high school depth. Includes statistics basics and literature review concepts for upper-level science fair projects.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Teachers</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/curriculum/lesson-plans-grades-9-12.pdf','Lesson Plans Grades 9-12')">Download</button>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          PDF
+        </div>
+        <div class="tpl-card-title">Student Worksheets Pack</div>
+        <div class="tpl-card-desc">Printable handouts: hypothesis worksheet, variable identification, data table template, procedure outline. One per lesson — print the whole pack or select individual sheets.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Teachers / Students</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/curriculum/student-worksheets-pack.pdf','Student Worksheets Pack')">Download</button>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          PDF
+        </div>
+        <div class="tpl-card-title">Grading Rubrics Pack</div>
+        <div class="tpl-card-desc">4 rubrics: project proposal, progress check, final project (research paper + display board), and presentation/interview. Percentage-based with clear descriptors.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Teachers</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/curriculum/grading-rubrics-pack.pdf','Grading Rubrics Pack')">Download</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── PARENT COMMUNICATION ───────────────────────────────────── -->
+  <div class="tpl-section" data-cat="parent">
+    <div class="tpl-section-head">
+      <h2>Parent Communication</h2>
+      <span class="tpl-section-count">3 resources</span>
+    </div>
+    <div class="tpl-grid">
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Word Doc
+        </div>
+        <div class="tpl-card-title">Parent Introduction Letter</div>
+        <div class="tpl-card-desc">Announces the science fair program to parents. Includes timeline, expectations, and how parents can support without doing the work.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Teachers → Parents</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/communication/parent-introduction-letter.docx','Parent Introduction Letter')">Download</button>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Word Doc
+        </div>
+        <div class="tpl-card-title">Parent Permission Slip</div>
+        <div class="tpl-card-desc">Permission for student to participate and for photos to be taken at the fair. Includes emergency contact field. Customizable with your school name.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Teachers → Parents</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/communication/parent-permission-slip.docx','Parent Permission Slip')">Download</button>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Word Doc
+        </div>
+        <div class="tpl-card-title">Parent Deadline Reminder</div>
+        <div class="tpl-card-desc">Short reminder letter 2 weeks before major deadlines. Fill-in fields for date and specific requirement. Send for proposal submissions, fair day, and results.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Teachers → Parents</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/communication/parent-deadline-reminder.docx','Parent Deadline Reminder')">Download</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── JUDGE RECRUITMENT ──────────────────────────────────────── -->
+  <div class="tpl-section" data-cat="recruitment">
+    <div class="tpl-section-head">
+      <h2>Judge Recruitment</h2>
+      <span class="tpl-section-count">5 resources</span>
+    </div>
+    <div class="tpl-grid">
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Word Doc
+        </div>
+        <div class="tpl-card-title">Judge Recruitment Email</div>
+        <div class="tpl-card-desc">Tested 2-paragraph cold email to STEM professionals. Subject line, personal opener, fair details placeholder, and clear ask. Customize with school name.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Teachers</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/judge-recruitment/judge-recruitment-email-template.docx','Judge Recruitment Email')">Download</button>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          PDF
+        </div>
+        <div class="tpl-card-title">Judge Training Manual</div>
+        <div class="tpl-card-desc">What judges need to know: scoring rubrics, student age expectations, scientific method overview, how to give constructive feedback. OAS-compliant.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Judges</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/judge-recruitment/judge-training-manual.pdf','Judge Training Manual')">Download</button>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Word Doc
+        </div>
+        <div class="tpl-card-title">Sponsorship Outreach Letter</div>
+        <div class="tpl-card-desc">Template letter to local businesses requesting sponsorship. Includes naming rights on trophies and program recognition. Scales to any sponsorship tier.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Teachers / Coordinators</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/judge-recruitment/sponsorship-outreach-letter.docx','Sponsorship Outreach Letter')">Download</button>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          Word Doc
+        </div>
+        <div class="tpl-card-title">Judge Thank-You Letter</div>
+        <div class="tpl-card-desc">Post-fair thank-you template for judges. Personalized, mentions volunteer hours for corporate tracking. Send within one week of the fair.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Teachers → Judges</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/judge-recruitment/judge-thank-you-letter.docx','Judge Thank-You Letter')">Download</button>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+          Canva Template
+        </div>
+        <div class="tpl-card-title">Judge Outreach Letter (Editable)</div>
+        <div class="tpl-card-desc">Beautifully designed outreach letter in Canva. Branded FairGame template you can customize with your school name, fair date, and contact info. Export as PDF to send.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Teachers</span>
+          <button class="tpl-dl-btn canva" onclick="trackDownload('CANVA_PLACEHOLDER','Judge Outreach Letter')">Open in Canva</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── JUDGING RESOURCES ──────────────────────────────────────── -->
+  <div class="tpl-section" data-cat="judge">
+    <div class="tpl-section-head">
+      <h2>Judging Resources</h2>
+      <span class="tpl-section-count">4 resources</span>
+    </div>
+    <div class="tpl-grid">
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          PDF
+        </div>
+        <div class="tpl-card-title">2026 Score Cards — Vertical Layout</div>
         <div class="tpl-card-desc">Official OAS 2026 vertical-layout scoring rubrics for all project categories. One sheet per student project. Print-ready.</div>
         <div class="tpl-card-footer">
           <span class="tpl-card-for">Judges</span>
-          <button class="tpl-dl-btn" onclick="trackDownload('Documents/2026-Judging-Score-Cards-Vertical-layout.pdf','2026 Judging Score Cards')">
-            Download
-          </button>
+          <button class="tpl-dl-btn" onclick="trackDownload('Documents/2026-Judging-Score-Cards-Vertical-layout.pdf','2026 Score Cards Vertical')">Download</button>
+        </div>
+      </div>
+
+      <div class="tpl-card">
+        <div class="tpl-card-type">
+          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          PDF
+        </div>
+        <div class="tpl-card-title">2026 Score Cards — Horizontal Layout</div>
+        <div class="tpl-card-desc">Same official OAS 2026 scoring rubrics in horizontal layout. Alternative format — use whichever prints better on your printer.</div>
+        <div class="tpl-card-footer">
+          <span class="tpl-card-for">Judges</span>
+          <button class="tpl-dl-btn" onclick="trackDownload('Documents/2026-Judging-Score-Cards-Horizontal-layout.pdf','2026 Score Cards Horizontal')">Download</button>
         </div>
       </div>
 
@@ -453,9 +725,7 @@
         <div class="tpl-card-desc">Everything a first-time judge needs to know: how to score fairly, what questions to ask students, and what to look for beyond the display board.</div>
         <div class="tpl-card-footer">
           <span class="tpl-card-for">Judges</span>
-          <button class="tpl-dl-btn" onclick="trackDownload('judge/judging-orientation-guide.pdf','Judging Orientation Guide')">
-            Download
-          </button>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/judge/judging-orientation-guide.pdf','Judging Orientation Guide')">Download</button>
         </div>
       </div>
 
@@ -468,16 +738,14 @@
         <div class="tpl-card-desc">Spreadsheet for fair coordinators to assign judges to projects by expertise area. Auto-calculates judge-to-project ratios.</div>
         <div class="tpl-card-footer">
           <span class="tpl-card-for">Teachers / Coordinators</span>
-          <button class="tpl-dl-btn" onclick="trackDownload('judge/judge-assignment-sheet.xlsx','Judge Assignment Sheet')">
-            Download
-          </button>
+          <button class="tpl-dl-btn" onclick="trackDownload('resources/judge/judge-assignment-sheet.xlsx','Judge Assignment Sheet')">Download</button>
         </div>
       </div>
 
     </div>
   </div>
 
-  <!-- ── FORMS ──────────────────────────────────────────────────── -->
+  <!-- ── OFFICIAL FORMS ─────────────────────────────────────────── -->
   <div class="tpl-section" data-cat="forms">
     <div class="tpl-section-head">
       <h2>Official Forms</h2>
@@ -494,9 +762,7 @@
         <div class="tpl-card-desc">Official form for schools to register as a FairGame affiliate fair. Required for access to the full judge network and resource library.</div>
         <div class="tpl-card-footer">
           <span class="tpl-card-for">Schools</span>
-          <button class="tpl-dl-btn" onclick="trackDownload('forms/affiliate-registration-form.pdf','Affiliate Registration Form')">
-            Download
-          </button>
+          <button class="tpl-dl-btn" onclick="trackDownload('forms/affiliate-registration-form.pdf','Affiliate Registration Form')">Download</button>
         </div>
       </div>
 
@@ -509,9 +775,7 @@
         <div class="tpl-card-desc">Required for projects involving chemicals, animals, or human subjects. Must be completed before experimentation begins.</div>
         <div class="tpl-card-footer">
           <span class="tpl-card-for">Students</span>
-          <button class="tpl-dl-btn" onclick="trackDownload('forms/safety-review-form.pdf','Safety Review Form')">
-            Download
-          </button>
+          <button class="tpl-dl-btn" onclick="trackDownload('forms/safety-review-form.pdf','Safety Review Form')">Download</button>
         </div>
       </div>
 
@@ -524,16 +788,14 @@
         <div class="tpl-card-desc">Parent/guardian consent form for FairGame to photograph or feature student work in publications and on the website.</div>
         <div class="tpl-card-footer">
           <span class="tpl-card-for">Students / Parents</span>
-          <button class="tpl-dl-btn" onclick="trackDownload('forms/media-release-form.pdf','Media Release Form')">
-            Download
-          </button>
+          <button class="tpl-dl-btn" onclick="trackDownload('forms/media-release-form.pdf','Media Release Form')">Download</button>
         </div>
       </div>
 
     </div>
   </div>
 
-  <!-- ── REQUEST A TEMPLATE ───────────────────────────────────── -->
+  <!-- ── REQUEST A TEMPLATE ─────────────────────────────────────── -->
   <div style="background:var(--green-50);border:1.5px solid var(--green-100);border-radius:12px;padding:40px;text-align:center;margin-top:24px;">
     <h3 style="font-family:var(--ff-serif);font-size:1.3rem;color:var(--green-900);margin:0 0 10px;">Don't see what you need?</h3>
     <p style="font-size:.9rem;color:var(--gray-500);line-height:1.7;max-width:480px;margin:0 auto 20px;">We're always adding new resources. Email us and we'll either point you to something that already exists or build it.</p>
@@ -584,7 +846,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/script.js"></script>
 <script>
-  // ── Supabase (reuse the instance from script.js if available, else create one)
   const TPL_SB_URL = 'https://buzcxrbjutexiofetgvn.supabase.co';
   const TPL_SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1emN4cmJqdXRleGlvZmV0Z3ZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Nzc1NTEsImV4cCI6MjA4OTM1MzU1MX0.ifMup4fCcfHaf7Q4TYfi1X1V-J8tQpu2JwaqvjBcsBQ';
   let tplSb = null;
@@ -600,47 +861,67 @@
 
   // ── Track a download and open the file
   async function trackDownload(path, name) {
-    // Log to Supabase
+    // Log to Supabase (non-blocking)
     if (tplSb) {
       tplSb.from('resource_downloads').insert([{
-        resource: name,
-        path,
+        resource: name, path,
         page: window.location.pathname,
         ts: new Date().toISOString()
       }]).then(() => {}).catch(() => {});
     }
-    // Open/download the file
-    if (path.includes('canva')) {
-      // Canva links — replace with real Canva share URLs when ready
-      alert('Canva template link coming soon! Email fairgameinitiative@outlook.com to request early access.');
+    // CANVA_PLACEHOLDER = design not yet published — show coming-soon message
+    if (path === 'CANVA_PLACEHOLDER') {
+      alert('This Canva template is coming soon! Email fairgameinitiative@outlook.com to request early access.');
       return;
     }
-    const url = path.startsWith('http') ? path : '/' + path;
-    window.open(url, '_blank');
+    // Real Canva URL or any http URL — open directly
+    if (path.startsWith('http')) {
+      window.open(path, '_blank');
+      return;
+    }
+    // Local file
+    window.open('/' + path, '_blank');
   }
   window.trackDownload = trackDownload;
+
+  // ── Open full Canva library (placeholder until brand kit URL is ready)
+  function openCanvaLibrary(e) {
+    const href = e.currentTarget.getAttribute('href');
+    if (href === 'CANVA_PLACEHOLDER') {
+      e.preventDefault();
+      alert('Full Canva library link coming soon! In the meantime, use the individual "Open in Canva" buttons below.');
+    }
+  }
+  window.openCanvaLibrary = openCanvaLibrary;
 
   // ── Category filter
   function filterCat(cat, btn) {
     document.querySelectorAll('.tpl-filter-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    document.querySelectorAll('.tpl-section[data-cat]').forEach(sec => {
-      if (cat === 'all' || sec.dataset.cat === cat) {
-        sec.classList.remove('hidden');
-      } else {
-        sec.classList.add('hidden');
-      }
-    });
-    // Canva filter crosses sections
+
+    // Reset all card visibility first
+    document.querySelectorAll('.tpl-card').forEach(c => c.style.display = '');
+
     if (cat === 'canva') {
-      document.querySelectorAll('.tpl-section[data-cat]').forEach(sec => sec.classList.remove('hidden'));
+      // Show all sections but hide non-canva cards
+      document.querySelectorAll('.tpl-section[data-cat]').forEach(s => s.classList.remove('hidden'));
       document.querySelectorAll('.tpl-card').forEach(card => {
-        const isCanva = card.querySelector('.tpl-dl-btn.canva');
-        card.style.display = isCanva ? '' : 'none';
+        card.style.display = card.querySelector('.tpl-dl-btn.canva') ? '' : 'none';
+      });
+      // Hide sections with no visible cards
+      document.querySelectorAll('.tpl-section[data-cat]').forEach(sec => {
+        const visible = [...sec.querySelectorAll('.tpl-card')].some(c => c.style.display !== 'none');
+        sec.classList.toggle('hidden', !visible);
       });
     } else {
-      document.querySelectorAll('.tpl-card').forEach(card => card.style.display = '');
+      document.querySelectorAll('.tpl-section[data-cat]').forEach(sec => {
+        sec.classList.toggle('hidden', cat !== 'all' && sec.dataset.cat !== cat);
+      });
     }
+
+    // Always show/hide the canva banner accordingly
+    const banner = document.getElementById('canva-library-banner');
+    if (banner) banner.style.display = (cat === 'all' || cat === 'canva') ? '' : 'none';
   }
   window.filterCat = filterCat;
 </script>
