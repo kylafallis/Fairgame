@@ -700,7 +700,13 @@ Object.assign(window, { regTeacher, regAmbassador, magicLink });
 
 /* ─────────────────────────────────────────────────────────────
    VOLUNTEER PAGE — judge & mentor application forms
+   Fill in these three values after setting up EmailJS
+   (see instructions at bottom of this file / README)
    ───────────────────────────────────────────────────────────── */
+const VOL_EJS_SERVICE  = 'YOUR_SERVICE_ID';   // e.g. 'service_abc123'
+const VOL_EJS_TEMPLATE = 'YOUR_TEMPLATE_ID';  // e.g. 'template_xyz456'
+const VOL_EJS_KEY      = 'YOUR_PUBLIC_KEY';   // Account > API Keys on emailjs.com
+
 function getExpertise() {
   const map = {
     je1: 'Biology / Life Sciences',
@@ -741,14 +747,14 @@ async function submitJudge() {
 
   if (!name || !email || !city || !county || !travelSel) {
     msgEl.textContent = 'Please fill out all required fields (name, email, city, county, and travel range).';
-    msgEl.className   = 'msg-err';
+    msgEl.className   = 'form-msg error';
     return;
   }
 
   msgEl.textContent = 'Submitting…';
-  msgEl.className   = '';
+  msgEl.className   = 'form-msg';
+  msgEl.style.display = 'block';
 
-  // Generate judge code using same logic as portal-shared.js generateJudgeCode
   const P = { Biology:'BI', Chemistry:'CH', Physics:'PH', Environmental:'EN', Computer:'CS', Medicine:'ME' };
   const first  = expertise[0] || '';
   const prefix = Object.entries(P).find(([k]) => first.includes(k))?.[1] || 'GN';
@@ -757,7 +763,6 @@ async function submitJudge() {
   const code   = `${prefix}-${fips}-${rnd}`;
 
   if (sb) {
-    // 1. Store judge record in judges table
     const { error: judgeErr } = await sb.from('judges').insert([{
       code,
       name,
@@ -775,36 +780,36 @@ async function submitJudge() {
     }]);
 
     if (judgeErr) {
-      console.warn('[submitJudge] judges insert:', judgeErr.message);
-      // Non-fatal — continue to send the magic link
-    }
-
-    // 2. Send a magic link that creates (or signs in) their judge account
-    const { error: otpErr } = await sb.auth.signInWithOtp({
-      email,
-      options: {
-        data: { name, role: 'judge' },
-        emailRedirectTo: window.location.origin + '/portal-judge.html'
-      }
-    });
-
-    if (otpErr) {
-      msgEl.textContent = 'Application saved but email error: ' + otpErr.message + '. Contact fairgameinitiative@outlook.com';
-      msgEl.className   = 'msg-err';
-      logEvent('judge_application', { level, expertise, error: otpErr.message });
+      msgEl.textContent = 'Error saving your application — please email fairgameinitiative@outlook.com';
+      msgEl.className   = 'form-msg error';
       return;
     }
+
+    // Send magic-link portal invite — non-blocking, failure is not fatal
+    sb.auth.signInWithOtp({
+      email,
+      options: { data: { name, role: 'judge' }, emailRedirectTo: window.location.origin + '/portal-judge.html' }
+    }).catch(() => {});
   }
 
-  // Clear form
+  // Notify admin via EmailJS (fire-and-forget)
+  if (VOL_EJS_SERVICE !== 'YOUR_SERVICE_ID' && typeof emailjs !== 'undefined') {
+    emailjs.send(VOL_EJS_SERVICE, VOL_EJS_TEMPLATE, {
+      form_type:  'Judge Application',
+      from_name:  name,
+      from_email: email,
+      details:    `Org: ${org || 'N/A'} | City: ${city} | County: ${county} | Travel: ${travel_range} | Level: ${level || 'Any'} | Expertise: ${expertise.join(', ') || 'None selected'} | Notes: ${notes || 'N/A'} | Code: ${code}`
+    }, VOL_EJS_KEY).catch(() => {});
+  }
+
   ['jName','jEmail','jOrg','jCity','jCounty','jNotes','jTravelOther'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   ['je1','je2','je3','je4','je5','je6'].forEach(id => { const el = document.getElementById(id); if (el) el.checked = false; });
   const lvl = document.getElementById('jLevel'); if (lvl) lvl.value = '';
   const trv = document.getElementById('jTravel'); if (trv) trv.value = '';
   const trvOther = document.getElementById('jTravelOther'); if (trvOther) trvOther.style.display = 'none';
 
-  msgEl.textContent = "Application received! Check your email for a sign-in link to access your judge portal. Your judge code is: " + code;
-  msgEl.className   = 'msg-ok';
+  msgEl.textContent = `Application received! Check your email for a sign-in link to your judge portal. Your judge code is: ${code}`;
+  msgEl.className   = 'form-msg success';
   logEvent('judge_application', { level, expertise, code });
 }
 
@@ -821,15 +826,15 @@ async function submitMentor() {
 
   if (!name || !email || !field || !bio) {
     msgEl.textContent = 'Please fill out all required fields including your bio.';
-    msgEl.className   = 'msg-err';
+    msgEl.className   = 'form-msg error';
     return;
   }
 
   msgEl.textContent = 'Submitting…';
-  msgEl.className   = '';
+  msgEl.className   = 'form-msg';
+  msgEl.style.display = 'block';
 
   if (sb) {
-    // Store in portal_requests so admin sees it in the approvals queue
     const { error } = await sb.from('portal_requests').insert([{
       name, email,
       school: role || '',
@@ -839,18 +844,27 @@ async function submitMentor() {
     }]);
     if (error) {
       msgEl.textContent = 'Error submitting — please email fairgameinitiative@outlook.com';
-      msgEl.className   = 'msg-err';
+      msgEl.className   = 'form-msg error';
       return;
     }
   }
 
-  // Clear form
+  // Notify admin via EmailJS (fire-and-forget)
+  if (VOL_EJS_SERVICE !== 'YOUR_SERVICE_ID' && typeof emailjs !== 'undefined') {
+    emailjs.send(VOL_EJS_SERVICE, VOL_EJS_TEMPLATE, {
+      form_type:  'Mentor / FairGame Family Application',
+      from_name:  name,
+      from_email: email,
+      details:    `Role/Title: ${role || 'N/A'} | STEM Field: ${field} | Hours/month: ${hours || 'N/A'} | Format: ${format || 'N/A'} | Bio: ${bio}`
+    }, VOL_EJS_KEY).catch(() => {});
+  }
+
   ['mName','mEmail','mRole','mField','mBio'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   const mh = document.getElementById('mHours'); if (mh) mh.value = '';
   const mf = document.getElementById('mFormat'); if (mf) mf.value = '';
 
   msgEl.textContent = "Application received! Because mentors work with students, we personally review every application. If approved, you'll receive an invite to our moderated FairGame Discord — typically within 3–5 business days.";
-  msgEl.className   = 'msg-ok';
+  msgEl.className   = 'form-msg success';
   logEvent('mentor_application', { field, hours });
 }
 
