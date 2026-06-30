@@ -177,17 +177,44 @@ function initCountUp() {
   const triggers = document.querySelectorAll('.cu');
   if (!triggers.length) return;
 
-  // Find a container element to observe — fall back to first .cu element itself
   const container = document.querySelector('.hero-stats') || triggers[0].parentElement;
+  let animated = false;
 
-  const observer = new IntersectionObserver(entries => {
-    if (entries[0].isIntersecting) {
-      triggers.forEach(el => countUp(el, parseInt(el.dataset.t, 10)));
-      observer.disconnect();
-    }
-  }, { threshold: 0.3 });
+  function startAnimation() {
+    if (animated) return;
+    animated = true;
+    triggers.forEach(el => countUp(el, parseInt(el.dataset.t, 10)));
+  }
 
-  observer.observe(container);
+  function attachObserver() {
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting) { startAnimation(); observer.disconnect(); }
+    }, { threshold: 0.3 });
+    observer.observe(container);
+  }
+
+  // Fetch live values from Supabase stats table, then attach the observer.
+  // Fall back immediately if Supabase isn't available or takes too long.
+  try {
+    const _sbUrl = 'https://buzcxrbjutexiofetgvn.supabase.co';
+    const _sbKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1emN4cmJqdXRleGlvZmV0Z3ZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Nzc1NTEsImV4cCI6MjA4OTM1MzU1MX0.ifMup4fCcfHaf7Q4TYfi1X1V-J8tQpu2JwaqvjBcsBQ';
+    if (window.supabase) {
+      const _sb = window.supabase.createClient(_sbUrl, _sbKey);
+      const timeout = setTimeout(attachObserver, 1500); // fallback if fetch is slow
+      _sb.from('stats').select('key,value').then(({ data }) => {
+        clearTimeout(timeout);
+        if (data?.length) {
+          const map = {};
+          data.forEach(r => { map[r.key] = r.value; });
+          triggers.forEach(el => {
+            const key = el.dataset.key;
+            if (key && map[key] !== undefined) el.dataset.t = String(map[key]);
+          });
+        }
+        attachObserver();
+      }).catch(() => attachObserver());
+    } else { attachObserver(); }
+  } catch(_) { attachObserver(); }
 }
 
 

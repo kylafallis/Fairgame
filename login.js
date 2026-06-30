@@ -41,7 +41,8 @@ async function go(user) {
   // Teacher / Ambassador: check approval status in portal_requests
   if (APPROVAL_ROLES.includes(role) && sb) {
     const { data: rows, error: reqErr } = await sb.from('portal_requests')
-      .select('status').eq('email', user.email)
+      .select('status').eq('email', user.email).eq('type', role)
+      .in('status', ['pending', 'active', 'rejected'])
       .order('created_at', { ascending: false }).limit(1);
     const req = rows?.[0] || null;
     // If RLS blocked the query, don't block the user — let them through

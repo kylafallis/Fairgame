@@ -60,7 +60,8 @@ function requireAuth(expectedRole, onReady) {
       // Teacher and Ambassador accounts require admin approval before portal access
       if ((role === 'teacher' || role === 'ambassador') && role !== 'admin') {
         const { data: rows, error: reqErr } = await sb.from('portal_requests')
-          .select('status').eq('email', user.email)
+          .select('status').eq('email', user.email).eq('type', role)
+          .in('status', ['pending', 'active', 'rejected'])
           .order('created_at', { ascending: false }).limit(1);
         const req = rows?.[0] || null;
         // If RLS blocked the query entirely, don't punish the user — let them through

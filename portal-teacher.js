@@ -212,7 +212,7 @@ function renderTeacherStudentTable(students) {
     <td class="col-sm">${s.project_title||'<em class="text-muted">Not set</em>'}</td>
     <td class="col-sm">${s.project_field||'—'}</td>
     <td><span class="chip chip-${s.paperwork_status||'pending'}">${s.paperwork_status||'pending'}</span></td>
-    <td><button class="btn-xs" onclick="alert('Document upload for teachers coming in next build.')">Upload</button></td>
+    <td><button class="btn-xs" onclick="showSection('documents',document.querySelector('[data-section=documents]'))">Upload</button></td>
   </tr>`).join('');
 }
 

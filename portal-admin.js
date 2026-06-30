@@ -208,10 +208,10 @@ async function loadMentors() {
       </tr>`).join('');
 }
 
-const STAT_KEYS   = ['schools_supported','states_covered','resources_count','teachers_network'];
-const STAT_LABELS = ['Schools Supported','States Covered','Resources Count','Teacher Network'];
+const STAT_KEYS   = ['schools_supported','students_reached','resources_count','teachers_network'];
+const STAT_LABELS = ['Schools Supported','Students Reached','Free Resources','Teacher Network'];
 async function loadStats() {
-  let vals = { schools_supported:12, states_covered:1, resources_count:47, teachers_network:100 };
+  let vals = { schools_supported:4, students_reached:500, resources_count:47, teachers_network:100 };
   if (sb) { const { data } = await sb.from('stats').select('*'); (data||[]).forEach(r => vals[r.key] = r.value); }
   document.getElementById('statsForm').innerHTML = STAT_KEYS.map((k,i) => `
     <div class="form-group"><label class="form-label">${STAT_LABELS[i]}</label><input type="number" id="stat_${k}" value="${vals[k]}" min="0"/></div>`).join('');
@@ -219,7 +219,7 @@ async function loadStats() {
 async function saveStats() {
   for (const key of STAT_KEYS) {
     const val = parseInt(document.getElementById('stat_'+key)?.value||'0');
-    if (sb) await sb.from('stats').update({ value: val, updated_at: new Date().toISOString() }).eq('key', key);
+    if (sb) await sb.from('stats').upsert({ key, value: val, updated_at: new Date().toISOString() }, { onConflict: 'key' });
   }
   showMsg('statsMsg','Stats saved — homepage counters will update.','ok');
 }
