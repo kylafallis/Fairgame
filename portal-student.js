@@ -249,13 +249,5 @@ async function _submitPost(body, msgId) {
   loadCommunityPosts();
 }
 
-/* ── Resources download ── */
-async function dlRes(path) {
-  const url = await getSignedUrl('resources', path);
-  if (url) window.open(url);
-  else alert('Resource not yet uploaded. Email fairgameinitiative@outlook.com to request it.');
-}
-window.dlRes = dlRes;
-
 /* ── Load community posts on section open ── */
 onSectionLoad('community', loadCommunityPosts);

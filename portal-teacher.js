@@ -277,6 +277,3 @@ function renderTimeline() {
 }
 function saveTl(i, v) { const s = JSON.parse(localStorage.getItem('fg_tl')||'{}'); s[i]=v; localStorage.setItem('fg_tl',JSON.stringify(s)); renderTimeline(); }
 window.saveTl = saveTl;
-
-async function dlTeacherRes(path) { const url = await getSignedUrl('resources', path); if (url) window.open(url); else alert('Resource not uploaded yet. Email fairgameinitiative@outlook.com'); }
-window.dlTeacherRes = dlTeacherRes;

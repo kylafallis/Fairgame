@@ -190,10 +190,3 @@ async function requestMeeting() {
   showMsg('schedMsg',"Request sent! We'll confirm within 48 hours.",'ok');
 }
 window.requestMeeting = requestMeeting;
-
-/* ── Resources download ── */
-async function dlRes(path) {
-  const url = await getSignedUrl('resources', path);
-  if (url) window.open(url); else alert('Resource not uploaded yet. Email fairgameinitiative@outlook.com');
-}
-window.dlRes = dlRes;
