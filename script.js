@@ -791,7 +791,6 @@ async function submitJudge() {
 
   if (sb) {
     const { error: judgeErr } = await sb.from('judges').insert([{
-      code,
       name,
       email,
       org:             org || '',
