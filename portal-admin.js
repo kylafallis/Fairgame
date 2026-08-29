@@ -23,6 +23,94 @@ const DEMO = {
 
 let allApprovals = [], approvalFilter = 'all';
 
+/* ── Welcome emails sent on approval ──────────────────────────────
+   No mail server behind this page, so approving opens a pre-filled message
+   in whatever mail client this machine uses. Edit the copy here. */
+const PORTAL_URL = 'https://fairgameinitiative.org/login.html';
+const APPROVAL_SIGNOFF = 'Kyla Fallis\nFairGame Initiative\nfairgameinitiative@outlook.com';
+
+function firstName(name) {
+  const parts = (name || '').trim().split(/\s+/).filter(Boolean);
+  if (!parts.length) return 'there';
+  // Teachers usually sign up as "Ms. Williams" — keep the title with the surname.
+  if (/^(mr|mrs|ms|miss|mx|dr|prof|professor)\.?$/i.test(parts[0])) {
+    return parts.length === 1 ? 'there' : parts[0] + ' ' + parts[parts.length - 1];
+  }
+  return parts[0];
+}
+
+function approvalEmailFor(type, name, discordLink) {
+  const hi = 'Hi ' + firstName(name) + ',\n\n';
+
+  if (type === 'teacher') {
+    return {
+      subject: 'Your FairGame Teacher Portal access is approved',
+      body: hi +
+        'Your teacher account is approved. You can sign in now at\n' + PORTAL_URL + '\n\n' +
+        'Inside the Teacher Portal you will find the student worksheet pack, the four grading rubrics, the grade-band timelines, the standards alignment map, and the judge request form. All of it is ready to use as it is.\n\n' +
+        'If your email address is not confirmed yet, click the link in the confirmation message from FairGame first, then sign in.\n\n' +
+        'Send me your fair date and a rough student count and I will help you work backward from the OAS registration deadline.\n\n' +
+        'Glad to have you in this.\n\n' + APPROVAL_SIGNOFF
+    };
+  }
+
+  if (type === 'ambassador') {
+    return {
+      subject: 'Your FairGame Ambassador Portal access is approved',
+      body: hi +
+        'Your Student Ambassador account is approved. Sign in at\n' + PORTAL_URL + '\n\n' +
+        'The Ambassador Portal has the club launch kit, the pitch deck for your principal, and your hour log. Start with the launch kit — it walks through your first three meetings.\n\n' +
+        'Tell me which school you are starting at and I will connect you with a mentor.\n\n' + APPROVAL_SIGNOFF
+    };
+  }
+
+  if (type === 'mentor') {
+    return {
+      subject: 'Welcome to the FairGame Community!',
+      body: hi +
+        'Great news — your FairGame mentor application has been approved.\n\n' +
+        'You are now part of our family. Here is your invite to the FairGame Discord, where students and teachers post questions and mentors like you help answer them. It is a low time commitment — jump in whenever you have a few minutes.\n\n' +
+        'Discord invite: ' + (discordLink || '[paste Discord invite link here]') + '\n\n' +
+        'Thank you for giving back. We are so glad to have you.\n\n' + APPROVAL_SIGNOFF
+    };
+  }
+
+  return {
+    subject: 'Your FairGame portal access is approved',
+    body: hi + 'Your FairGame account is approved. You can sign in at\n' + PORTAL_URL + '\n\n' + APPROVAL_SIGNOFF
+  };
+}
+
+function buildMailto(email, type, name, discordLink) {
+  const m = approvalEmailFor(type, name, discordLink);
+  return 'mailto:' + encodeURIComponent(email) +
+         '?subject=' + encodeURIComponent(m.subject) +
+         '&body='    + encodeURIComponent(m.body);
+}
+
+function openMailto(url) {
+  try {
+    const a = document.createElement('a');
+    a.href = url; a.style.display = 'none';
+    document.body.appendChild(a); a.click(); a.remove();
+    return true;
+  } catch (_) { return false; }
+}
+
+function approvalMsg(html, type) {
+  const el = document.getElementById('approvalsMsg');
+  if (!el) return;
+  el.innerHTML = html;
+  el.className = 'msg-strip show ' + (type || 'ok');
+}
+
+/* Escapes user-submitted text before it goes into the admin tables. */
+function esc(v) {
+  return String(v == null ? '' : v)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
 requireAuth('admin', () => {
   loadAllData();
   onSectionLoad('activity',  loadActivity);
@@ -104,49 +192,53 @@ function renderApprovals() {
   document.getElementById('approvalsTbody').innerHTML = !f.length
     ? '<tr><td colspan="7"><div class="empty-state"><p>No records match the current filter.</p></div></td></tr>'
     : f.map(a => `<tr>
-        <td class="col-name">${a.name}</td>
-        <td class="col-sm">${a.email}</td>
-        <td class="col-sm">${a.school}</td>
-        <td><span class="chip chip-interest">${a.type}</span></td>
+        <td class="col-name">${esc(a.name)}</td>
+        <td class="col-sm">${esc(a.email)}</td>
+        <td class="col-sm">${esc(a.school)}</td>
+        <td><span class="chip chip-interest">${esc(a.type)}</span></td>
         <td class="col-sm">${new Date(a.created_at).toLocaleDateString()}</td>
-        <td><span class="chip chip-${a.status}">${a.status}</span></td>
+        <td><span class="chip chip-${esc(a.status)}">${esc(a.status)}</span></td>
         <td style="white-space:nowrap;display:flex;gap:6px;">
-          ${a.status==='pending'||a.status==='interest' ? `<button class="btn-xs approve" onclick="approveUser('${a.id}','${a.email}','${a.type}')">Approve</button>` : ''}
-          <button class="btn-xs danger" onclick="rejectUser('${a.id}')">Reject</button>
+          ${a.status==='pending'||a.status==='interest' ? `<button class="btn-xs approve" onclick="approveUser('${esc(a.id)}')">Approve</button>` : ''}
+          <button class="btn-xs danger" onclick="rejectUser('${esc(a.id)}')">Reject</button>
         </td>
       </tr>`).join('');
 }
 
-async function approveUser(id, email, type) {
+async function approveUser(id) {
+  const rec = allApprovals.find(a => String(a.id) === String(id));
+  if (!rec) return;
+  const { email, type, name } = rec;
   if (!confirm(`Approve ${email} as ${type}? They will be able to sign in immediately.`)) return;
-  if (sb) await sb.from('portal_requests').update({ status:'active' }).eq('id', id);
 
-  // For mentors: open a pre-filled email with the Discord invite link
-  if (type === 'mentor') {
-    const discordLink = document.getElementById('discordLink')?.value.trim() || '[paste Discord invite link here]';
-    const sub  = encodeURIComponent('Welcome to the FairGame Community!');
-    const body = encodeURIComponent(
-`Hi,
-
-Great news — your FairGame mentor application has been approved!
-
-You're now part of our family. Here's your invite to the FairGame Discord, where students and teachers post questions and mentors like you help answer them. It's a low time commitment — just jump in whenever you have a few minutes.
-
-Discord invite: ${discordLink}
-
-Thank you for giving back. We're so glad to have you.
-
-— FairGame Initiative
-fairgameinitiative@outlook.com`);
-    window.open(`mailto:${email}?subject=${sub}&body=${body}`);
+  if (sb) {
+    const { error } = await sb.from('portal_requests').update({ status:'active' }).eq('id', id);
+    if (error) {
+      approvalMsg('Could not approve ' + esc(email) + ' — ' + esc(error.message), 'err');
+      return;
+    }
   }
+
+  // Every approved role gets a welcome email; mentors also get the Discord invite.
+  const discordLink = document.getElementById('discordLink')?.value.trim() || '';
+  const mailto = buildMailto(email, type, name, discordLink);
+  openMailto(mailto);
+  approvalMsg(
+    'Approved <strong>' + esc(email) + '</strong>. A welcome email is open in your mail app — ' +
+    'if nothing happened, <a href="' + mailto + '">open it here</a>.',
+    'ok'
+  );
 
   await loadApprovals();
   await loadAllData();
 }
 async function rejectUser(id) {
   if (!confirm('Reject this request?')) return;
-  if (sb) await sb.from('portal_requests').update({ status:'rejected' }).eq('id', id);
+  if (sb) {
+    const { error } = await sb.from('portal_requests').update({ status:'rejected' }).eq('id', id);
+    if (error) { approvalMsg('Could not reject — ' + esc(error.message), 'err'); return; }
+  }
+  approvalMsg('Request rejected. No email was sent.', 'ok');
   await loadApprovals();
 }
 window.approveUser = approveUser; window.rejectUser = rejectUser;
