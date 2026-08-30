@@ -94,14 +94,14 @@
       <div class="msg-strip" id="approvalsMsg" style="margin:0 0 16px;"></div>
       <div class="card">
         <div class="card-header">
-          <h3>Pending & Recent Requests</h3>
+          <h3>Requests</h3>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
-            <button class="btn-xs active" onclick="filterApp('all',this)">All</button>
-            <button class="btn-xs" onclick="filterApp('pending',this)">Pending</button>
-            <button class="btn-xs" onclick="filterApp('teacher',this)">Teachers</button>
-            <button class="btn-xs" onclick="filterApp('ambassador',this)">Ambassadors</button>
-            <button class="btn-xs" onclick="filterApp('mentor',this)">Mentors</button>
-            <button class="btn-xs" onclick="filterApp('student_mentor_request',this)">Student Requests</button>
+            <button class="btn-xs active" style="font-weight:700;" onclick="filterApp('pending',this)">Pending</button>
+            <span style="width:1px;background:var(--g100);margin:0 2px;"></span>
+            <button class="btn-xs" onclick="filterApp('teacher',this)">Teacher History</button>
+            <button class="btn-xs" onclick="filterApp('ambassador',this)">Ambassador History</button>
+            <button class="btn-xs" onclick="filterApp('mentor',this)">Mentor History</button>
+            <button class="btn-xs" onclick="filterApp('student_mentor_request',this)">Student Request History</button>
           </div>
         </div>
         <div class="card-body-flush" style="overflow-x:auto;">

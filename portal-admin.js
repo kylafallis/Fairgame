@@ -6,6 +6,9 @@ const DEMO = {
     { id:'a3', name:'Mr. Davis',    email:'tdavis@lima.edu',   school:'Lima Senior HS',   type:'teacher',    status:'active',   created_at:'2026-03-01T09:00:00Z' },
     { id:'a4', name:'Jordan Lee',   email:'jordan@school.edu', school:'Sacramento High School', type:'student_mentor_request', status:'pending', created_at:'2026-03-14T16:00:00Z',
       data:{ grade:'11th', state:'Sacramento, CA', title:'Low-cost water quality biosensor', topics:['Environmental Science','Chemistry / Biochemistry'] } },
+    { id:'a5', name:'Dr. Sarah Chen', email:'schen@example.com', school:'',                 type:'mentor',      status:'active',   created_at:'2026-02-18T11:00:00Z' },
+    { id:'a6', name:'Alex Rivera',   email:'alex@school.edu',   school:'Bath High School',  type:'student_mentor_request', status:'active', created_at:'2026-02-20T13:00:00Z',
+      data:{ grade:'10th', state:'Columbus, OH', title:'Soil pH and crop yield', topics:['Biology / Life Sciences'] } },
   ],
   schools: [
     { school_name:'Bath High School',    teacher_name:'Ms. Williams', program_type:'School fair only', fair_date:'2026-03-14', student_count:35, county:'Allen County',    status:'planning' },
@@ -23,7 +26,8 @@ const DEMO = {
   ],
 };
 
-let allApprovals = [], approvalFilter = 'all', allJudgesForMatch = [];
+let allApprovals = [], approvalFilter = 'pending', allJudgesForMatch = [];
+const PENDING_STATUSES = ['pending', 'interest'];
 
 /* ── Welcome emails sent on approval ──────────────────────────────
    No mail server behind this page, so approving opens a pre-filled message
@@ -234,9 +238,12 @@ function filterApp(type, btn) {
 }
 window.filterApp = filterApp;
 function renderApprovals() {
-  const f = approvalFilter === 'all' ? allApprovals : allApprovals.filter(a => a.type === approvalFilter || a.status === approvalFilter);
+  const f = approvalFilter === 'pending'
+    ? allApprovals.filter(a => PENDING_STATUSES.includes(a.status))
+    : allApprovals.filter(a => a.type === approvalFilter && !PENDING_STATUSES.includes(a.status));
+  const emptyMsg = approvalFilter === 'pending' ? 'No pending requests right now.' : 'No history yet for this type.';
   document.getElementById('approvalsTbody').innerHTML = !f.length
-    ? '<tr><td colspan="7"><div class="empty-state"><p>No records match the current filter.</p></div></td></tr>'
+    ? `<tr><td colspan="7"><div class="empty-state"><p>${emptyMsg}</p></div></td></tr>`
     : f.map(a => {
         const row = `<tr>
         <td class="col-name">${esc(a.name)}</td>
