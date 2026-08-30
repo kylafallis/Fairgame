@@ -27,7 +27,7 @@ async function loadProject() {
     projectData = data;
     renderProjectDisplay(data);
     document.getElementById('kProjectStatus').textContent = stageLabel(data.stage);
-    document.getElementById('kField').textContent = shortField(data.field) || '—';
+    document.getElementById('kField').textContent = shortField(data.field) || '–';
     // Pre-fill modal fields
     document.getElementById('projTitle').value  = data.title  || '';
     document.getElementById('projField').value  = data.field  || '';
@@ -37,7 +37,7 @@ async function loadProject() {
     document.getElementById('projDesc').value   = data.description || '';
   } else {
     document.getElementById('kProjectStatus').textContent = 'Not set';
-    document.getElementById('kField').textContent = '—';
+    document.getElementById('kField').textContent = '–';
   }
 }
 
@@ -50,10 +50,10 @@ function renderProjectDisplay(d) {
         <div class="text-serif fw-600" style="font-size:1.05rem;color:var(--g900);">${d.title}</div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;">
-        <div><div class="text-xs text-muted">Field</div><div class="text-sm fw-500">${d.field || '—'}</div></div>
-        <div><div class="text-xs text-muted">Grade</div><div class="text-sm fw-500">${d.grade || '—'}</div></div>
+        <div><div class="text-xs text-muted">Field</div><div class="text-sm fw-500">${d.field || '–'}</div></div>
+        <div><div class="text-xs text-muted">Grade</div><div class="text-sm fw-500">${d.grade || '–'}</div></div>
         <div><div class="text-xs text-muted">Stage</div><div class="text-sm fw-500">${stageLabel(d.stage)}</div></div>
-        <div><div class="text-xs text-muted">School</div><div class="text-sm fw-500">${d.school || '—'}</div></div>
+        <div><div class="text-xs text-muted">School</div><div class="text-sm fw-500">${d.school || '–'}</div></div>
       </div>
       ${d.description ? `<div><div class="text-xs text-muted" style="margin-bottom:4px;">Description / Hypothesis</div><p class="text-sm" style="line-height:1.6;color:var(--gray-700,#3d453d);">${d.description}</p></div>` : ''}
     </div>
@@ -62,7 +62,7 @@ function renderProjectDisplay(d) {
 
 function stageLabel(s) {
   const map = { planning:'Planning', research:'Researching', experiment:'Experimenting', analysis:'Analyzing', display:'Building Board', registered:'Registered' };
-  return map[s] || s || '—';
+  return map[s] || s || '–';
 }
 function shortField(f) {
   if (!f) return '';
@@ -88,7 +88,7 @@ async function saveProject() {
   projectData = row;
   renderProjectDisplay(row);
   document.getElementById('kProjectStatus').textContent = stageLabel(stage);
-  document.getElementById('kField').textContent = shortField(field) || '—';
+  document.getElementById('kField').textContent = shortField(field) || '–';
   setTimeout(() => closeModal('editProjectModal'), 1200);
   portalLog('project_updated', { title });
 }
@@ -141,7 +141,7 @@ async function sendHelpMessage() {
       subject: topic, body: message
     }]).catch(() => {});
   }
-  const sub  = encodeURIComponent(`FairGame Student Question — ${topic}`);
+  const sub  = encodeURIComponent(`FairGame Student Question - ${topic}`);
   const body = encodeURIComponent(`Topic: ${topic}\n\n${message}`);
   window.open(`mailto:fairgameinitiative@outlook.com?subject=${sub}&body=${body}`);
   document.getElementById('helpTopic').value = '';
@@ -160,11 +160,11 @@ async function scheduleCall() {
   if (sb) {
     await sb.from('messages').insert([{
       from_user_id: studentId, from_role: 'student', to_role: 'admin',
-      subject: `Call Request — ${date} ${time}`,
+      subject: `Call Request - ${date} ${time}`,
       body: notes || '(No additional notes)'
     }]).catch(() => {});
   }
-  const sub  = encodeURIComponent(`FairGame Call Request — ${date}`);
+  const sub  = encodeURIComponent(`FairGame Call Request - ${date}`);
   const bod  = encodeURIComponent(`Hi FairGame Team,\n\nI'd like to schedule a 30-minute call on ${date} (${time}).\n\n${notes}`);
   window.open(`mailto:fairgameinitiative@outlook.com?subject=${sub}&body=${bod}`);
   showMsg('callMsg', "Request sent! We'll confirm within 48 hours.", 'ok');
@@ -185,7 +185,7 @@ async function requestMentor() {
     }]).catch(() => {});
   }
   const sub = encodeURIComponent('FairGame Mentor Request');
-  const bod = encodeURIComponent(`Hi FairGame Team,\n\nI'd like to be connected with a mentor for my project.\n\nProject: ${title}\nField: ${field}\n\n— ${name}`);
+  const bod = encodeURIComponent(`Hi FairGame Team,\n\nI'd like to be connected with a mentor for my project.\n\nProject: ${title}\nField: ${field}\n\n- ${name}`);
   window.open(`mailto:fairgameinitiative@outlook.com?subject=${sub}&body=${bod}`);
   showMsg('mentorMsg', "Mentor request sent! We'll be in touch shortly.", 'ok');
   portalLog('mentor_requested', { field, title });

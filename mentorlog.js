@@ -8,9 +8,9 @@ const DEMO_PAIRS = [
 const DEMO_SESSIONS = {
   p1: [
     { date:'2025-11-08', hours:2.0, notes:'Introduced the scientific method. Helped Rishi narrow topic from general water quality to biosensor detection. Assigned: write hypothesis and list three variables.' },
-    { date:'2025-11-22', hours:1.5, notes:'Reviewed hypothesis — good! Discussed experimental design. Controls need work. Identified local creek as test site. Assigned: write full procedure.' },
+    { date:'2025-11-22', hours:1.5, notes:'Reviewed hypothesis - good! Discussed experimental design. Controls need work. Identified local creek as test site. Assigned: write full procedure.' },
     { date:'2025-12-06', hours:1.5, notes:'Procedure looks solid. Talked about data collection tables and statistical analysis. Rishi starting field collection next week. Looking strong for district.' },
-    { date:'2026-01-10', hours:1.5, notes:'Data collection going well, unexpected pH reading on sample 3 — discussed how to handle outliers honestly. Displaying raw data correctly. On track.' },
+    { date:'2026-01-10', hours:1.5, notes:'Data collection going well, unexpected pH reading on sample 3 - discussed how to handle outliers honestly. Displaying raw data correctly. On track.' },
   ],
 };
 
@@ -27,7 +27,7 @@ function renderPairList() {
   list.innerHTML = allPairs.map(p => `
     <div class="pair-item ${p.id === currentPairId ? 'active' : ''}" onclick="selectPair('${p.id}')">
       <div class="pair-names">${p.student_name} + ${p.mentor_name}</div>
-      <div class="pair-school">${p.school || '—'}</div>
+      <div class="pair-school">${p.school || '–'}</div>
       <div class="pair-meta">
         <span class="pair-status ${p.status}">${p.status}</span>
         <span class="pair-hours">${p.total_hours || 0} hrs · ${p.session_count || 0} sessions</span>
@@ -47,7 +47,7 @@ async function selectPair(id) {
   document.getElementById('detailSubtitle').textContent = `${pair.school || 'School not listed'} · ${pair.topic || 'No topic set'}`;
   document.getElementById('metaHours').textContent    = (pair.total_hours || 0).toFixed(1);
   document.getElementById('metaSessions').textContent = pair.session_count || 0;
-  document.getElementById('metaStarted').textContent  = pair.started_at ? new Date(pair.started_at).toLocaleDateString('en-US', { month:'short', year:'numeric' }) : '—';
+  document.getElementById('metaStarted').textContent  = pair.started_at ? new Date(pair.started_at).toLocaleDateString('en-US', { month:'short', year:'numeric' }) : '–';
 
   // Milestones
   currentMilestones = pair.milestones || {};
@@ -76,7 +76,7 @@ function renderSessions(sessions) {
   list.innerHTML = sessions.map(s => `
     <div class="session-item">
       <div class="session-date">${new Date(s.date + 'T00:00').toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })}</div>
-      <div class="session-notes">${s.notes || '—'}</div>
+      <div class="session-notes">${s.notes || '–'}</div>
       <div class="session-hours">${s.hours}h</div>
     </div>`).join('');
 }
@@ -102,7 +102,7 @@ async function logSession() {
 
   if (sb && currentPairId) {
     const { error: sErr } = await sb.from('mentorship_sessions').insert([{ pair_id: currentPairId, date, hours, notes }]);
-    if (sErr) { msg.textContent = 'Error — try again.'; msg.style.color = '#c0392b'; return; }
+    if (sErr) { msg.textContent = 'Error - try again.'; msg.style.color = '#c0392b'; return; }
     // Update totals
     const pair = allPairs.find(p => p.id === currentPairId);
     await sb.from('mentorships').update({
@@ -150,7 +150,7 @@ async function createPair() {
 
   if (sb) {
     const { error } = await sb.from('mentorships').insert([newPair]);
-    if (error) { msg.textContent = 'Error — try again.'; msg.style.color = '#c0392b'; return; }
+    if (error) { msg.textContent = 'Error - try again.'; msg.style.color = '#c0392b'; return; }
   } else {
     newPair.id = 'local_' + Date.now();
     allPairs.unshift(newPair);
@@ -163,4 +163,14 @@ async function createPair() {
 }
 window.createPair = createPair;
 
-document.addEventListener('DOMContentLoaded', loadPairs);
+function prefillFromQuery() {
+  const q = new URLSearchParams(window.location.search);
+  if (!q.has('student')) return;
+  document.getElementById('pStudentName').value  = q.get('student')  || '';
+  document.getElementById('pStudentEmail').value = q.get('email')    || '';
+  document.getElementById('pSchool').value       = q.get('school')   || '';
+  document.getElementById('pTopic').value        = q.get('topic')    || '';
+  openAddPair();
+}
+
+document.addEventListener('DOMContentLoaded', () => { loadPairs(); prefillFromQuery(); });

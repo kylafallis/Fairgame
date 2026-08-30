@@ -39,8 +39,8 @@
     <a class="pnav-link" href="/" style="font-size:.78rem;color:rgba(255,255,255,.3);">← Public site</a>
   </div>
   <div class="pnav-footer">
-    <div class="pnav-user-name" id="navUserName">—</div>
-    <div class="pnav-user-email" id="navUserEmail">—</div>
+    <div class="pnav-user-name" id="navUserName">–</div>
+    <div class="pnav-user-email" id="navUserEmail">–</div>
     <button class="pnav-logout" onclick="portalLogout()">Sign out</button>
   </div>
 </nav>
@@ -57,14 +57,14 @@
     <div class="portal-section active" id="sec-home">
       <div id="alertArea"></div>
       <div class="kpi-row" id="homeKpis">
-        <div class="kpi-card"><div class="kpi-card-n" id="kSchools">—</div><div class="kpi-card-l">Active Schools</div></div>
-        <div class="kpi-card"><div class="kpi-card-n" id="kPending">—</div><div class="kpi-card-l">Pending Approvals</div></div>
-        <div class="kpi-card"><div class="kpi-card-n" id="kJudges">—</div><div class="kpi-card-l">Judges Registered</div></div>
-        <div class="kpi-card"><div class="kpi-card-n" id="kMentors">—</div><div class="kpi-card-l">Active Mentorships</div></div>
-        <div class="kpi-card"><div class="kpi-card-n" id="kDownloads">—</div><div class="kpi-card-l">Resource Downloads</div></div>
-        <div class="kpi-card"><div class="kpi-card-n" id="kSubscribers">—</div><div class="kpi-card-l">Email Subscribers</div></div>
-        <div class="kpi-card"><div class="kpi-card-n" id="kPortal">—</div><div class="kpi-card-l">Portal Members</div></div>
-        <div class="kpi-card"><div class="kpi-card-n" id="kJudgeReqs">—</div><div class="kpi-card-l">Judge Requests Sent</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kSchools">–</div><div class="kpi-card-l">Active Schools</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kPending">–</div><div class="kpi-card-l">Pending Approvals</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kJudges">–</div><div class="kpi-card-l">Judges Registered</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kMentors">–</div><div class="kpi-card-l">Active Mentorships</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kDownloads">–</div><div class="kpi-card-l">Resource Downloads</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kSubscribers">–</div><div class="kpi-card-l">Email Subscribers</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kPortal">–</div><div class="kpi-card-l">Portal Members</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kJudgeReqs">–</div><div class="kpi-card-l">Judge Requests Sent</div></div>
       </div>
       <div class="card">
         <div class="card-header"><h3>Quick Actions</h3></div>
@@ -101,6 +101,7 @@
             <button class="btn-xs" onclick="filterApp('teacher',this)">Teachers</button>
             <button class="btn-xs" onclick="filterApp('ambassador',this)">Ambassadors</button>
             <button class="btn-xs" onclick="filterApp('mentor',this)">Mentors</button>
+            <button class="btn-xs" onclick="filterApp('student_mentor_request',this)">Student Requests</button>
           </div>
         </div>
         <div class="card-body-flush" style="overflow-x:auto;">
@@ -114,9 +115,9 @@
         <div class="card-body">
           <h3 class="text-serif fw-600 mb-16" style="font-size:.96rem;color:var(--g900);">How approvals work</h3>
           <p class="text-sm text-muted" style="line-height:1.7;">
-            <strong>Teachers &amp; Ambassadors:</strong> Click Approve. Their account unlocks immediately — they can sign in to their portal right away with the password they set during signup.<br><br>
-            <strong>Every approval opens a pre-filled welcome email</strong> in your mail app, addressed to the person you just approved. Send it — the signup page promises they will hear from us.<br><br><strong>Mentors:</strong> Click Approve, then send them the Discord invite link from the field below. They will be welcomed into the moderated FairGame community where they can answer questions from students and teachers.<br><br>
-            <strong>Rejections</strong> are also immediate — the user sees a "not approved" message when they try to sign in.
+            <strong>Teachers &amp; Ambassadors:</strong> Click Approve. Their account unlocks immediately - they can sign in to their portal right away with the password they set during signup.<br><br>
+            <strong>Every approval opens a pre-filled welcome email</strong> in your mail app, addressed to the person you just approved. Send it - the signup page promises they will hear from us.<br><br><strong>Mentors:</strong> Click Approve, then send them the Discord invite link from the field below. They will be welcomed into the moderated FairGame community where they can answer questions from students and teachers.<br><br>
+            <strong>Rejections</strong> are also immediate - the user sees a "not approved" message when they try to sign in.
           </p>
           <div class="form-group" style="margin-top:16px;max-width:420px;">
             <label class="form-label">Discord invite link (sent to approved mentors)</label>
@@ -172,7 +173,7 @@
     <div class="portal-section" id="sec-resources">
       <div class="section-heading"><h2>Resource Library</h2><p>The full FairGame resource library, organized by category</p></div>
       <details class="res-category" open>
-        <summary>Program Guides<span class="res-count">3 files — Setup and research guide PDFs</span></summary>
+        <summary>Program Guides<span class="res-count">3 files - Setup and research guide PDFs</span></summary>
         <div class="res-category-body">
         <div class="res-grid">
         <div class="res-card">
@@ -194,7 +195,7 @@
         </div>
       </details>
       <details class="res-category">
-        <summary>Teacher Curriculum & Rubrics<span class="res-count">14 files — Curriculum modules, rubrics, and implementation guides</span></summary>
+        <summary>Teacher Curriculum & Rubrics<span class="res-count">14 files - Curriculum modules, rubrics, and implementation guides</span></summary>
         <div class="res-category-body">
         <div class="res-grid">
         <div class="res-card">
@@ -271,7 +272,7 @@
         </div>
       </details>
       <details class="res-category">
-        <summary>Classroom Kits & Printables<span class="res-count">23 files — Posters, kickoff decks, trackers, and classroom activities</span></summary>
+        <summary>Classroom Kits & Printables<span class="res-count">23 files - Posters, kickoff decks, trackers, and classroom activities</span></summary>
         <div class="res-category-body">
         <div class="res-grid">
         <div class="res-card">
@@ -393,7 +394,7 @@
         </div>
       </details>
       <details class="res-category">
-        <summary>Fair Coordination & Event Day<span class="res-count">20 files — Timelines, certificates, signage, budgets, and event-day logistics</span></summary>
+        <summary>Fair Coordination & Event Day<span class="res-count">20 files - Timelines, certificates, signage, budgets, and event-day logistics</span></summary>
         <div class="res-category-body">
         <div class="res-grid">
         <div class="res-card">
@@ -500,7 +501,7 @@
         </div>
       </details>
       <details class="res-category">
-        <summary>Volunteer Management<span class="res-count">1 file — Intake forms for judges and mentors</span></summary>
+        <summary>Volunteer Management<span class="res-count">1 file - Intake forms for judges and mentors</span></summary>
         <div class="res-category-body">
         <div class="res-grid">
         <div class="res-card">
@@ -512,7 +513,7 @@
         </div>
       </details>
       <details class="res-category">
-        <summary>Judge Resources<span class="res-count">6 files — Welcome guide, FAQ, code of conduct, and scoring materials</span></summary>
+        <summary>Judge Resources<span class="res-count">6 files - Welcome guide, FAQ, code of conduct, and scoring materials</span></summary>
         <div class="res-category-body">
         <div class="res-grid">
         <div class="res-card">
@@ -549,7 +550,7 @@
         </div>
       </details>
       <details class="res-category">
-        <summary>Student Project Templates<span class="res-count">33 files — Templates and worksheets for every stage of a project</span></summary>
+        <summary>Student Project Templates<span class="res-count">33 files - Templates and worksheets for every stage of a project</span></summary>
         <div class="res-category-body">
         <div class="res-grid">
         <div class="res-card"><div class="res-card-title">Experiment Menu Grades 5 to 6</div><div class="res-card-type">PDF</div><a href="/files/students/fairgame-experiment-menu-grades-5-to-6.pdf" target="_blank" class="btn-outline text-sm" style="font-size:.76rem;padding:6px 12px;align-self:flex-start;">Download →</a></div>
@@ -589,7 +590,7 @@
         </div>
       </details>
       <details class="res-category">
-        <summary>Ambassador Toolkit<span class="res-count">10 files — Outreach templates, pitch decks, and recruitment materials</span></summary>
+        <summary>Ambassador Toolkit<span class="res-count">10 files - Outreach templates, pitch decks, and recruitment materials</span></summary>
         <div class="res-category-body">
         <div class="res-grid">
         <div class="res-card"><div class="res-card-title">Bring a Friend Referral Program</div><div class="res-card-type">Word</div><a href="/files/ambassadors/fairgame-bring-a-friend-referral-program.docx" target="_blank" class="btn-outline text-sm" style="font-size:.76rem;padding:6px 12px;align-self:flex-start;">Download →</a></div>
@@ -606,7 +607,7 @@
         </div>
       </details>
       <details class="res-category">
-        <summary>About FairGame<span class="res-count">3 files — One-pagers for donors, schools, and industry partners</span></summary>
+        <summary>About FairGame<span class="res-count">3 files - One-pagers for donors, schools, and industry partners</span></summary>
         <div class="res-category-body">
         <div class="res-grid">
         <div class="res-card"><div class="res-card-title">One Pager Donors</div><div class="res-card-type">PowerPoint</div><a href="/files/about/fairgame-one-pager-donors.pptx" target="_blank" class="btn-outline text-sm" style="font-size:.76rem;padding:6px 12px;align-self:flex-start;">Download →</a></div>
@@ -616,7 +617,7 @@
         </div>
       </details>
       <details class="res-category">
-        <summary>Brand Kit & Logos<span class="res-count">17 files — Logos, style guide, and brand assets</span></summary>
+        <summary>Brand Kit & Logos<span class="res-count">17 files - Logos, style guide, and brand assets</span></summary>
         <div class="res-category-body">
         <div class="res-grid">
         <div class="res-card"><div class="res-card-title">Brand Style Guide</div><div class="res-card-type">PDF</div><a href="/files/brand/fairgame-brand-style-guide.pdf" target="_blank" class="btn-outline text-sm" style="font-size:.76rem;padding:6px 12px;align-self:flex-start;">Download →</a></div>

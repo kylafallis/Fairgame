@@ -4,6 +4,8 @@ const DEMO = {
     { id:'a1', name:'Ms. Williams', email:'mwilliams@bath.edu', school:'Bath High School', type:'teacher',    status:'pending',  created_at:'2026-03-10T10:00:00Z' },
     { id:'a2', name:'Priya Sharma', email:'priya@walnut.edu',  school:'Walnut Hills HS',  type:'ambassador', status:'interest', created_at:'2026-03-12T14:30:00Z' },
     { id:'a3', name:'Mr. Davis',    email:'tdavis@lima.edu',   school:'Lima Senior HS',   type:'teacher',    status:'active',   created_at:'2026-03-01T09:00:00Z' },
+    { id:'a4', name:'Jordan Lee',   email:'jordan@school.edu', school:'Sacramento High School', type:'student_mentor_request', status:'pending', created_at:'2026-03-14T16:00:00Z',
+      data:{ grade:'11th', state:'Sacramento, CA', title:'Low-cost water quality biosensor', topics:['Environmental Science','Chemistry / Biochemistry'] } },
   ],
   schools: [
     { school_name:'Bath High School',    teacher_name:'Ms. Williams', program_type:'School fair only', fair_date:'2026-03-14', student_count:35, county:'Allen County',    status:'planning' },
@@ -21,7 +23,7 @@ const DEMO = {
   ],
 };
 
-let allApprovals = [], approvalFilter = 'all';
+let allApprovals = [], approvalFilter = 'all', allJudgesForMatch = [];
 
 /* ── Welcome emails sent on approval ──────────────────────────────
    No mail server behind this page, so approving opens a pre-filled message
@@ -32,7 +34,7 @@ const APPROVAL_SIGNOFF = 'Kyla Fallis\nFairGame Initiative\nfairgameinitiative@o
 function firstName(name) {
   const parts = (name || '').trim().split(/\s+/).filter(Boolean);
   if (!parts.length) return 'there';
-  // Teachers usually sign up as "Ms. Williams" — keep the title with the surname.
+  // Teachers usually sign up as "Ms. Williams" - keep the title with the surname.
   if (/^(mr|mrs|ms|miss|mx|dr|prof|professor)\.?$/i.test(parts[0])) {
     return parts.length === 1 ? 'there' : parts[0] + ' ' + parts[parts.length - 1];
   }
@@ -59,7 +61,7 @@ function approvalEmailFor(type, name, discordLink) {
       subject: 'Your FairGame Ambassador Portal access is approved',
       body: hi +
         'Your Student Ambassador account is approved. Sign in at\n' + PORTAL_URL + '\n\n' +
-        'The Ambassador Portal has the club launch kit, the pitch deck for your principal, and your hour log. Start with the launch kit — it walks through your first three meetings.\n\n' +
+        'The Ambassador Portal has the club launch kit, the pitch deck for your principal, and your hour log. Start with the launch kit - it walks through your first three meetings.\n\n' +
         'Tell me which school you are starting at and I will connect you with a mentor.\n\n' + APPROVAL_SIGNOFF
     };
   }
@@ -68,10 +70,21 @@ function approvalEmailFor(type, name, discordLink) {
     return {
       subject: 'Welcome to the FairGame Community!',
       body: hi +
-        'Great news — your FairGame mentor application has been approved.\n\n' +
-        'You are now part of our family. Here is your invite to the FairGame Discord, where students and teachers post questions and mentors like you help answer them. It is a low time commitment — jump in whenever you have a few minutes.\n\n' +
+        'Great news - your FairGame mentor application has been approved.\n\n' +
+        'You are now part of our family. Here is your invite to the FairGame Discord, where students and teachers post questions and mentors like you help answer them. It is a low time commitment - jump in whenever you have a few minutes.\n\n' +
         'Discord invite: ' + (discordLink || '[paste Discord invite link here]') + '\n\n' +
         'Thank you for giving back. We are so glad to have you.\n\n' + APPROVAL_SIGNOFF
+    };
+  }
+
+  if (type === 'student_mentor_request') {
+    return {
+      subject: 'FairGame: your mentor request has been reviewed',
+      body: hi +
+        "We've reviewed your mentor request and are matching you with a mentor whose background fits your project. " +
+        "You'll hear from us directly with an introduction shortly.\n\n" +
+        'In the meantime, feel free to keep working - the Research Guide has tips on experimental design and building your display board:\n' +
+        'https://fairgameinitiative.org/researchguide.html\n\n' + APPROVAL_SIGNOFF
     };
   }
 
@@ -177,8 +190,41 @@ async function loadActivity() {
 }
 
 async function loadApprovals() {
-  allApprovals = sb ? (await sb.from('portal_requests').select('*').order('created_at',{ascending:false})).data||[] : DEMO.approvals;
+  if (sb) {
+    const [reqs, judges] = await Promise.all([
+      sb.from('portal_requests').select('*').order('created_at',{ascending:false}),
+      sb.from('judges').select('name,email,expertise,status'),
+    ]);
+    allApprovals = reqs.data || [];
+    allJudgesForMatch = (judges.data || []).filter(j => j.status !== 'inactive');
+  } else {
+    allApprovals = DEMO.approvals;
+    allJudgesForMatch = DEMO.judges;
+  }
   renderApprovals();
+}
+
+/* Suggests mentors/judges whose expertise or STEM field overlaps a student's requested topics. */
+function matchMentorsForTopics(topics) {
+  if (!topics?.length) return [];
+  const wanted = topics.map(t => t.toLowerCase());
+  const overlaps = (text) => wanted.some(t => text.toLowerCase().includes(t.split(' / ')[0].toLowerCase()));
+
+  const fromJudges = allJudgesForMatch
+    .filter(j => (j.expertise || []).some(e => wanted.includes(e)))
+    .map(j => ({ name: j.name, email: j.email, source: 'judge' }));
+
+  const fromMentors = allApprovals
+    .filter(a => a.type === 'mentor' && a.status === 'active' && overlaps(a.data?.field || ''))
+    .map(a => ({ name: a.name, email: a.email, source: 'mentor' }));
+
+  const seen = new Set();
+  return [...fromJudges, ...fromMentors].filter(m => {
+    const key = (m.email || m.name).toLowerCase();
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
 }
 function filterApp(type, btn) {
   approvalFilter = type;
@@ -191,7 +237,8 @@ function renderApprovals() {
   const f = approvalFilter === 'all' ? allApprovals : allApprovals.filter(a => a.type === approvalFilter || a.status === approvalFilter);
   document.getElementById('approvalsTbody').innerHTML = !f.length
     ? '<tr><td colspan="7"><div class="empty-state"><p>No records match the current filter.</p></div></td></tr>'
-    : f.map(a => `<tr>
+    : f.map(a => {
+        const row = `<tr>
         <td class="col-name">${esc(a.name)}</td>
         <td class="col-sm">${esc(a.email)}</td>
         <td class="col-sm">${esc(a.school)}</td>
@@ -202,19 +249,38 @@ function renderApprovals() {
           ${a.status==='pending'||a.status==='interest' ? `<button class="btn-xs approve" onclick="approveUser('${esc(a.id)}')">Approve</button>` : ''}
           <button class="btn-xs danger" onclick="rejectUser('${esc(a.id)}')">Reject</button>
         </td>
-      </tr>`).join('');
+      </tr>`;
+        if (a.type !== 'student_mentor_request') return row;
+
+        const topics  = a.data?.topics || [];
+        const matches = matchMentorsForTopics(topics);
+        const pairUrl = `/mentorlog.html?student=${encodeURIComponent(a.name||'')}&email=${encodeURIComponent(a.email||'')}&school=${encodeURIComponent(a.school||'')}&topic=${encodeURIComponent(a.data?.title || topics.join(', '))}`;
+        const detail = `<tr class="row-detail">
+        <td colspan="7" style="background:var(--g50,#f7faf7);padding:10px 16px;font-size:.8rem;color:var(--gray-600);">
+          <strong>Topics:</strong> ${topics.map(esc).join(', ') || '–'}
+          &nbsp;&middot;&nbsp;
+          <strong>Suggested mentors:</strong> ${matches.length ? matches.map(m => esc(m.name) + (m.email ? ' ('+esc(m.email)+')' : '')).join(', ') : 'No overlap found yet - check the mentor list manually.'}
+          &nbsp;&middot;&nbsp;
+          <a href="${pairUrl}" class="btn-xs" style="text-decoration:none;">Create Pair in Mentor Log →</a>
+        </td>
+      </tr>`;
+        return row + detail;
+      }).join('');
 }
 
 async function approveUser(id) {
   const rec = allApprovals.find(a => String(a.id) === String(id));
   if (!rec) return;
   const { email, type, name } = rec;
-  if (!confirm(`Approve ${email} as ${type}? They will be able to sign in immediately.`)) return;
+  const confirmMsg = type === 'student_mentor_request'
+    ? `Mark ${email}'s mentor request as matched? This sends them a confirmation email.`
+    : `Approve ${email} as ${type}? They will be able to sign in immediately.`;
+  if (!confirm(confirmMsg)) return;
 
   if (sb) {
     const { error } = await sb.from('portal_requests').update({ status:'active' }).eq('id', id);
     if (error) {
-      approvalMsg('Could not approve ' + esc(email) + ' — ' + esc(error.message), 'err');
+      approvalMsg('Could not approve ' + esc(email) + ' - ' + esc(error.message), 'err');
       return;
     }
   }
@@ -224,7 +290,7 @@ async function approveUser(id) {
   const mailto = buildMailto(email, type, name, discordLink);
   openMailto(mailto);
   approvalMsg(
-    'Approved <strong>' + esc(email) + '</strong>. A welcome email is open in your mail app — ' +
+    'Approved <strong>' + esc(email) + '</strong>. A welcome email is open in your mail app - ' +
     'if nothing happened, <a href="' + mailto + '">open it here</a>.',
     'ok'
   );
@@ -236,7 +302,7 @@ async function rejectUser(id) {
   if (!confirm('Reject this request?')) return;
   if (sb) {
     const { error } = await sb.from('portal_requests').update({ status:'rejected' }).eq('id', id);
-    if (error) { approvalMsg('Could not reject — ' + esc(error.message), 'err'); return; }
+    if (error) { approvalMsg('Could not reject - ' + esc(error.message), 'err'); return; }
   }
   approvalMsg('Request rejected. No email was sent.', 'ok');
   await loadApprovals();
@@ -250,10 +316,10 @@ async function loadSchools() {
     : data.map(s => `<tr>
         <td class="col-name">${s.school_name}</td>
         <td class="col-sm">${s.teacher_name}</td>
-        <td class="col-sm">${s.program_type||'—'}</td>
+        <td class="col-sm">${s.program_type||'–'}</td>
         <td class="col-sm">${s.fair_date||'TBD'}</td>
-        <td class="col-sm">${s.student_count||'—'}</td>
-        <td class="col-sm">${s.county||'—'}</td>
+        <td class="col-sm">${s.student_count||'–'}</td>
+        <td class="col-sm">${s.county||'–'}</td>
         <td><span class="chip chip-${s.status||'planning'}">${s.status||'planning'}</span></td>
       </tr>`).join('');
 }
@@ -263,11 +329,11 @@ async function loadJudges() {
   document.getElementById('judgesTbody').innerHTML = !data.length
     ? '<tr><td colspan="7"><div class="empty-state"><p>No judges yet.</p></div></td></tr>'
     : data.map(j => `<tr>
-        <td class="col-mono">${j.code||'—'}</td>
+        <td class="col-mono">${j.code||'–'}</td>
         <td class="col-name">${j.name}</td>
         <td class="col-sm">${(j.expertise||[]).join(', ')}</td>
-        <td class="col-sm">${j.city||'—'}</td>
-        <td class="col-sm">${j.available_level||'—'}</td>
+        <td class="col-sm">${j.city||'–'}</td>
+        <td class="col-sm">${j.available_level||'–'}</td>
         <td><span class="chip chip-${j.status}">${j.status}</span></td>
         <td style="white-space:nowrap;">
           ${j.status==='unverified' ? `<button class="btn-xs approve" onclick="verifyJudge('${j.id}')">Verify</button>` : ''}
@@ -293,7 +359,7 @@ async function loadMentors() {
     : data.map(m => `<tr>
         <td class="col-name">${m.student_name}</td>
         <td class="col-sm">${m.mentor_name}</td>
-        <td class="col-sm">${m.school||'—'}</td>
+        <td class="col-sm">${m.school||'–'}</td>
         <td class="col-sm" style="color:var(--g700);font-weight:500;">${m.total_hours||0}h</td>
         <td class="col-sm">${m.session_count||0}</td>
         <td><span class="chip chip-${m.status==='active'?'active':'declined'}">${m.status}</span></td>
@@ -313,6 +379,6 @@ async function saveStats() {
     const val = parseInt(document.getElementById('stat_'+key)?.value||'0');
     if (sb) await sb.from('stats').upsert({ key, value: val, updated_at: new Date().toISOString() }, { onConflict: 'key' });
   }
-  showMsg('statsMsg','Stats saved — homepage counters will update.','ok');
+  showMsg('statsMsg','Stats saved - homepage counters will update.','ok');
 }
 window.saveStats = saveStats;

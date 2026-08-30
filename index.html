@@ -44,6 +44,7 @@
         <a href="#">Get Involved </a>
         <div class="dropdown-menu">
           <a href="/volunteer.html">Volunteer / Judge</a>
+          <a href="/mentor-request.html">Request a Mentor</a>
           <a href="/donate.html">Donate</a>
           <a href="#portal">Ambassador Portal</a>
           <a href="#portal">Teacher Portal</a>
@@ -318,7 +319,7 @@
       <div>
         <span class="overline">Curriculum</span>
         <h2 style="margin-bottom:12px;">Our Curriculum Outline</h2>
-        <p style="color:var(--gray-500);margin-bottom:24px;line-height:1.75;">We've developed a Grades 5–8 curriculum outline to guide schools through the science fair process — from forming a hypothesis to presenting results. Download the PDF and take a look.</p>
+        <p style="color:var(--gray-500);margin-bottom:24px;line-height:1.75;">We've developed a Grades 5–8 curriculum outline to guide schools through the science fair process - from forming a hypothesis to presenting results. Download the PDF and take a look.</p>
         <a href="/files/FairGame_Curriculum_Gr5-8.pdf" target="_blank" rel="noopener"
            class="btn btn-primary" style="display:inline-flex;align-items:center;gap:8px;">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
@@ -469,6 +470,7 @@
         <h5>Get Involved</h5>
         <ul>
           <li><a href="/volunteer.html">Volunteer / Judge</a></li>
+          <li><a href="/mentor-request.html">Request a Mentor</a></li>
           <li><a href="/donate.html">Donate</a></li>
           <li><a href="#portal">Ambassador Portal</a></li>
           <li><a href="mailto:fairgameinitiative@outlook.com">Partner With Us</a></li>
@@ -493,7 +495,7 @@
 <!-- SCRIPTS  -->
   <!-- Supabase -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <!-- EmailJS (contact form notifications) — safe to leave if not yet configured -->
+  <!-- EmailJS (contact form notifications) - safe to leave if not yet configured -->
   <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <!-- FairGame site scripts -->
   <script src="/script.js"></script>
@@ -508,7 +510,7 @@
       statusEl.textContent = 'Sending...'; statusEl.style.color = 'var(--gray-500)';
       if (typeof sb !== 'undefined' && sb) {
         const { error } = await sb.from('curriculum_feedback').insert([{ name, email, message, source: 'home_banner' }]);
-        if (error) { statusEl.textContent = 'Something went wrong — email us at fairgameinitiative@outlook.com'; statusEl.style.color = '#c0392b'; return; }
+        if (error) { statusEl.textContent = 'Something went wrong - email us at fairgameinitiative@outlook.com'; statusEl.style.color = '#c0392b'; return; }
       }
       statusEl.textContent = 'Thank you! Your feedback has been received.';
       statusEl.style.color = 'var(--green-600)';

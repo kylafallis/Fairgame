@@ -1,5 +1,5 @@
 /* ================================================================
-   FairGame Initiative — Portal Shared Stylesheet
+   FairGame Initiative - Portal Shared Stylesheet
    Used by: login, portal-ambassador, portal-teacher,
             portal-judge, portal-admin, portal-router
    ================================================================ */
@@ -354,7 +354,7 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg widt
   font-weight: 600;
 }
 .card-body { padding: 20px; }
-.card-body-flush { /* no padding — for tables */ }
+.card-body-flush { /* no padding - for tables */ }
 
 /* ── Resource categories (collapsible folders) ─────────────────── */
 .res-category {

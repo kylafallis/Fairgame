@@ -62,7 +62,7 @@ input:focus{border-color:var(--g600);}
   accent-color:var(--g600);cursor:pointer;
 }
 .age-confirm-row label{font-size:0.82rem;color:var(--gray-700);line-height:1.5;cursor:pointer;}
-/* Under-13 guardian panel — hidden by default */
+/* Under-13 guardian panel - hidden by default */
 .under13-panel{display:none;margin-top:12px;padding:12px 14px;background:#fff3cd;border:1.5px solid #ffc107;border-radius:3px;}
 .under13-panel p{font-size:0.8rem;color:#856404;margin-bottom:8px;line-height:1.5;}
 .under13-panel input{width:100%;padding:9px 11px;border:1.5px solid #ffc107;border-radius:3px;font-size:0.85rem;font-family:var(--ff-sans);}

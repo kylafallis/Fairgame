@@ -1,5 +1,5 @@
 /* ============================================================
-   FairGame Initiative — site.js
+   FairGame Initiative - site.js
    All interactivity for every page on fairgameinitiative.org
    ============================================================ */
 
@@ -56,11 +56,11 @@ window.trackDL    = trackDownload;
 
 
 /* ─────────────────────────────────────────────────────────────
-   NAV — transparent over hero, solid green on scroll
+   NAV - transparent over hero, solid green on scroll
    ───────────────────────────────────────────────────────────── */
 
 /* ─────────────────────────────────────────────────────────────
-   NAV AUTH STATE — update user icon based on session
+   NAV AUTH STATE - update user icon based on session
    ───────────────────────────────────────────────────────────── */
 function updateNavAuthState() {
   const btn = document.getElementById('navUserBtn');
@@ -274,11 +274,11 @@ const QD = {
         links: [
           { t: 'Research Guide: Choosing a Topic',  d: 'Step-by-step topic selection framework',      h: '/researchguide.html'          },
           { t: 'Winning Project Examples',           d: 'What ISEF winners actually researched',       h: '/researchguide.html#examples' },
-          { t: 'Get a Mentor Match',                 d: "We'll connect you with a STEM professional",  h: '#portal'                      },
+          { t: 'Get a Mentor Match',                 d: "We'll connect you with a STEM professional",  h: '/mentor-request.html'         },
         ],
         cta: [
           { t: 'Start Research Guide →', h: '/researchguide.html' },
-          { t: 'Get Mentor →',           h: '#portal', o: true     },
+          { t: 'Get Mentor →',           h: '/mentor-request.html', o: true },
         ]
       },
       experiment: {
@@ -316,10 +316,10 @@ const QD = {
         role: 'Student: Mentorship',
         title: 'Get matched with a mentor',
         links: [
-          { t: 'Ambassador Matching',       d: 'Apply for a personal student ambassador',    h: '#portal'          },
+          { t: 'Request a Mentor',          d: "Tell us your topic, we'll match you to a mentor",    h: '/mentor-request.html' },
           { t: 'STEM Professional Network', d: 'Scientists & engineers who can help',        h: '/volunteer.html'  },
         ],
-        cta: [{ t: 'Apply for Mentorship →', h: '#portal' }]
+        cta: [{ t: 'Apply for Mentorship →', h: '/mentor-request.html' }]
       },
     }
   },
@@ -623,7 +623,7 @@ async function doSubscribe() {
       role:   qRole,
       source: 'quiz'
     }]);
-    // code 23505 = duplicate — still treat as success
+    // code 23505 = duplicate - still treat as success
     if (error && error.code !== '23505') {
       msgEl.textContent = 'Something went wrong. Please try again.';
       msgEl.className   = 'msg-err';
@@ -641,7 +641,7 @@ window.doSubscribe = doSubscribe;
 
 
 /* ─────────────────────────────────────────────────────────────
-   PORTAL FORMS  (index.html — teacher & ambassador sign-up)
+   PORTAL FORMS  (index.html - teacher & ambassador sign-up)
    ───────────────────────────────────────────────────────────── */
 async function regTeacher() {
   const name   = (document.getElementById('tName')   || {}).value?.trim();
@@ -664,7 +664,7 @@ async function regTeacher() {
       name, email, school, type: 'teacher'
     }]);
     if (error) {
-      msgEl.textContent = 'Error — please email fairgameinitiative@outlook.com';
+      msgEl.textContent = 'Error - please email fairgameinitiative@outlook.com';
       msgEl.className   = 'portal-msg msg-err';
       return;
     }
@@ -696,7 +696,7 @@ async function regAmbassador() {
       name, email, school, type: 'ambassador'
     }]);
     if (error) {
-      msgEl.textContent = 'Error — please email fairgameinitiative@outlook.com';
+      msgEl.textContent = 'Error - please email fairgameinitiative@outlook.com';
       msgEl.className   = 'portal-msg msg-err';
       return;
     }
@@ -726,7 +726,7 @@ Object.assign(window, { regTeacher, regAmbassador, magicLink });
 
 
 /* ─────────────────────────────────────────────────────────────
-   VOLUNTEER PAGE — judge & mentor application forms
+   VOLUNTEER PAGE - judge & mentor application forms
    Fill in these three values after setting up EmailJS
    (see instructions at bottom of this file / README)
    ───────────────────────────────────────────────────────────── */
@@ -806,12 +806,12 @@ async function submitJudge() {
     }]);
 
     if (judgeErr) {
-      msgEl.textContent = 'Error saving your application — please email fairgameinitiative@outlook.com';
+      msgEl.textContent = 'Error saving your application - please email fairgameinitiative@outlook.com';
       msgEl.className   = 'form-msg error';
       return;
     }
 
-    // Send magic-link portal invite — non-blocking, failure is not fatal
+    // Send magic-link portal invite - non-blocking, failure is not fatal
     sb.auth.signInWithOtp({
       email,
       options: { data: { name, role: 'judge' }, emailRedirectTo: window.location.origin + '/portal-judge.html' }
@@ -869,7 +869,7 @@ async function submitMentor() {
       data:   { field, hours, format, bio, source: 'volunteer_form' }
     }]);
     if (error) {
-      msgEl.textContent = 'Error submitting — please email fairgameinitiative@outlook.com';
+      msgEl.textContent = 'Error submitting - please email fairgameinitiative@outlook.com';
       msgEl.className   = 'form-msg error';
       return;
     }
@@ -889,16 +889,88 @@ async function submitMentor() {
   const mh = document.getElementById('mHours'); if (mh) mh.value = '';
   const mf = document.getElementById('mFormat'); if (mf) mf.value = '';
 
-  msgEl.textContent = "Application received! Because mentors work with students, we personally review every application. If approved, you'll receive an invite to our moderated FairGame Discord — typically within 3–5 business days.";
+  msgEl.textContent = "Application received! Because mentors work with students, we personally review every application. If approved, you'll receive an invite to our moderated FairGame Discord - typically within 3–5 business days.";
   msgEl.className   = 'form-msg success';
   logEvent('mentor_application', { field, hours });
 }
 
-Object.assign(window, { getExpertise, submitJudge, submitMentor });
+function getStudentTopics() {
+  const map = {
+    st1: 'Biology / Life Sciences',
+    st2: 'Chemistry / Biochemistry',
+    st3: 'Physics / Engineering',
+    st4: 'Environmental Science',
+    st5: 'Computer Science / Math',
+    st6: 'Medicine / Health Sciences',
+  };
+  return Object.entries(map)
+    .filter(([id]) => document.getElementById(id)?.checked)
+    .map(([, label]) => label);
+}
+
+async function submitStudentMentorRequest() {
+  const name    = document.getElementById('srName')?.value.trim();
+  const email   = document.getElementById('srEmail')?.value.trim();
+  const school  = document.getElementById('srSchool')?.value.trim();
+  const grade   = document.getElementById('srGrade')?.value;
+  const state   = document.getElementById('srState')?.value.trim();
+  const format  = document.getElementById('srFormat')?.value;
+  const title   = document.getElementById('srTitle')?.value.trim();
+  const desc    = document.getElementById('srDesc')?.value.trim();
+  const help    = document.getElementById('srHelp')?.value;
+  const topics  = getStudentTopics();
+  const msgEl   = document.getElementById('srMsg');
+  if (!msgEl) return;
+
+  if (!name || !email || !school || !grade || !state || !desc || !topics.length) {
+    msgEl.textContent = 'Please fill out all required fields, including at least one topic of interest.';
+    msgEl.className   = 'form-msg error';
+    return;
+  }
+
+  msgEl.textContent = 'Submitting…';
+  msgEl.className   = 'form-msg';
+  msgEl.style.display = 'block';
+
+  if (sb) {
+    const { error } = await sb.from('portal_requests').insert([{
+      name, email,
+      school: school || '',
+      type:   'student_mentor_request',
+      status: 'pending',
+      data:   { grade, state, format, title, desc, help, topics, source: 'mentor_request_form' }
+    }]);
+    if (error) {
+      msgEl.textContent = 'Error submitting - please email fairgameinitiative@outlook.com';
+      msgEl.className   = 'form-msg error';
+      return;
+    }
+  }
+
+  // Notify admin via EmailJS (fire-and-forget)
+  if (VOL_EJS_SERVICE !== 'YOUR_SERVICE_ID' && typeof emailjs !== 'undefined') {
+    emailjs.send(VOL_EJS_SERVICE, VOL_EJS_TEMPLATE, {
+      form_type:  'Student Mentor Request',
+      from_name:  name,
+      from_email: email,
+      details:    `School: ${school} | Grade: ${grade} | Location: ${state} | Format: ${format || 'N/A'} | Topics: ${topics.join(', ')} | Project: ${title || '(not set)'} | Help needed: ${help || 'N/A'} | Description: ${desc}`
+    }, VOL_EJS_KEY).catch(() => {});
+  }
+
+  ['srName','srEmail','srSchool','srState','srTitle','srDesc'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['st1','st2','st3','st4','st5','st6'].forEach(id => { const el = document.getElementById(id); if (el) el.checked = false; });
+  ['srGrade','srFormat','srHelp'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+
+  msgEl.textContent = "Request received! We'll match you with a mentor whose background fits your topic and reach out within 3–5 business days.";
+  msgEl.className   = 'form-msg success';
+  logEvent('student_mentor_request', { topics, grade });
+}
+
+Object.assign(window, { getExpertise, submitJudge, submitMentor, getStudentTopics, submitStudentMentorRequest });
 
 
 /* ─────────────────────────────────────────────────────────────
-   DONATE PAGE — amount selector & frequency toggle
+   DONATE PAGE - amount selector & frequency toggle
    ───────────────────────────────────────────────────────────── */
 function initDonate() {
   const customInput = document.getElementById('customAmt');
@@ -945,7 +1017,7 @@ Object.assign(window, { setAmt, setFreq, goToDonate });
 
 
 /* ─────────────────────────────────────────────────────────────
-   SETUP GUIDE PAGE — FAQ accordion & active TOC highlight
+   SETUP GUIDE PAGE - FAQ accordion & active TOC highlight
    ───────────────────────────────────────────────────────────── */
 function initFAQ() {
   document.querySelectorAll('.faq-q').forEach(q => {
@@ -976,7 +1048,7 @@ function initTOC() {
 
 
 /* ─────────────────────────────────────────────────────────────
-   TEACHERS PAGE — tab switcher
+   TEACHERS PAGE - tab switcher
    ───────────────────────────────────────────────────────────── */
 function showTab(id, btn) {
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -1059,7 +1131,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 /* ─────────────────────────────────────────────────────────────
    FAIR REGISTRATION  (fairregister.html)
-   Teachers register their fair — writes to 'fairs' table
+   Teachers register their fair - writes to 'fairs' table
    ───────────────────────────────────────────────────────────── */
 async function submitFair() {
   const school   = document.getElementById('fSchool')?.value.trim();
@@ -1086,7 +1158,7 @@ async function submitFair() {
       program_type: program, status: 'planning'
     }]).select().single();
 
-    if (error) { msgEl.textContent = 'Error — please try again or email us.'; msgEl.style.color = '#c0392b'; return; }
+    if (error) { msgEl.textContent = 'Error - please try again or email us.'; msgEl.style.color = '#c0392b'; return; }
 
     // Auto-match: find judges in same county
     if (fair && county) {
@@ -1107,7 +1179,7 @@ async function submitFair() {
       msgEl.style.color = 'var(--green-600)';
     }
   } else {
-    msgEl.textContent = 'Fair registered! (Supabase not connected — add credentials to script.js)';
+    msgEl.textContent = 'Fair registered! (Supabase not connected - add credentials to script.js)';
     msgEl.style.color = 'var(--green-600)';
   }
 
@@ -1147,7 +1219,7 @@ async function handleJudgeResponse() {
 
   banner.textContent = action === 'accept'
     ? 'You\'re confirmed as a judge! The teacher will contact you with details.'
-    : 'No problem — your response has been recorded. Thank you for considering it.';
+    : 'No problem - your response has been recorded. Thank you for considering it.';
   banner.style.background = action === 'accept' ? 'var(--green-50)' : 'var(--gray-50)';
   banner.style.borderColor = action === 'accept' ? 'var(--green-500)' : 'var(--gray-300)';
 }
@@ -1194,7 +1266,7 @@ async function submitContactForm(type) {
       name, email, school: school || '', type: type === 'school' ? 'teacher' : 'student',
       status: 'interest', data: { message, source: 'contact_form' }
     }]);
-    if (error) { msgEl.textContent = 'Something went wrong — email us at fairgameinitiative@outlook.com'; msgEl.style.color = '#c0392b'; return; }
+    if (error) { msgEl.textContent = 'Something went wrong - email us at fairgameinitiative@outlook.com'; msgEl.style.color = '#c0392b'; return; }
   }
 
   // Send email notification via EmailJS

@@ -1,5 +1,5 @@
 /* ================================================================
-   FairGame — portal-shared.js
+   FairGame - portal-shared.js
    Auth (email/password + Google OAuth), session, nav, file utils.
    Load FIRST on every portal page via <script src="/portal-shared.js">
    ================================================================ */
@@ -19,7 +19,7 @@ try {
       auth: { autoRefreshToken: true, persistSession: true, detectSessionInUrl: true }
     });
   }
-} catch (e) { console.warn('[Portal] Supabase not configured — running in dev mode.'); }
+} catch (e) { console.warn('[Portal] Supabase not configured - running in dev mode.'); }
 
 const ROLE_ROUTES = {
   teacher:    '/portal-teacher.html',
@@ -44,7 +44,7 @@ function requireAuth(expectedRole, onReady) {
     if (isDemo) {
       const banner = document.createElement('div');
       banner.style.cssText = 'position:fixed;bottom:0;left:0;right:0;background:#1a3a1a;color:rgba(255,255,255,0.8);text-align:center;padding:10px 16px;font-size:0.82rem;z-index:9999;border-top:1px solid rgba(255,255,255,0.1);';
-      banner.textContent = 'Preview mode — data shown is sample only. Not connected to live database.';
+      banner.textContent = 'Preview mode - data shown is sample only. Not connected to live database.';
       document.body.appendChild(banner);
     }
     if (typeof onReady === 'function') onReady(currentUser);
@@ -64,7 +64,7 @@ function requireAuth(expectedRole, onReady) {
           .in('status', ['pending', 'active', 'rejected'])
           .order('created_at', { ascending: false }).limit(1);
         const req = rows?.[0] || null;
-        // If RLS blocked the query entirely, don't punish the user — let them through
+        // If RLS blocked the query entirely, don't punish the user - let them through
         if (!reqErr) {
           if (!req || req.status === 'pending') { _showPortalPending(user.email, role); return; }
           if (req.status === 'rejected')        { _showPortalRejected(user.email);      return; }
@@ -89,7 +89,7 @@ function _showPortalPending(email, role) {
         <p style="font-size:.84rem;color:#6b756b;margin-bottom:20px;">Signed in as <strong>${email}</strong></p>
         <div style="background:#fff8e1;border:1.5px solid #f59e0b;border-radius:4px;padding:14px 16px;font-size:.84rem;color:#78350f;line-height:1.6;margin-bottom:20px;">
           <strong style="display:block;margin-bottom:4px;">Your ${role} account is pending approval.</strong>
-          We review all ${role} accounts personally. You'll receive an email at <strong>${email}</strong> once approved — typically within 1–3 business days.
+          We review all ${role} accounts personally. You'll receive an email at <strong>${email}</strong> once approved - typically within 1–3 business days.
         </div>
         <button onclick="portalLogout()" style="width:100%;padding:10px;background:none;border:1.5px solid #c8cec8;border-radius:3px;font-size:.82rem;color:#6b756b;cursor:pointer;">Sign out</button>
       </div>

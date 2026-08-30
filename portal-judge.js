@@ -11,7 +11,7 @@ requireAuth('judge', async (user) => {
     judgeRecord = data;
     if (data) prefillProfile(data);
     else {
-      // Judge signed in via magic link but record not found — show their email at minimum
+      // Judge signed in via magic link but record not found - show their email at minimum
       document.getElementById('navUserEmail').textContent = user.email;
     }
   }
@@ -20,8 +20,8 @@ requireAuth('judge', async (user) => {
 });
 
 function prefillProfile(j) {
-  document.getElementById('profileCode').textContent = j.code || '—';
-  document.getElementById('kCode').textContent       = j.code || '—';
+  document.getElementById('profileCode').textContent = j.code || '–';
+  document.getElementById('kCode').textContent       = j.code || '–';
   document.getElementById('pName').value    = j.name   || '';
   document.getElementById('pOrg').value     = j.org    || '';
 
@@ -128,8 +128,8 @@ async function setPassword() {
 window.setPassword = setPassword;
 
 const EMPTY_JOKES = [
-  "No requests yet — even Schrödinger's cat hasn't observed one. Check back soon.",
-  "Zero requests. Much like dark matter, they exist — just not here yet.",
+  "No requests yet - even Schrödinger's cat hasn't observed one. Check back soon.",
+  "Zero requests. Much like dark matter, they exist - just not here yet.",
   "Nothing yet. Your inbox is currently in its ground state. Excitation imminent.",
   "No requests yet. The control group has no data. Science is patient.",
 ];
@@ -177,7 +177,7 @@ async function respond(reqId, teacherEmail, status) {
   if (status === 'accepted' && teacherEmail) {
     const name = document.getElementById('pName').value || 'the judge';
     const sub  = encodeURIComponent('Science Fair Judge Confirmation');
-    const body = encodeURIComponent(`Hi,\n\nI'm happy to confirm — I'll be there to judge. Please send any materials I'll need.\n\nBest,\n${name}`);
+    const body = encodeURIComponent(`Hi,\n\nI'm happy to confirm - I'll be there to judge. Please send any materials I'll need.\n\nBest,\n${name}`);
     window.open(`mailto:${teacherEmail}?subject=${sub}&body=${body}`);
   }
   await loadRequests();

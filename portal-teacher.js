@@ -37,8 +37,8 @@ function prefillFair(fair) {
   if (fair.fair_date) document.getElementById('fDate').value = fair.fair_date;
   if (fair.program_type) document.getElementById('fProgram').value = fair.program_type;
   const days = fair.fair_date ? Math.ceil((new Date(fair.fair_date) - new Date()) / 86400000) : null;
-  document.getElementById('kFairDate').textContent  = days && days > 0 ? days : '—';
-  document.getElementById('kStudents').textContent  = fair.student_count || '—';
+  document.getElementById('kFairDate').textContent  = days && days > 0 ? days : '–';
+  document.getElementById('kStudents').textContent  = fair.student_count || '–';
   document.getElementById('kStatus').textContent    = fair.status || 'Planning';
   document.getElementById('kConfirmed').textContent = '0';
   const chip = document.getElementById('fairStatusChip');
@@ -47,8 +47,8 @@ function prefillFair(fair) {
   summary.innerHTML = `<div class="detail-grid">
     <div><div class="detail-item-label">School</div><div class="detail-item-value">${fair.school_name}</div></div>
     <div><div class="detail-item-label">Fair Date</div><div class="detail-item-value">${fair.fair_date || 'TBD'}</div></div>
-    <div><div class="detail-item-label">County</div><div class="detail-item-value">${fair.county || '—'}</div></div>
-    <div><div class="detail-item-label">Program Type</div><div class="detail-item-value">${fair.program_type || '—'}</div></div>
+    <div><div class="detail-item-label">County</div><div class="detail-item-value">${fair.county || '–'}</div></div>
+    <div><div class="detail-item-label">Program Type</div><div class="detail-item-value">${fair.program_type || '–'}</div></div>
   </div>`;
 }
 
@@ -98,14 +98,14 @@ async function loadJudgeSection() {
 
   let judges = DEMO_JUDGES;
   if (sb) {
-    // Fetch all active judges — we'll filter by travel range client-side
+    // Fetch all active judges - we'll filter by travel range client-side
     const { data } = await sb.from('judges').select('*').eq('status','active');
     if (data) judges = data;
   }
 
   // Filter: judge must be willing to travel to the school's county, OR be statewide
   judges = judges.filter(j => {
-    if (!j.county && !j.city) return true; // no location data — show anyway
+    if (!j.county && !j.city) return true; // no location data - show anyway
     const jCounty = (j.county || '').toLowerCase();
     const jCity   = (j.city   || '').toLowerCase();
     if (j.travel_miles >= 9999 || j.travel_range === 'statewide') return true; // statewide
@@ -133,10 +133,10 @@ async function loadJudgeSection() {
   grid.innerHTML = judges.map(j => `
     <div class="card" style="margin:0;">
       <div class="card-body">
-        <div class="col-mono mb-4">${j.code || '—'}</div>
+        <div class="col-mono mb-4">${j.code || '–'}</div>
         <div class="fw-500" style="font-size:.88rem;color:var(--g900);margin-bottom:2px;">${j.name}</div>
         <div class="text-sm text-muted mb-4">${(j.expertise||[]).join(', ')}</div>
-        <div class="text-xs text-muted mb-4">${j.city || '—'}</div>
+        <div class="text-xs text-muted mb-4">${j.city || '–'}</div>
         <div class="text-xs text-muted mb-16" style="color:var(--g600);">Travels: ${travelLabel(j.travel_miles)} · ${j.available_level || 'Any level'}</div>
         <button class="btn-primary w-full" onclick="requestJudge('${j.id}','${(j.name||'').replace(/'/g,"\\'")}','${j.email||''}')" style="justify-content:center;font-size:.78rem;padding:8px;">Request →</button>
       </div>
@@ -164,7 +164,7 @@ async function requestJudge(judgeId, judgeName, judgeEmail) {
 
   // Open pre-filled email to judge
   if (judgeEmail) {
-    const sub  = encodeURIComponent(`Science Fair Judge Request — ${school}`);
+    const sub  = encodeURIComponent(`Science Fair Judge Request - ${school}`);
     const body = encodeURIComponent(
 `Hi ${judgeName},
 
@@ -189,10 +189,10 @@ async function sendCustomInvite() {
   const school   = document.getElementById('fSchool').value.trim() || 'our school';
   const date     = document.getElementById('fDate').value || 'TBD';
   const teacher  = document.getElementById('fTeacher').value.trim();
-  const sub  = encodeURIComponent(`Science Fair Judge Invitation — ${school}`);
+  const sub  = encodeURIComponent(`Science Fair Judge Invitation - ${school}`);
   const body = encodeURIComponent(`Hi,\n\nI'm coordinating the science fair at ${school} on ${date}. Would you be interested in serving as a judge? It's typically a 3–5 hour commitment.\n\nPlease reply if you're available and I'll send full details.\n\nThank you,\n${teacher}`);
   window.open(`mailto:${email}?subject=${sub}&body=${body}`);
-  showMsg('customInviteMsg', 'Email opened — edit the message before sending.', 'ok');
+  showMsg('customInviteMsg', 'Email opened - edit the message before sending.', 'ok');
 }
 window.sendCustomInvite = sendCustomInvite;
 
@@ -208,9 +208,9 @@ function renderTeacherStudentTable(students) {
   if (!students.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><p>No students yet.</p></div></td></tr>'; return; }
   tbody.innerHTML = students.map(s => `<tr>
     <td class="col-name">${s.name}</td>
-    <td class="col-sm">${s.grade||'—'}</td>
+    <td class="col-sm">${s.grade||'–'}</td>
     <td class="col-sm">${s.project_title||'<em class="text-muted">Not set</em>'}</td>
-    <td class="col-sm">${s.project_field||'—'}</td>
+    <td class="col-sm">${s.project_field||'–'}</td>
     <td><span class="chip chip-${s.paperwork_status||'pending'}">${s.paperwork_status||'pending'}</span></td>
     <td><button class="btn-xs" onclick="showSection('documents',document.querySelector('[data-section=documents]'))">Upload</button></td>
   </tr>`).join('');

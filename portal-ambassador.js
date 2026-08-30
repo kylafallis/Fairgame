@@ -36,7 +36,7 @@ function renderHomeStats(students) {
 
 function renderRecentStudents(students) {
   const el = document.getElementById('recentStudentsTable');
-  if (!students.length) { el.innerHTML = '<div class="empty-state"><p>No students yet — add your first student using the button above.</p></div>'; return; }
+  if (!students.length) { el.innerHTML = '<div class="empty-state"><p>No students yet - add your first student using the button above.</p></div>'; return; }
   el.innerHTML = `<table class="data-table">
     <thead><tr><th>Name</th><th>Project</th><th>Paperwork</th></tr></thead>
     <tbody>${students.map(s => `<tr>
@@ -56,9 +56,9 @@ function renderStudentTable(students) {
   }
   tbody.innerHTML = students.map(s => `<tr>
     <td class="col-name">${s.name}</td>
-    <td class="col-sm">${s.grade || '—'}</td>
+    <td class="col-sm">${s.grade || '–'}</td>
     <td class="col-sm" style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.project_title || '<span class="text-muted"><em>Not set</em></span>'}</td>
-    <td class="col-sm text-muted">${s.project_field || '—'}</td>
+    <td class="col-sm text-muted">${s.project_field || '–'}</td>
     <td><span class="chip chip-${s.paperwork_status||'pending'}">${s.paperwork_status||'pending'}</span></td>
     <td class="col-sm">${s.mentor_id ? '<span class="text-green">Assigned</span>' : '<span class="text-muted">None</span>'}</td>
     <td style="white-space:nowrap;">
@@ -100,7 +100,7 @@ window.saveStudent = saveStudent;
 /* ── Documents ── */
 function populateDocSelect() {
   const sel = document.getElementById('docStudentSelect');
-  sel.innerHTML = '<option value="">— Choose a student —</option>' +
+  sel.innerHTML = '<option value="">– Choose a student –</option>' +
     allStudents.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
 }
 
@@ -108,7 +108,7 @@ async function loadStudentDocs(studentId) {
   if (!studentId) return;
   activeDocStudentId = studentId;
   const student = allStudents.find(s => s.id === studentId);
-  document.getElementById('docVaultTitle').textContent = student?.name + ' — Documents';
+  document.getElementById('docVaultTitle').textContent = student?.name + ' - Documents';
   document.getElementById('docVaultCard').style.display = 'block';
   document.getElementById('uploadStudentId').value = studentId;
   document.getElementById('uploadFor').textContent = 'Uploading for: ' + (student?.name || '');
@@ -116,7 +116,7 @@ async function loadStudentDocs(studentId) {
   list.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
   if (!sb) { list.innerHTML = '<div class="empty-state"><p>Connect Supabase to view documents.</p></div>'; return; }
   const { data: docs } = await sb.from('documents').select('*').eq('student_id', studentId).order('uploaded_at', { ascending: false });
-  if (!docs?.length) { list.innerHTML = '<div class="empty-state"><p>No files yet — click Upload File to add the first one.</p></div>'; return; }
+  if (!docs?.length) { list.innerHTML = '<div class="empty-state"><p>No files yet - click Upload File to add the first one.</p></div>'; return; }
   list.innerHTML = docs.map(d => `
     <div class="flex items-center gap-12" style="padding:10px 0;border-bottom:var(--border,1px solid #e2e6e2);">
       <div style="flex:1;">
@@ -160,7 +160,7 @@ async function doUpload() {
   const path = `students/${ambassadorId}/${studentId}/${Date.now()}_${file.name.replace(/\s+/g,'_')}`;
   if (sb) {
     const { error: upErr } = await uploadPortalFile('student-docs', path, file);
-    if (upErr) { showMsg('uploadMsg','Upload failed — check file type and size.','err'); return; }
+    if (upErr) { showMsg('uploadMsg','Upload failed - check file type and size.','err'); return; }
     await sb.from('documents').insert([{ owner_id: ambassadorId, owner_type: 'ambassador', student_id: studentId, file_path: path, file_name: file.name, file_type: docType, uploaded_at: new Date().toISOString() }]);
     await sb.from('students').update({ paperwork_status: 'uploaded' }).eq('id', studentId);
   }
@@ -183,8 +183,8 @@ async function requestMeeting() {
   const notes = document.getElementById('schedNotes').value.trim();
   if (!date || !notes) { showMsg('schedMsg','Please set a date and describe what you need help with.','err'); return; }
   showMsg('schedMsg','Sending…','info');
-  if (sb) await sb.from('messages').insert([{ from_user_id: ambassadorId, from_role:'ambassador', to_role:'admin', subject:`Meeting Request — ${date} ${time}`, body: notes }]).catch(()=>{});
-  const sub  = encodeURIComponent(`FairGame Meeting Request — ${date}`);
+  if (sb) await sb.from('messages').insert([{ from_user_id: ambassadorId, from_role:'ambassador', to_role:'admin', subject:`Meeting Request - ${date} ${time}`, body: notes }]).catch(()=>{});
+  const sub  = encodeURIComponent(`FairGame Meeting Request - ${date}`);
   const body = encodeURIComponent(`Hi FairGame Team,\n\nI'd like to schedule a meeting on ${date} (${time}).\n\n${notes}`);
   window.open(`mailto:fairgameinitiative@outlook.com?subject=${sub}&body=${body}`);
   showMsg('schedMsg',"Request sent! We'll confirm within 48 hours.",'ok');

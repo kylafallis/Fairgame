@@ -1,6 +1,6 @@
 /*  TOKENS  */
     :root {
-      /* Green palette — same family as current site, just dialed in */
+      /* Green palette - same family as current site, just dialed in */
       --green-900: #1c3a1c;
       --green-800: #254f25;
       --green-700: #2d6030;
@@ -914,7 +914,7 @@
     .vol-card h3 { color: var(--green-900); margin-bottom: 10px; }
     .vol-card p { font-size: 0.88rem; color: var(--gray-500); margin-bottom: 18px; line-height: 1.65; }
     .vol-detail { font-size: 0.82rem; color: var(--gray-700); margin-bottom: 6px; display: flex; gap: 8px; align-items: flex-start; }
-    .vol-detail::before { content: '—'; color: var(--green-400); flex-shrink: 0; }
+    .vol-detail::before { content: '–'; color: var(--green-400); flex-shrink: 0; }
 
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
     @media (max-width: 640px) { .form-grid { grid-template-columns: 1fr; } }

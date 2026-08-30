@@ -105,7 +105,7 @@ async function go(user) {
         .in('status', ['pending', 'active', 'rejected'])
         .order('created_at', { ascending: false }).limit(1);
       const req = rows?.[0] || null;
-      // If RLS blocked the query, don't block the user — let them through
+      // If RLS blocked the query, don't block the user - let them through
       if (!reqErr) {
         if (!req || req.status === 'pending') {
           showPendingScreen(user.email, role);
@@ -207,7 +207,7 @@ function handleChooserAge(cb) {
 window.handleChooserAge = handleChooserAge;
 
 async function chooseRole(role) {
-  // Same COPPA gate the email signup uses — OAuth skips it otherwise.
+  // Same COPPA gate the email signup uses - OAuth skips it otherwise.
   const ageOk    = document.getElementById('chooserAge')?.checked;
   const guardian = document.getElementById('chooserGuardian')?.value.trim() || '';
   let extra = { age_confirmed: true };
@@ -274,7 +274,7 @@ function showPendingScreen(email, role) {
     <p class="login-sub" style="margin-bottom:18px;">Signed in as <strong>${email}</strong></p>
     <div style="background:#fff8e1;border:1.5px solid #f59e0b;border-radius:4px;padding:14px 16px;font-size:.84rem;color:#78350f;line-height:1.6;margin-bottom:18px;">
       <strong style="display:block;margin-bottom:4px;">Your ${role} account is pending approval.</strong>
-      We review all ${role} accounts personally to ensure a safe environment for students. You'll receive an email at <strong>${email}</strong> once your account is approved — typically within 1–3 business days.
+      We review all ${role} accounts personally to ensure a safe environment for students. You'll receive an email at <strong>${email}</strong> once your account is approved - typically within 1–3 business days.
     </div>
     <button onclick="doSignOut()" style="width:100%;padding:10px;background:none;border:1.5px solid var(--gray-200);border-radius:3px;font-size:.82rem;color:var(--gray-500);cursor:pointer;">
       Sign out and switch accounts
@@ -429,7 +429,7 @@ async function doSignup() {
       'err');
   } else if (needsApproval) {
     msg('signupMsg',
-      'Account created! Your request is now under review. We will contact you at ' + email + ' once your account has been approved — typically within 1–3 business days. Please also confirm your email address from the message we just sent.',
+      'Account created! Your request is now under review. We will contact you at ' + email + ' once your account has been approved - typically within 1–3 business days. Please also confirm your email address from the message we just sent.',
       'ok');
   } else if (isUnder13) {
     msg('signupMsg',
@@ -442,7 +442,7 @@ async function doSignup() {
 
 /* ── Google OAuth ─────────────────────────────────────────────
    OAuth cannot carry metadata through the redirect, so a signup must stash
-   the chosen role first — otherwise the account comes back role-less and
+   the chosen role first - otherwise the account comes back role-less and
    teachers land in the student portal with no request in the queue. */
 async function doGoogle(context) {
   if (!sb) { alert('Google sign-in is not configured yet.'); return; }
@@ -473,7 +473,7 @@ async function showForgot(e) {
   if (!sb) return;
   const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/login.html' });
   if (error) msg('loginMsg', error.message, 'err');
-  else msg('loginMsg', 'Password reset email sent — check your inbox.', 'ok');
+  else msg('loginMsg', 'Password reset email sent - check your inbox.', 'ok');
 }
 
 /* ── Sign Out ─────────────────────────────────────────────────── */

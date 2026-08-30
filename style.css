@@ -1,10 +1,10 @@
 /* ─────────────────────────────────────────────────────────────
-   FairGame Initiative — style.css
+   FairGame Initiative - style.css
    Fonts:   Playfair Display (headings) + DM Sans (body)
-   Palette: Green tightened — #357a38 primary
+   Palette: Green tightened - #357a38 primary
    Radius:  0px everywhere
-            EXCEPTION 1 — inputs: 3px
-            EXCEPTION 2 — portal banner buttons: 20px (pill)
+            EXCEPTION 1 - inputs: 3px
+            EXCEPTION 2 - portal banner buttons: 20px (pill)
    ──────────────────────────────────────────────────────────── */
 
 /* ── TOKENS ──────────────────────────────────────────────────── */
@@ -99,7 +99,7 @@ p { color: var(--gray-500); line-height: 1.75; }
   .section-head { flex-direction: column; align-items: flex-start; }
 }
 
-/* ── BUTTONS — sharp (0px) ───────────────────────────────────── */
+/* ── BUTTONS - sharp (0px) ───────────────────────────────────── */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -147,7 +147,7 @@ p { color: var(--gray-500); line-height: 1.75; }
 }
 .btn-ghost:hover { color: var(--gray-900); }
 
-/* ── PORTAL BANNER BUTTONS — pill (rounded, exception) ───────── */
+/* ── PORTAL BANNER BUTTONS - pill (rounded, exception) ───────── */
 .btn-portal {
   display: inline-flex;
   align-items: center;
@@ -156,7 +156,7 @@ p { color: var(--gray-500); line-height: 1.75; }
   font-size: 0.78rem;
   font-weight: 500;
   letter-spacing: 0.03em;
-  border-radius: 20px;        /* Intentionally rounded — per spec */
+  border-radius: 20px;        /* Intentionally rounded - per spec */
   transition: all 0.18s;
   cursor: pointer;
   line-height: 1;
@@ -182,7 +182,7 @@ p { color: var(--gray-500); line-height: 1.75; }
   color: var(--green-700);
 }
 
-/* ── INPUTS — 3px radius (only inputs have any radius) ───────── */
+/* ── INPUTS - 3px radius (only inputs have any radius) ───────── */
 input[type="text"],
 input[type="email"],
 input[type="tel"],
@@ -575,7 +575,7 @@ nav {
 .res-card:nth-child(3n)      { border-right: none; }
 .res-card:nth-last-child(-n+3) { border-bottom: none; }
 
-/* Geometric icon — no emoji */
+/* Geometric icon - no emoji */
 .res-icon-wrap {
   width: 36px; height: 36px;
   background: var(--green-100);

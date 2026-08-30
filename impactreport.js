@@ -147,7 +147,7 @@ function buildSchoolTable(schools) {
         <td style="font-weight:500;color:var(--green-900);">${s.name}</td>
         <td>${s.city}</td>
         <td style="font-size:0.78rem;">${s.program}</td>
-        <td>${s.students_est || '—'}</td>
+        <td>${s.students_est || '–'}</td>
         <td><span class="status-pill ${s.status}">${s.status}</span></td>
       </tr>`).join('')}
     </tbody></table>`;

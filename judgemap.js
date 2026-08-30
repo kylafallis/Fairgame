@@ -5,7 +5,7 @@ let map, allJudges = [], markers = {}, activeFilter = 'all', activeLevelFilter =
 const OHIO_CENTER = [40.4173, -82.9071];
 const OHIO_ZOOM   = 7;
 
-/* Ohio county → approx lat/lng lookup (subset — expand as needed) */
+/* Ohio county → approx lat/lng lookup (subset - expand as needed) */
 const COUNTY_COORDS = {
   'franklin':    [39.97,  -82.99], 'cuyahoga': [41.48,  -81.68], 'hamilton': [39.10,  -84.51],
   'summit':      [41.10,  -81.52], 'montgomery':[39.76, -84.19], 'lucas':    [41.66,  -83.56],
@@ -182,7 +182,7 @@ async function registerJudgeMap() {
 
   if (sb) {
     const { error } = await sb.from('judges').insert([{ name, email, org, city, expertise, available_level: level, status: 'active' }]);
-    if (error) { msg.textContent = 'Error — please try again or email us.'; msg.style.color = '#c0392b'; return; }
+    if (error) { msg.textContent = 'Error - please try again or email us.'; msg.style.color = '#c0392b'; return; }
   }
 
   msg.textContent = 'You\'re on the map! Refresh to see your pin.'; msg.style.color = 'var(--green-600)';
@@ -233,7 +233,7 @@ async function sendMatchRequest() {
   }
 
   // Trigger email via mailto as fallback (replace with Supabase Edge Function when ready)
-  const subject = encodeURIComponent(`Science Fair Judge Request — ${school}`);
+  const subject = encodeURIComponent(`Science Fair Judge Request - ${school}`);
   const body    = encodeURIComponent(
     `Hi ${judgeName},\n\nMy name is ${teacher} and I'm coordinating the science fair at ${school}.\n\n` +
     `Fair date: ${date}\n\n${message ? message + '\n\n' : ''}` +
@@ -257,55 +257,3 @@ document.addEventListener('DOMContentLoaded', () => {
   initMap();
   loadJudges();
 });
-
-<footer>
-  <div class="container">
-    <div class="footer-grid">
-      <div>
-        <div class="f-brand-name">FairGame Initiative</div>
-        <p class="f-brand-desc">Bringing competitive STEM opportunities to rural and low-income schools. Advised by Forbes 30 Under 30 founders and nationwide STEM education experts.</p>
-        &nbsp;·&nbsp;
-        <a href="/privacy.html" style="color:rgba(255,255,255,.6);">Privacy Policy</a>
-        &nbsp;·&nbsp;
-        <a href="/terms.html" style="color:rgba(255,255,255,.6);">Terms of Service</a>
-        <div class="f-social">
-          <a href="#" title="Instagram">IG</a>
-          <a href="#" title="Twitter / X">X</a>
-          <a href="#" title="LinkedIn">in</a>
-          <a href="#" title="TikTok">TK</a>
-        </div>
-      </div>
-      <div class="f-col">
-        <h5>Resources</h5>
-        <ul>
-          <li><a href="/starthere.html">Start Here</a></li>
-          <li><a href="/setupguide.html">Setup Guide</a></li>
-          <li><a href="/stateresources.html">State Resources</a></li>
-          <li><a href="/researchguide.html">Research Guide</a></li>
-          <li><a href="/teachers-professionals.html">For Teachers</a></li>
-        </ul>
-      </div>
-      <div class="f-col">
-        <h5>Get Involved</h5>
-        <ul>
-          <li><a href="/volunteer.html">Volunteer / Judge</a></li>
-          <li><a href="/donate.html">Donate</a></li>
-          <li><a href="#portal">Ambassador Portal</a></li>
-          <li><a href="mailto:fairgameinitiative@outlook.com">Partner With Us</a></li>
-        </ul>
-      </div>
-      <div class="f-col">
-        <h5>Organization</h5>
-        <ul>
-          <li><a href="/successstories.html">Success Stories</a></li>
-          <li><a href="mailto:fairgameinitiative@outlook.com">Contact Us</a></li>
-          <li><a href="https://fairgameinitiative.org">fairgameinitiative.org</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <p>© 2026 FairGame Initiative · All rights reserved.</p>
-      <div><a href="#">Privacy Policy</a><a href="#">Terms of Service</a></div>
-    </div>
-  </div>
-</footer>

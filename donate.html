@@ -135,7 +135,7 @@
   <div class="cs-overline">Support FairGame</div>
   <h1 class="cs-heading">Your generosity<br><em>changes everything.</em></h1>
   <p class="cs-body">
-    Our donation page is almost ready. Every dollar goes directly to supporting students and schools — covering fair registration, materials, and the program infrastructure that makes competitive science fair accessible to every student, regardless of zip code.
+    Our donation page is almost ready. Every dollar goes directly to supporting students and schools - covering fair registration, materials, and the program infrastructure that makes competitive science fair accessible to every student, regardless of zip code.
   </p>
   <p class="cs-body" style="margin-top:-16px;">
     Check back soon, or leave your email and we'll let you know the moment it's live.
@@ -179,7 +179,7 @@
     if (sb) {
       await sb.from('email_subscribers').insert([{ email, role: 'donor_notify', source: 'donate_coming_soon' }]).catch(()=>{});
     }
-    msgEl.textContent = "Got it — we'll let you know!";
+    msgEl.textContent = "Got it - we'll let you know!";
     msgEl.style.color = 'var(--green-400)';
     document.getElementById('notifyEmail').value = '';
   }
