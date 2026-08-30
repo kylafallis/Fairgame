@@ -157,7 +157,6 @@ async function createPair() {
   }
 
   msg.textContent = 'Pair created!'; msg.style.color = 'var(--green-600)';
-  logEvent('mentorship_created', { school });
   setTimeout(() => { closeAddPair(); msg.textContent = ''; }, 1500);
   await loadPairs();
 }
@@ -173,4 +172,4 @@ function prefillFromQuery() {
   openAddPair();
 }
 
-document.addEventListener('DOMContentLoaded', () => { loadPairs(); prefillFromQuery(); });
+requireAuth('admin', () => { loadPairs(); prefillFromQuery(); });

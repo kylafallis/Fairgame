@@ -52,10 +52,15 @@ function requireAuth(expectedRole, onReady) {
   }
   sb.auth.getSession().then(async ({ data: { session }, error }) => {
     if (error || !session?.user) { window.location.replace('/login.html'); return; }
-    // Refresh token so user_metadata reflects any role changes made in the dashboard
+    // Refresh token so user_metadata/app_metadata reflect any role changes made in the dashboard
     const { data: refreshed } = await sb.auth.refreshSession();
     const user = refreshed?.session?.user || session.user;
-    const role = user.user_metadata?.role || user.app_metadata?.role || 'ambassador';
+    // app_metadata is only settable via the server (SQL/service-role), never from the
+    // browser, so it's the only source trusted for the admin bypass. user_metadata is
+    // self-editable by any signed-in user and must never grant admin on its own.
+    const isRealAdmin = user.app_metadata?.role === 'admin';
+    const claimedRole = user.user_metadata?.role || 'ambassador';
+    const role = isRealAdmin ? 'admin' : (claimedRole === 'admin' ? 'ambassador' : claimedRole);
     if (role === 'admin' || role === expectedRole) {
       // Teacher and Ambassador accounts require admin approval before portal access
       if ((role === 'teacher' || role === 'ambassador') && role !== 'admin') {
