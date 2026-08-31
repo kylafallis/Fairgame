@@ -502,7 +502,10 @@ $$;
 -- PART 7 - THE ADMIN QUEUE VIEW
 -- ---------------------------------------------------------------------
 
-create or replace view public.v_judge_review_queue as
+-- Dropped first rather than replaced, because a later migration may
+-- have added columns and CREATE OR REPLACE VIEW cannot remove one.
+drop view if exists public.v_judge_review_queue;
+create view public.v_judge_review_queue as
 select j.id                     as judge_id,
        j.name,
        j.email,

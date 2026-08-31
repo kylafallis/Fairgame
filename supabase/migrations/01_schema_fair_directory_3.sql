@@ -90,17 +90,30 @@ end $$;
 -- After running this migration, insert yourself:
 --   insert into public.user_roles (user_id, role, full_name)
 --   values ('<your-auth-uid>', 'admin', 'Kyla Fallis');
+--
+-- Allowed roles are admin, teacher, ambassador, judge, fair_manager,
+-- student, parent, and inactive. Only the first five reach a portal.
+-- Students and parents hold an account without access to any of the
+-- tables this migration creates.
 -- =====================================================================
 
 create table if not exists public.user_roles (
   user_id     uuid primary key references auth.users(id) on delete cascade,
-  role        text not null check (role in
-                ('admin','teacher','ambassador','judge','fair_manager','inactive')),
+  role        text not null,
   full_name   text,
   state_code  char(2),
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );
+
+-- The allowed role list is set here rather than inline, because
+-- CREATE TABLE IF NOT EXISTS will not touch a constraint that already
+-- exists. Dropping and re-adding lets this script widen the list on a
+-- table built by an earlier run.
+alter table public.user_roles drop constraint if exists user_roles_role_check;
+alter table public.user_roles add constraint user_roles_role_check
+  check (role in ('admin','teacher','ambassador','judge',
+                  'fair_manager','student','parent','inactive'));
 
 alter table public.user_roles enable row level security;
 
@@ -836,7 +849,8 @@ create policy "plan_templates_admin" on public.fair_plan_task_templates
 -- PART 7 - HELPER VIEWS
 -- =====================================================================
 
-create or replace view public.v_upcoming_fair_deadlines as
+drop view if exists public.v_upcoming_fair_deadlines;
+create view public.v_upcoming_fair_deadlines as
 select f.id as fair_id, f.name as fair_name, f.state_code, f.level,
        d.label, d.due_date, d.audience, d.detail_url
 from public.fair_deadlines d
@@ -845,7 +859,8 @@ where d.due_date >= current_date
   and f.active = true
 order by d.due_date;
 
-create or replace view public.v_state_fair_counts as
+drop view if exists public.v_state_fair_counts;
+create view public.v_state_fair_counts as
 select state_code,
        count(*) filter (where level = 'state')     as state_fairs,
        count(*) filter (where level = 'regional')  as regional_fairs,
@@ -859,7 +874,8 @@ where active = true
 group by state_code
 order by state_code;
 
-create or replace view public.v_judge_coverage_by_state as
+drop view if exists public.v_judge_coverage_by_state;
+create view public.v_judge_coverage_by_state as
 select coalesce(j.state_code, 'ZZ') as state_code,
        count(*)                                        as judges_total,
        count(*) filter (where j.email_opt_in)          as judges_mailable,

@@ -46,16 +46,36 @@ four things, because the rest of this work depends on them:
    | `travel_range` | text | free-text answer from the signup form |
    | `travel_miles` | integer | the numeric distance field, already present |
 
+   Two defaults on that table change how the features behave, and migration
+   05 handles both. `travel_miles` defaults to 10, so a defaulted value and a
+   deliberate one look identical, and `travel_miles_confirmed` now records
+   which it is. `status` defaults to `active`, so filtering a campaign on it
+   excludes nobody, and `profile_status` is the real review gate.
+
    Two of these are free text a person typed, `available_level` and
    `travel_range`. Nothing can measure or compare them, so the migrations leave
    them alone and add `preferred_levels text[]` and use the existing
    `travel_miles` for the structured versions. No second mileage column is
    created.
 
-2. How `portal-router.html` reads a user's role today.
-3. Whether `portal-shared.js` already has a query helper, a toast or alert
+2. Three tables already in the database that this work connects to rather
+   than replaces. Do not build a second version of any of them.
+
+   - `fairs` holds school fairs a teacher registers. Migration 05 adds a
+     trigger that mirrors each row into `fair_events` at level `school`, so
+     judges can be matched to them. Teacher portal work writes to `fairs`,
+     never to `fair_events` directly.
+   - `judge_requests` is the existing teacher-to-judge invitation record. Keep
+     using it for a teacher inviting a judge to their own school fair.
+     `judge_fair_interests` is the different case of a judge raising a hand for
+     a directory fair.
+   - `fair_plans` is the fair manager's planning record. Migration 05 mirrors
+     it into `fair_events` the same way once it has a target date.
+
+3. How `portal-router.html` reads a user's role today.
+4. Whether `portal-shared.js` already has a query helper, a toast or alert
    pattern, and a table-rendering helper that new pages should reuse.
-4. The CSS conventions in the existing portal pages, including class names,
+5. The CSS conventions in the existing portal pages, including class names,
    color variables, and card or panel markup. Every new page must look like it
    was built by the same person on the same day.
 
@@ -87,6 +107,7 @@ Run these in order in the Supabase SQL editor. Do not edit the seed data.
 2. `02_seed_fairs.sql`
 3. `03_seed_email_templates.sql`
 4. `04_judge_matching.sql`
+5. `05_schema_reconciliation.sql`
 
 Then confirm the new tables exist and report the row counts from
 `select * from public.v_state_fair_counts;`.
@@ -111,16 +132,21 @@ happening next, with the contact for each one and a way to say they will judge i
    to the judge's state. Each shows the label, the date, days remaining, and the
    fair name. Anything inside 30 days gets a highlighted border.
 
-3. **Fairs near me.** Cards for fairs where `state_code` matches and either
+3. **FairGame school fairs near me.** A separate band above the rest, listing
+   matches where `level` is `school`. These are the fairs FairGame helped a
+   school start, often the school's first, and they are the hardest to staff.
+   Give this band its own heading and put it before the regional listings.
+
+4. **Fairs near me.** Cards for fairs where `state_code` matches and either
    `county` or an entry in `counties_served` matches the judge's county. Each
    card shows fair name, level badge, date or "date not yet posted", venue and
    city, grade range, and the ISEF affiliate mark when true.
 
-4. **All fairs in my state.** A filterable table. Filters: level, month, county,
+5. **All fairs in my state.** A filterable table. Filters: level, month, county,
    and a checkbox for "needs judges". Columns: fair, level, date, city, counties
    served, deadline, and an action column.
 
-5. **Fair detail panel.** Clicking a row opens a side panel with everything on
+6. **Fair detail panel.** Clicking a row opens a side panel with everything on
    the record plus a **Fair contacts** block. That block lists rows from
    `fair_contacts` with name, title, email as a `mailto:` link, and phone. Under
    it print the source URL and `last_verified_at` as "Confirmed on
@@ -128,7 +154,7 @@ happening next, with the contact for each one and a way to say they will judge i
    a plain amber line reading "We have not confirmed this listing for the current
    season. Check the fair's own site before you rely on the date."
 
-6. **Advancement path.** When `advances_to_id` is set, draw a simple three-step
+7. **Advancement path.** When `advances_to_id` is set, draw a simple three-step
    row: this fair, then the fair it advances to, then ISEF when the chain reaches
    an affiliate. Text and arrows only, no diagram library.
 
@@ -146,8 +172,10 @@ happening next, with the contact for each one and a way to say they will judge i
   scraper feeds. It is the cheapest data quality win in this whole build.
 
 **Public version.** Add the same directory, contacts removed, to a new public
-page `fairs.html` linked from the main navigation. Anonymous visitors read
-`fair_events` only, which the policies already allow. This is the page that will
+page `fairs.html` linked from the main navigation. Anonymous visitors see only
+rows where `public_listing` is true, which is the regional and state directory.
+School fairs stay off the public page while remaining visible to signed-in
+judges, so a school's event is never broadcast without the school asking. This is the page that will
 earn search traffic from students and teachers looking for their regional fair,
 so give every fair a clean anchor at `fairs.html#<slug>`.
 
@@ -164,7 +192,10 @@ sidebar under a new "Outreach" heading.
 **Step 1, build the audience.**
 
 Controls: state, county multi-select, expertise multi-select, level preference,
-"active judges only", and an optional linked fair from `fair_events`. Calling
+"reviewed and published profiles only", and an optional linked fair from
+`fair_events`. Use the `p_published_only` argument for that last filter, not
+`p_verified_only`. The `status` column defaults to `active`, so filtering on it
+excludes nobody and would give a false sense of a screened list. Calling
 `fg_preview_judge_recipients()` returns the matching judges. Show the count
 prominently and the full list in a table with a checkbox per row, all checked by
 default. Show a second count for judges excluded by suppression or opt-out, with
@@ -285,6 +316,12 @@ this a separate role rather than a tab inside the teacher portal.
    plan's state, so the manager can see the deadline for the fair theirs feeds
    into.
 
+**Teacher portal, one small addition.** The fair registration form in
+`portal-teacher.html` writes to `fairs`. Add a single checkbox reading "List this
+fair on the public FairGame fair finder" that writes `fairs.list_publicly`. It
+stays unticked by default. Everything else is automatic: the trigger mirrors the
+row into the directory, and judges nearby start matching to it.
+
 **Account creation.** Add "Fair organizer (not a teacher)" to the contact form on
 the homepage so these requests land in `portal_requests` with their own type, and
 add the matching approve path in `portal-admin.html`.
@@ -396,7 +433,9 @@ structured control directly beneath it:
 - `available_level` reads "Regional and state fairs". Below it, four checkboxes
   for school, district, regional, and state that write `preferred_levels`.
 - `travel_range` reads "Up to about an hour". Below it, a number box that writes
-  `travel_miles`.
+  `travel_miles` and sets `travel_miles_confirmed` to true on save. Until that
+  flag is true the record may still be carrying the default of 10 miles, and
+  the match reasons say so in plain words.
 
 Never overwrite the original answer. It is what the volunteer said, and a
 mistranslation should be correctable by reading it again.
@@ -598,6 +637,7 @@ numbers after step 3:
 | `email_templates` after migration 03 | 6 |
 | `fair_plan_task_templates` | 20 |
 | `email_templates` after migration 04 | 7 |
+| `fair_scrape_sources` | 20 |
 
 By state: Ohio 15 fairs with 13 verified, California 9 with 6 verified,
 Tennessee 5 with 3 verified, Michigan 6 with 2 verified. Tennessee correctly
@@ -613,15 +653,29 @@ for a judge, and it correctly skipped a judge whose address was in
 `email_suppressions`. `fg_seed_plan_tasks()` produced 20 dated checklist rows
 from one target date.
 
-Migration 04 was tested against a database built from the live column list above,
-not from an assumed one. A judge in Columbus with a 45 mile radius
+Migrations 04 and 05 were tested against a database rebuilt table for table from
+the live schema, all 31 tables, not from an assumed one. All five migrations run
+clean three times in a row on that copy, and 04 and 05 also reapply cleanly on a
+database where they have already run. A judge in Columbus with a 45 mile radius
 and a preference for regional and state fairs matched the three Franklin County
 fairs at a score of 105 and 1.1 miles, geocoded from city alone with no postal
 code on file. A judge with nothing but a name, an email, and a state produced
 five research items and no blocking ones.
-Publishing three fairs moved them to published, set `profile_status`, and queued
+Publishing four fairs moved them to published, set `profile_status`, and queued
 one campaign whose recipient carried a formatted fair list. A judge calling the
 publish function was refused.
+
+Migration 05 was checked the same way. A school fair inserted into `fairs` the
+way the teacher portal inserts one appeared in `fair_events` at level `school`
+within the same statement, stayed invisible to an anonymous client, showed to a
+signed-in judge, and scored 85 in that judge's match list with the reason "A
+FairGame school fair". An anonymous client saw 25 of the 36 fairs and none of
+the contacts, campaigns, plans, matches, or postal centroids, and its insert into
+`fair_events` was refused. A signed-in judge saw all 36 fairs and all 27
+contacts, still saw no campaigns or plans, and saw only their four published
+matches with none of the proposals. A judge carrying the default of 10 miles
+matched on county and had every distance line labelled "a distance nobody has
+confirmed" until the flag was set.
 
 If your numbers differ after running the migrations, stop and tell me before
 building anything on top of them.
