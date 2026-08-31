@@ -21,6 +21,63 @@ create extension if not exists "pgcrypto";
 create extension if not exists "citext";
 
 -- =====================================================================
+-- PART 0a - SHAPE HELPERS FOR THE EXISTING judges TABLE
+-- =====================================================================
+-- The live judges table stores some fields as arrays and some as plain
+-- text, and the two shapes cannot be compared with the same operator.
+-- fg_text_array() normalizes either one into text[] so every query below
+-- works without anyone having to remember which is which.
+--
+--   text          'Biology'              -> {Biology}
+--   text[]        {Biology,Chemistry}    -> {Biology,Chemistry}
+--   null          null                   -> null
+--
+-- Call it as: public.fg_text_array(to_jsonb(j.expertise))
+
+create or replace function public.fg_text_array(v jsonb)
+returns text[]
+language sql immutable as $$
+  select case
+    when v is null then null
+    when jsonb_typeof(v) = 'null'  then null
+    when jsonb_typeof(v) = 'array' then array(select jsonb_array_elements_text(v))
+    else array[v #>> '{}']
+  end;
+$$;
+
+-- CONFIRMED SHAPE OF THE LIVE judges TABLE, checked August 31, 2026
+--   id uuid | name text | email text | org text | city text
+--   expertise text[] | available_level text | status text | notes text
+--   created_at timestamptz | county text | travel_range text
+--   travel_miles integer
+--
+-- Everything below uses those names. Two of them are the pre-existing
+-- free-text answers from the signup form, available_level and
+-- travel_range, and they are kept rather than overwritten. The new
+-- structured fields sit beside them and the profile page asks a person
+-- to translate one into the other.
+--
+-- Print what the table actually looks like, so a mismatch shows up as a
+-- readable notice instead of a type error 400 lines later.
+do $$
+declare r record; v_line text := '';
+begin
+  for r in
+    select column_name, data_type
+    from information_schema.columns
+    where table_schema = 'public' and table_name = 'judges'
+    order by ordinal_position
+  loop
+    v_line := v_line || r.column_name || ' ' || r.data_type || ' | ';
+  end loop;
+  if v_line = '' then
+    raise notice 'FairGame: no judges table found. Run supabase-schema.sql first.';
+  else
+    raise notice 'FairGame: judges columns -> %', v_line;
+  end if;
+end $$;
+
+-- =====================================================================
 -- PART 0 - ROLE HANDLING (READ THIS FIRST)
 -- =====================================================================
 -- Your Operations Guide stores role in Supabase user_metadata, for
@@ -226,10 +283,21 @@ create index if not exists fair_deadlines_due_idx  on public.fair_deadlines (due
 -- Your judges table is Ohio-shaped today. These columns let it hold
 -- four states and drive an opt-in mailing list.
 
-alter table public.judges add column if not exists state_code char(2);
+-- Columns the live table already has. Declared here with IF NOT EXISTS
+-- so this script never depends on something it did not confirm.
+alter table public.judges add column if not exists org text;
 alter table public.judges add column if not exists city text;
+alter table public.judges add column if not exists county text;
+alter table public.judges add column if not exists notes text;
+alter table public.judges add column if not exists available_level text;
+alter table public.judges add column if not exists travel_range text;
+alter table public.judges add column if not exists travel_miles integer;
+
+-- New columns.
+-- travel_miles is the existing distance field and stays the single source
+-- of truth. No second mileage column is created.
+alter table public.judges add column if not exists state_code char(2);
 alter table public.judges add column if not exists postal_code text;
-alter table public.judges add column if not exists willing_to_travel_miles integer default 30;
 alter table public.judges add column if not exists preferred_levels text[] default '{}';
 alter table public.judges add column if not exists preferred_grade_bands text[] default '{}';
 alter table public.judges add column if not exists virtual_ok boolean default false;
@@ -434,6 +502,8 @@ create table if not exists public.email_suppressions (
 );
 
 -- Recipient builder. Admin calls this to preview a send before creating it.
+-- Expertise and county are normalized through fg_text_array, so this
+-- works whether the live column holds one value or several.
 create or replace function public.fg_preview_judge_recipients(
   p_state       char(2),
   p_expertise   text[] default null,
@@ -452,19 +522,25 @@ stable
 security definer
 set search_path = public
 as $$
-  select j.id, j.name, j.email::citext, j.county, j.expertise
+  select j.id,
+         j.name,
+         j.email::citext,
+         array_to_string(public.fg_text_array(to_jsonb(j.county)), ' / '),
+         array_to_string(public.fg_text_array(to_jsonb(j.expertise)), ', ')
   from public.judges j
   where public.fg_is_admin()
     and j.state_code = p_state
     and coalesce(j.email_opt_in, true) = true
     and j.email is not null
     and (p_verified_only is false or j.status = 'active')
-    and (p_expertise is null or j.expertise = any(p_expertise))
-    and (p_counties  is null or j.county    = any(p_counties))
+    and (p_expertise is null
+         or public.fg_text_array(to_jsonb(j.expertise)) && p_expertise)
+    and (p_counties is null
+         or public.fg_text_array(to_jsonb(j.county)) && p_counties)
     and not exists (
       select 1 from public.email_suppressions s where s.email = j.email::citext
     )
-  order by j.county nulls last, j.name;
+  order by 4 nulls last, j.name;
 $$;
 
 -- =====================================================================

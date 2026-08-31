@@ -15,9 +15,16 @@
 --
 -- MATCHING WORKS WITHOUT COORDINATES
 --   County and state matching runs on data you already collect. Distance
---   in miles is an enhancement that switches on once a judge has a
---   postal code and a fair has a location. Nothing breaks while those
---   are blank. They are reported as research tasks instead.
+--   in miles switches on once a judge has a city or a postal code and the
+--   fair has a location. Nothing breaks while those are blank. They are
+--   reported as research tasks instead.
+--
+-- IT READS THE SIGNUP FORM ANSWERS YOU ALREADY HAVE
+--   The live judges table stores two free-text answers, available_level
+--   and travel_range. Neither can be compared or measured, so they are
+--   left untouched and surfaced as research tasks that quote what the
+--   person wrote. Translating "Up to about an hour" into 45 miles is a
+--   judgement call, and it stays a human one.
 -- =====================================================================
 
 -- ---------------------------------------------------------------------
@@ -95,10 +102,13 @@ language sql immutable as $$
 $$;
 
 -- Fill judge coordinates from their postal code where possible.
+-- Postal code first, then city and state. The live signup form collects
+-- city but not postal code, so the second pass is the one that will do
+-- most of the work until the form is changed.
 create or replace function public.fg_geocode_judges_from_zip()
 returns integer
 language plpgsql security definer set search_path = public as $$
-declare v_count integer;
+declare v_zip integer; v_city integer;
 begin
   update public.judges j
   set latitude = z.latitude,
@@ -109,8 +119,28 @@ begin
   where j.postal_code is not null
     and left(regexp_replace(j.postal_code, '[^0-9]', '', 'g'), 5) = z.zip
     and j.latitude is null;
-  get diagnostics v_count = row_count;
-  return v_count;
+  get diagnostics v_zip = row_count;
+
+  update public.judges j
+  set latitude = c.lat,
+      longitude = c.lon,
+      geocode_source = 'census_zcta_city',
+      geocoded_at = now()
+  from (
+    select lower(trim(city)) as city_key, state_code,
+           avg(latitude) as lat, avg(longitude) as lon
+    from public.us_zip_centroids
+    where city is not null
+    group by 1, 2
+  ) c
+  where j.latitude is null
+    and j.city is not null
+    and j.state_code is not null
+    and lower(trim(j.city)) = c.city_key
+    and j.state_code = c.state_code;
+  get diagnostics v_city = row_count;
+
+  return v_zip + v_city;
 end;
 $$;
 
@@ -148,30 +178,42 @@ begin
       'Set state_code on the judge. Without it no fair can be matched.','judge';
   end if;
 
-  if j.county is null or length(trim(j.county)) = 0 then
+  -- Casting to text covers both shapes: a plain text column reads as ''
+  -- when empty, an array column reads as '{}'.
+  if j.county is null or coalesce(j.county::text, '') in ('', '{}') then
     return query select 'JUDGE_NO_COUNTY','limiting','No county on record',
       'County drives the closest matches. Look it up from their organization or ask them.','judge';
   end if;
 
-  if j.postal_code is null then
-    return query select 'JUDGE_NO_POSTAL','limiting','No postal code',
-      'Without a postal code the system cannot measure travel distance and falls back to county only.','judge';
+  if j.postal_code is null and j.city is null then
+    return query select 'JUDGE_NO_PLACE','limiting','No city or postal code',
+      'Without one of the two the system cannot measure travel distance and falls back to county only.','judge';
   elsif j.latitude is null then
     return query select 'JUDGE_NO_COORDS','limiting','Postal code not yet located',
       'The postal code is not in the centroid table. Load the Census gazetteer file or set latitude and longitude by hand.','judge';
   end if;
 
-  if j.willing_to_travel_miles is null then
-    return query select 'JUDGE_NO_RADIUS','limiting','No travel distance given',
-      'Ask how far they will drive. The system assumes 30 miles until told otherwise.','judge';
+  if j.travel_miles is null then
+    if j.travel_range is not null and length(trim(j.travel_range)) > 0 then
+      return query select 'JUDGE_RANGE_UNPARSED','limiting','Travel distance is still free text',
+        'They wrote "' || j.travel_range || '" on the signup form. Put the number of miles in travel_miles so the matcher can use it.','judge';
+    else
+      return query select 'JUDGE_NO_RADIUS','limiting','No travel distance given',
+        'Ask how far they will drive. The system assumes 30 miles until told otherwise.','judge';
+    end if;
   end if;
 
   if j.preferred_levels is null or array_length(j.preferred_levels,1) is null then
-    return query select 'JUDGE_NO_LEVELS','limiting','No fair levels chosen',
-      'Ask whether they want school, district, regional, or state fairs. Every level is offered until they say.','judge';
+    if j.available_level is not null and length(trim(j.available_level)) > 0 then
+      return query select 'JUDGE_LEVEL_UNMAPPED','limiting','Fair levels are still free text',
+        'They wrote "' || j.available_level || '" on the signup form. Tick the matching boxes for school, district, regional, or state so the matcher can use it.','judge';
+    else
+      return query select 'JUDGE_NO_LEVELS','limiting','No fair levels chosen',
+        'Ask whether they want school, district, regional, or state fairs. Every level is offered until they say.','judge';
+    end if;
   end if;
 
-  if j.expertise is null or length(trim(j.expertise)) = 0 then
+  if j.expertise is null or coalesce(j.expertise::text, '') in ('', '{}') then
     return query select 'JUDGE_NO_EXPERTISE','polish','No subject area',
       'Subject area decides which category a fair assigns them to. Ask what they work in.','judge';
   end if;
@@ -230,9 +272,12 @@ language plpgsql security definer set search_path = public as $$
 -- columns on the tables below. This directive makes the column win.
 #variable_conflict use_column
 declare
-  j       record;
-  v_radius integer;
-  v_levels text[];
+  j          record;
+  v_radius   integer;
+  v_levels   text[];
+  v_counties text[];
+  v_county_label text;
+  v_levels_given boolean;
 begin
   select * into j from public.judges where id = p_judge_id;
   if not found then
@@ -242,11 +287,15 @@ begin
     raise exception 'Judge % has no state_code. Set it before matching.', p_judge_id;
   end if;
 
-  v_radius := coalesce(j.willing_to_travel_miles, 30);
-  v_levels := case
-                when j.preferred_levels is null or array_length(j.preferred_levels,1) is null
-                then array['school','district','regional','state']
-                else j.preferred_levels
+  v_radius := coalesce(j.travel_miles, 30);
+  -- The live judges table may hold county as one value or several.
+  v_counties := public.fg_text_array(to_jsonb(j.county));
+  v_county_label := array_to_string(v_counties, ' / ');
+  v_levels_given := j.preferred_levels is not null
+                    and array_length(j.preferred_levels,1) is not null;
+  v_levels := case when v_levels_given
+                then j.preferred_levels
+                else array['school','district','regional','state']
               end;
 
   -- refresh proposals only. Every column is qualified because this
@@ -262,8 +311,9 @@ begin
       f.id,
       public.fg_miles_between(j.latitude, j.longitude, f.latitude, f.longitude) as miles,
       (
-          case when j.county is not null
-                    and (f.county = j.county or j.county = any(coalesce(f.counties_served,'{}')))
+          case when v_counties is not null
+                    and (f.county = any(v_counties)
+                         or coalesce(f.counties_served,'{}') && v_counties)
                then 40 else 0 end
         + case when j.latitude is not null and f.latitude is not null
                     and public.fg_miles_between(j.latitude,j.longitude,f.latitude,f.longitude) <= v_radius
@@ -276,13 +326,18 @@ begin
       )::smallint as score,
       (
         array_remove(array[
-          case when j.county is not null
-                    and (f.county = j.county or j.county = any(coalesce(f.counties_served,'{}')))
-               then 'Serves ' || j.county || ' County' end,
+          case when v_counties is not null
+                    and (f.county = any(v_counties)
+                         or coalesce(f.counties_served,'{}') && v_counties)
+               then 'Serves ' || v_county_label || ' County' end,
           case when j.latitude is not null and f.latitude is not null
                     and public.fg_miles_between(j.latitude,j.longitude,f.latitude,f.longitude) <= v_radius
                then 'Within ' || v_radius || ' miles' end,
-          case when f.level = any(v_levels) then 'Level they asked for: ' || f.level end,
+          case when f.level = any(v_levels) then
+                 case when v_levels_given
+                      then 'Level they asked for: ' || f.level
+                      else 'Level not chosen yet, showing all' end
+               end,
           case when coalesce(f.event_start_date, f.judging_date) >= current_date
                then 'Date still ahead' end,
           case when f.judges_needed then 'Fair is short on judges' end
@@ -295,7 +350,7 @@ begin
           case when f.verification_status <> 'verified' then 'FAIR_UNVERIFIED' end,
           case when f.judge_signup_url is null then 'FAIR_NO_SIGNUP' end,
           case when j.latitude is null then 'JUDGE_NO_COORDS' end,
-          case when j.county is null then 'JUDGE_NO_COUNTY' end
+          case when v_counties is null then 'JUDGE_NO_COUNTY' end
         ], null)
       ) as blockers
     from public.fair_events f
@@ -432,7 +487,7 @@ begin
     (v_campaign, p_judge_id, j.email::citext, j.name,
      jsonb_build_object(
        'first_name', coalesce(split_part(trim(j.name), ' ', 1), 'there'),
-       'county', coalesce(j.county, ''),
+       'county', coalesce(array_to_string(public.fg_text_array(to_jsonb(j.county)), ' / '), ''),
        'state_name', coalesce(j.state_code, ''),
        'fair_list', coalesce(v_list, 'No fairs matched yet. We will write again when one comes up.'),
        'match_count', v_published
@@ -451,9 +506,9 @@ create or replace view public.v_judge_review_queue as
 select j.id                     as judge_id,
        j.name,
        j.email,
-       j.organization,
-       j.expertise,
-       j.county,
+       j.org                    as organization,
+       array_to_string(public.fg_text_array(to_jsonb(j.expertise)), ', ') as expertise,
+       array_to_string(public.fg_text_array(to_jsonb(j.county)),    ' / ') as county,
        j.state_code,
        j.status                 as verification_status,
        j.profile_status,
@@ -463,9 +518,13 @@ select j.id                     as judge_id,
        (select count(*) from public.judge_fair_matches m
          where m.judge_id = j.id and m.status = 'published')  as published_fairs,
        (j.state_code is null or j.email is null)              as blocked,
-       (j.county is null or j.postal_code is null
+       (coalesce(j.county::text,'') in ('','{}')
+         or j.postal_code is null
+         or j.travel_miles is null
          or j.preferred_levels is null
-         or array_length(j.preferred_levels,1) is null)       as needs_research
+         or array_length(j.preferred_levels,1) is null)       as needs_research,
+       j.available_level        as level_answer_raw,
+       j.travel_range           as travel_answer_raw
 from public.judges j
 order by (j.profile_status = 'new') desc, j.created_at desc;
 

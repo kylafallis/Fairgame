@@ -26,9 +26,32 @@ Existing files you will touch or read first:
 Read `supabase-schema.sql` and `portal-shared.js` in full. Then report back on
 four things, because the rest of this work depends on them:
 
-1. The exact column names and types of the `judges` table. The new SQL assumes
-   `id uuid`, `name`, `email`, `county`, `expertise`, `status`. If any of that is
-   different, tell me before running the migrations rather than guessing.
+1. Whether the live `judges` table still matches the shape below. It was read
+   from the database on August 31, 2026 and every query in the migrations is
+   built on it. Report any difference before running anything.
+
+   | Column | Type | Note |
+   |---|---|---|
+   | `id` | uuid | |
+   | `name` | text | |
+   | `email` | text | |
+   | `org` | text | not `organization` |
+   | `city` | text | the only location field the signup form collects |
+   | `expertise` | text[] | a list, not one value |
+   | `available_level` | text | free-text answer from the signup form |
+   | `status` | text | unverified or active |
+   | `notes` | text | |
+   | `created_at` | timestamptz | |
+   | `county` | text | one value |
+   | `travel_range` | text | free-text answer from the signup form |
+   | `travel_miles` | integer | the numeric distance field, already present |
+
+   Two of these are free text a person typed, `available_level` and
+   `travel_range`. Nothing can measure or compare them, so the migrations leave
+   them alone and add `preferred_levels text[]` and use the existing
+   `travel_miles` for the structured versions. No second mileage column is
+   created.
+
 2. How `portal-router.html` reads a user's role today.
 3. Whether `portal-shared.js` already has a query helper, a toast or alert
    pattern, and a table-rendering helper that new pages should reuse.
@@ -63,6 +86,7 @@ Run these in order in the Supabase SQL editor. Do not edit the seed data.
 1. `01_schema_fair_directory.sql`
 2. `02_seed_fairs.sql`
 3. `03_seed_email_templates.sql`
+4. `04_judge_matching.sql`
 
 Then confirm the new tables exist and report the row counts from
 `select * from public.v_state_fair_counts;`.
@@ -114,7 +138,8 @@ happening next, with the contact for each one and a way to say they will judge i
   `interested` and flips the button to a confirmed state.
 - **Open judge signup** appears only when `judge_signup_url` is present.
 - **Email the fair** builds a `mailto:` to the primary contact with a subject of
-  "Judge volunteer for {{fair name}}" and a short prefilled body.
+  "Judge volunteer for {{fair name}}" and a short prefilled body, with
+  fairgameinitiative@outlook.com on cc.
 - **Report a problem** writes a `fair_scrape_changes` row with `change_type`
   `dead_link`, `review_status` `pending`, and the judge's note in
   `evidence_snippet`. That puts judge corrections into the same review queue the
@@ -170,6 +195,13 @@ requires typing the state code.
 On confirm, insert the `email_campaigns` row and one
 `email_campaign_recipients` row per approved judge with status `queued`, then
 call the Edge Function.
+
+**Sending identity.** Resend will only send from a domain verified by DNS, so
+the From address is `judges@fairgameinitiative.org`. Every message carries
+`Reply-To: fairgameinitiative@outlook.com`, and the same address is printed in
+the signature so a recipient can write back by hand. Hard-code neither one in
+the Edge Function. Read both from the `email_campaigns` row so they stay
+editable.
 
 **Edge Function.** `supabase/functions/send-campaign/index.ts`.
 
@@ -285,7 +317,8 @@ scripts/scraper/
 **Behavior.**
 
 - Reads `fair_scrape_sources` where `active` is true and `check_frequency` is due
-- Fetches with a descriptive user agent naming FairGame and a contact address,
+- Fetches with the user agent
+  `FairGameInitiative-FairBot/1.0 (+https://fairgameinitiative.org; fairgameinitiative@outlook.com)`,
   honors `robots.txt`, waits at least two seconds between requests to one host,
   and retries twice with backoff
 - Stores a content hash per source and skips parsing when nothing changed
@@ -325,6 +358,141 @@ this fair" button, since most months will be one date change per fair.
 
 ---
 
+# Feature 5: Judge profile review and publish
+
+**Goal.** A new judge signs up. Kyla opens their profile from the admin
+dashboard, sees which fairs the system matched them to and why, sees a list of
+anything it could not work out, fixes or researches those, then presses Publish.
+The judge then sees those fairs in their own portal and receives one email
+listing them.
+
+This is the human checkpoint between a stranger filling in a web form and that
+person appearing in front of students. Nothing reaches a judge until she presses
+the button.
+
+**Migration.** Run `04_judge_matching.sql` after the first three. It adds
+`judge_fair_matches`, `us_zip_centroids`, profile status columns on `judges`,
+and four functions the page calls.
+
+**New entry point.** In `portal-admin.html`, a section called **Judge profiles**
+driven by `v_judge_review_queue`. Each row shows name, organization, county,
+state, when they signed up, how many fairs are proposed, and two flags the view
+already computes: `blocked` and `needs_research`. New profiles sort to the top.
+The row's button opens the profile.
+
+**New file.** `portal-admin-judge.html?id=<judge_id>`, laid out in four bands.
+
+**Band 1, who they are.** Every field on the `judges` record, editable in place:
+name, `org`, email, expertise, county, city, state, postal code, `travel_miles`,
+`preferred_levels`, virtual willingness, and `admin_notes`. Saving any field
+re-runs the matcher, because changing the travel distance from 30 to 60 should
+change the answer on screen immediately.
+
+Two fields need a translation control rather than an edit box. The signup form
+writes free text into `available_level` and `travel_range`, and neither can be
+measured. Show what the person actually wrote in quotation marks, then put the
+structured control directly beneath it:
+
+- `available_level` reads "Regional and state fairs". Below it, four checkboxes
+  for school, district, regional, and state that write `preferred_levels`.
+- `travel_range` reads "Up to about an hour". Below it, a number box that writes
+  `travel_miles`.
+
+Never overwrite the original answer. It is what the volunteer said, and a
+mistranslation should be correctable by reading it again.
+
+**Band 2, fairs they are eligible for.** Call
+`fg_match_judge_fairs(judge_id)` and render the result as a table sorted by
+score. Columns: a checkbox, fair name, level, date, city, distance in miles,
+score, and the reasons. The reasons come back as an array of plain sentences
+such as "Serves Franklin County" and "Within 60 miles", so print them as small
+text under the fair name rather than inventing your own wording.
+
+Pre-tick every row scoring 60 or above and leave the rest unticked but visible.
+Rows carrying a blocker in `blocked_by` get a small amber marker and a tooltip
+naming the blocker. A row with `FAIR_NO_DATE` cannot be ticked at all, because
+inviting someone to an undated event helps nobody.
+
+Give each row a Dismiss action that sets the match status to `dismissed` with a
+reason, so a fair she has ruled out for this judge stops reappearing every time
+the matcher runs.
+
+**Band 3, what needs research.** Call `fg_judge_profile_gaps(judge_id)` and
+group the result by severity. Blocking items first in the alert color, then
+limiting, then polish. Each row prints the label, the subject it concerns, and
+the `how_to_fix` sentence. Judge-side gaps get an inline edit control that jumps
+to the matching field in Band 1. Fair-side gaps get a link to that fair's record
+and its source URL, so a gap turns into one click and a phone call rather than a
+hunt.
+
+Print a plain sentence above this band saying what it is: these are the things
+the system could not decide on its own, and each one either has to be looked up
+or accepted as unknown.
+
+**Band 4, publish.** A summary line reading how many fairs are ticked and whether
+an email will go out, then two controls. **Publish and email** calls
+`fg_publish_judge_matches(judge_id, selected_fair_ids, true)`. **Publish without
+email** passes false. Both are disabled while any blocking gap is unresolved,
+with the reason stated next to the button rather than left to guesswork.
+
+The function returns a `campaign_id`. Hand that straight to the existing
+`send-campaign` Edge Function from Feature 2, so this single-recipient email goes
+through the same suppression, unsubscribe, and bounce path as a bulk send. Do not
+write a second sending path.
+
+After publishing, the page shows what happened: which fairs went live, whether
+the email was queued, and a link to the campaign record. If the judge was
+suppressed or opted out, the function returns a null campaign id, and the page
+must say so plainly rather than reporting a send that did not happen.
+
+**Judge side.** In `portal-judge-fairs.html` from Feature 1, add a band at the
+top called **Matched for you**, reading published rows from
+`judge_fair_matches`. Show the same distance and reasons the admin saw, so the
+judge understands why each fair is there. Proposed rows are invisible to them by
+policy, so no filtering in the page is needed or trusted.
+
+**Postal code lookup.** Distance matching needs coordinates. Write a one-time
+loader at `scripts/load_zip_centroids.py` that reads the United States Census
+ZCTA gazetteer file, which is public domain, and fills `us_zip_centroids`. Then
+run `select public.fg_geocode_judges_from_zip();` to fill coordinates for judges
+who already gave a postal code. Add the same call to the end of the monthly
+scraper run so new judges pick up coordinates without anyone thinking about it.
+
+Until that table is loaded, matching still works on county and state and simply
+reports `JUDGE_NO_COORDS` as a research item. Do not block the feature on the
+loader.
+
+**Fair coordinates.** Most seeded fairs have no latitude and longitude yet. Add
+a small admin action on the fair record that accepts a city and postal code and
+fills coordinates from `us_zip_centroids`. Ten minutes of clicking removes the
+`FAIR_NO_COORDS` flag from most of the directory.
+
+**Acceptance checks for this feature.**
+
+- Create a judge with only a name, an email, and a state. The profile page must
+  load, show zero blocking gaps, four limiting gaps and one polish gap, and still
+  propose fairs on state match alone. The match reasons must read "Level not
+  chosen yet, showing all" rather than claiming the judge asked for that level.
+- Create a second judge the way the live signup form does it: city Columbus, no
+  postal code, expertise as a two-item list, and free text in `available_level`
+  and `travel_range`. The research band must quote both answers back and ask for
+  the translation. Distance must still work, because the geocoder falls back to
+  city and state.
+- Fill in `preferred_levels` and `travel_miles` for that judge. The research band
+  must empty out, and the three Columbus fairs must sit at the top with a score
+  of 105 and a distance near one mile.
+- Confirm a fair with no date cannot be ticked.
+- Publish two fairs with email on. Confirm `judge_fair_matches` shows two
+  published rows, `judges.profile_status` reads `published`, a campaign exists
+  with exactly one recipient, and the recipient's `merge_data` carries a
+  `fair_list` with both fairs and their dates.
+- Sign in as that judge and confirm they see the two published fairs and none of
+  the proposals.
+- Attempt the publish call while signed in as a judge. It must fail with
+  "Only an admin may publish judge matches."
+
+---
+
 # Copy rules for anything a person reads
 
 Every string that appears on screen or in an email follows these:
@@ -357,7 +525,8 @@ crucial, vital, transformative, innovative, cutting-edge.
 4. Feature 1, judge information tab and the public `fairs.html`
 5. Feature 3, fair manager, because it needs no new infrastructure
 6. Feature 2, outreach, including the three Edge Functions
-7. Feature 4, scraper and the admin review queue
+7. Feature 5, judge profile review and publish, which reuses the send path
+8. Feature 4, scraper and the admin review queue
 
 Commit after each numbered step with a message naming what changed. Do not
 combine steps.
@@ -426,8 +595,9 @@ numbers after step 3:
 | `fair_contacts` | 27 |
 | `fair_deadlines` | 18 |
 | `fair_scrape_sources` | 20 |
-| `email_templates` | 6 |
+| `email_templates` after migration 03 | 6 |
 | `fair_plan_task_templates` | 20 |
+| `email_templates` after migration 04 | 7 |
 
 By state: Ohio 15 fairs with 13 verified, California 9 with 6 verified,
 Tennessee 5 with 3 verified, Michigan 6 with 2 verified. Tennessee correctly
@@ -442,6 +612,16 @@ campaigns. `fg_preview_judge_recipients()` returned rows for an admin and nothin
 for a judge, and it correctly skipped a judge whose address was in
 `email_suppressions`. `fg_seed_plan_tasks()` produced 20 dated checklist rows
 from one target date.
+
+Migration 04 was tested against a database built from the live column list above,
+not from an assumed one. A judge in Columbus with a 45 mile radius
+and a preference for regional and state fairs matched the three Franklin County
+fairs at a score of 105 and 1.1 miles, geocoded from city alone with no postal
+code on file. A judge with nothing but a name, an email, and a state produced
+five research items and no blocking ones.
+Publishing three fairs moved them to published, set `profile_status`, and queued
+one campaign whose recipient carried a formatted fair list. A judge calling the
+publish function was refused.
 
 If your numbers differ after running the migrations, stop and tell me before
 building anything on top of them.
