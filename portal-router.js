@@ -1,6 +1,6 @@
-const SB_URL = 'https://buzcxrbjutexiofetgvn.supabase.co';
-const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1emN4cmJqdXRleGlvZmV0Z3ZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Nzc1NTEsImV4cCI6MjA4OTM1MzU1MX0.ifMup4fCcfHaf7Q4TYfi1X1V-J8tQpu2JwaqvjBcsBQ';
-const sb = window.supabase.createClient(SB_URL, SB_KEY);
+/* The Supabase client, getRole(), and claimRole() come from
+   portal-shared.js, loaded first - classic scripts share one global
+   scope, so `sb` declared there is usable here by name. */
 
 const ROUTES = {
   teacher:    '/portal-teacher.html',
@@ -10,10 +10,19 @@ const ROUTES = {
   admin:      '/portal-admin.html',
 };
 
+async function resolveRole(user) {
+  let role = await getRole(user.id);
+  if (!role) {
+    const claimed = user.user_metadata?.role;
+    if (claimed && SELF_PROVISION_ROLES.includes(claimed)) role = await claimRole(claimed);
+  }
+  return role;
+}
+
 // Supabase magic link puts the token in the URL hash
-sb.auth.onAuthStateChange((event, session) => {
+sb.auth.onAuthStateChange(async (event, session) => {
   if (event === 'SIGNED_IN' && session?.user) {
-    const role = session.user.user_metadata?.role || session.user.app_metadata?.role;
+    const role = await resolveRole(session.user);
     window.location.replace(ROUTES[role] || '/portal-ambassador.html');
   }
   if (event === 'SIGNED_OUT') {
@@ -22,17 +31,16 @@ sb.auth.onAuthStateChange((event, session) => {
 });
 
 // Handle cases where the hash is already resolved
-sb.auth.getSession().then(({ data: { session }, error }) => {
+sb.auth.getSession().then(async ({ data: { session }, error }) => {
   if (error) {
     document.getElementById('errMsg').innerHTML =
       'Sign-in failed: ' + error.message + '<br><a href="/login.html">Try again →</a>';
     document.querySelector('.spinner').style.display = 'none';
   } else if (session?.user) {
-    const role = session.user.user_metadata?.role || session.user.app_metadata?.role;
+    const role = await resolveRole(session.user);
     if (!role) {
-      console.warn('No role found in user_metadata:', session.user.user_metadata);
+      console.warn('No role found in user_roles for', session.user.email);
     }
-    const dest = ROUTES[role] || '/portal-ambassador.html';
-    window.location.replace(dest);
+    window.location.replace(ROUTES[role] || '/portal-ambassador.html');
   }
 });

@@ -8,6 +8,25 @@ const ROUTES = { teacher:'/portal-teacher.html', ambassador:'/portal-ambassador.
 // Roles that require admin approval before portal access
 const APPROVAL_ROLES = ['teacher', 'ambassador'];
 
+// Roles the signup form lets a person pick without review. These are the
+// only roles fg_self_provision_role() will write.
+const SELF_PROVISION_ROLES = ['student', 'ambassador', 'teacher'];
+
+/* Role lives in user_roles, not user_metadata - a signed-in user can
+   rewrite their own metadata from the browser, so it is never trusted
+   for routing. A first login after signup has no user_roles row yet,
+   so claim one from whatever they picked on the signup form. */
+async function fetchOrProvisionRole(user) {
+  const { data: row } = await sb.from('user_roles').select('role').eq('user_id', user.id).maybeSingle();
+  if (row?.role) return row.role;
+  const claimed = user.user_metadata?.role;
+  if (claimed && SELF_PROVISION_ROLES.includes(claimed)) {
+    const { data, error } = await sb.rpc('fg_self_provision_role', { p_role: claimed });
+    if (!error && data) return data;
+  }
+  return null;
+}
+
 // Set to true during signup to prevent the onAuthStateChange listener from auto-redirecting
 let suppressAutoRedirect = false;
 
@@ -77,7 +96,7 @@ async function go(user) {
   if (routingGuard) return;
   routingGuard = true;
   try {
-    let role = user.user_metadata?.role || user.app_metadata?.role || null;
+    let role = await fetchOrProvisionRole(user);
 
     // Google sign-in creates the account with no role attached. Apply the role
     // chosen before the redirect, and ask rather than guess if we do not have one.

@@ -32,6 +32,34 @@ async function doSignOut() {
   if (sb) await sb.auth.signOut();
   window.location.reload();
 }
+
+/* ── Role lookup ─────────────────────────────────────────────────
+   user_roles is the only source of truth for access control. It can
+   only be written by an admin session or the service key, unlike
+   user_metadata, which a signed-in user can rewrite on themselves from
+   the browser. user_metadata still holds the display name only. */
+const SELF_PROVISION_ROLES = ['student', 'ambassador', 'teacher'];
+
+async function getRole(userId) {
+  if (!sb || !userId) return null;
+  const { data, error } = await sb.from('user_roles').select('role').eq('user_id', userId).maybeSingle();
+  if (error) { console.warn('[Portal] getRole failed:', error.message); return null; }
+  return data?.role || null;
+}
+window.getRole = getRole;
+
+/* Claims a user_roles row for the three roles the signup form lets a
+   person pick without review. Writes once - the underlying function
+   does nothing on conflict - so it can never change a role that is
+   already on file. */
+async function claimRole(role) {
+  if (!sb || !SELF_PROVISION_ROLES.includes(role)) return null;
+  const { data, error } = await sb.rpc('fg_self_provision_role', { p_role: role });
+  if (error) { console.warn('[Portal] claimRole failed:', error.message); return null; }
+  return data;
+}
+window.claimRole = claimRole;
+
 /* ── Auth guard ──────────────────────────────────────────────── */
 function requireAuth(expectedRole, onReady) {
   const isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
@@ -52,15 +80,18 @@ function requireAuth(expectedRole, onReady) {
   }
   sb.auth.getSession().then(async ({ data: { session }, error }) => {
     if (error || !session?.user) { window.location.replace('/login.html'); return; }
-    // Refresh token so user_metadata/app_metadata reflect any role changes made in the dashboard
+    // Refresh token so a fresh session is on hand before we look up the role
     const { data: refreshed } = await sb.auth.refreshSession();
     const user = refreshed?.session?.user || session.user;
-    // app_metadata is only settable via the server (SQL/service-role), never from the
-    // browser, so it's the only source trusted for the admin bypass. user_metadata is
-    // self-editable by any signed-in user and must never grant admin on its own.
-    const isRealAdmin = user.app_metadata?.role === 'admin';
-    const claimedRole = user.user_metadata?.role || 'ambassador';
-    const role = isRealAdmin ? 'admin' : (claimedRole === 'admin' ? 'ambassador' : claimedRole);
+    // Role comes from user_roles, never from user_metadata. A brand new
+    // self-serve signup has no row there yet, so try to claim one from
+    // whatever they picked on the signup form before giving up.
+    let role = await getRole(user.id);
+    if (!role) {
+      const claimed = user.user_metadata?.role;
+      if (claimed && SELF_PROVISION_ROLES.includes(claimed)) role = await claimRole(claimed);
+    }
+    if (!role) { window.location.replace('/login.html'); return; }
     if (role === 'admin' || role === expectedRole) {
       // Teacher and Ambassador accounts require admin approval before portal access
       if ((role === 'teacher' || role === 'ambassador') && role !== 'admin') {
