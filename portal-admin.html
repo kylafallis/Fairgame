@@ -30,6 +30,7 @@
     <a class="pnav-link"       data-section="schools"   data-label="Schools"       onclick="showSection('schools',this)">Schools</a>
     <a class="pnav-link"       data-section="judges"    data-label="Judges"        onclick="showSection('judges',this)">Judge Network</a>
     <a class="pnav-link"       data-section="mentors"   data-label="Mentorships"   onclick="showSection('mentors',this)">Mentorships</a>
+    <a class="pnav-link"       data-section="convos"    data-label="Conversations"  onclick="showSection('convos',this)">Conversations</a>
     <a class="pnav-link"       data-section="review"    data-label="Message Review" onclick="showSection('review',this)">Message Review <span class="pnav-badge" id="reviewBadge" style="display:none;"></span></a>
     <div class="pnav-section">Reports</div>
     <a class="pnav-link" href="/impactreport.html">Impact Report ↗</a>
@@ -152,6 +153,31 @@
     </div>
 
     <!-- MENTORSHIPS -->
+    <!-- CONVERSATIONS -->
+    <div class="portal-section" id="sec-convos">
+      <div class="section-heading">
+        <h2>Conversations</h2>
+        <p>Every mentor and student pair, and everything they have said to each other</p>
+      </div>
+
+      <div class="card">
+        <div class="card-body" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <input type="text" id="convoSearch" placeholder="Search by student, mentor, or school…"
+                 style="flex:1;min-width:200px;" oninput="renderConvos()"/>
+          <select id="convoFilter" onchange="renderConvos()" style="min-width:170px;">
+            <option value="all">All pairs</option>
+            <option value="flagged">Flagged only</option>
+            <option value="active">Open channels</option>
+            <option value="pending">Not open yet</option>
+            <option value="quiet">No messages yet</option>
+          </select>
+          <button class="btn-xs" onclick="loadConvos()">Refresh</button>
+        </div>
+      </div>
+
+      <div id="convoList" style="margin-top:16px;"></div>
+    </div>
+
     <!-- MESSAGE REVIEW -->
     <div class="portal-section" id="sec-review">
       <div class="section-heading">

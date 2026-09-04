@@ -139,6 +139,7 @@ requireAuth('admin', () => {
   onSectionLoad('judges',    loadJudges);
   onSectionLoad('mentors',   loadMentors);
   onSectionLoad('review',    loadReviewQueue);
+  onSectionLoad('convos',    loadConvos);
   refreshReviewBadge();
   onSectionLoad('settings',  loadStats);
 });
@@ -524,3 +525,171 @@ async function pauseFromReview(mentorshipId, messageId) {
   await loadMentors();
 }
 window.pauseFromReview = pauseFromReview;
+
+
+/* ══════════════════════════════════════════════════════════════════
+   CONVERSATIONS
+
+   Every mentor-student pair in one place, each collapsed to a summary
+   until opened. Supervision that requires hunting through five screens
+   does not get done, so this is deliberately the shortest path from
+   "who is talking" to "what did they say".
+
+   Transcripts load only when a row is opened. There is no reason to
+   pull every message on the platform to render a list of names.
+   ══════════════════════════════════════════════════════════════════ */
+
+let allConvos = [];
+const convoOpen  = new Set();   // ids currently expanded
+const convoCache = new Map();   // id -> rendered transcript HTML
+
+const SEV_LABEL = {
+  0: '', 1: 'Low', 2: 'Concerning', 3: 'Serious', 4: 'Urgent', 5: 'Urgent',
+};
+
+async function loadConvos() {
+  if (!sb) { fgEmpty('convoList', 'Connect Supabase to see conversations.'); return; }
+  return fgLoad('convoList',
+    async () => {
+      convoCache.clear();
+      allConvos = fgRows(await sb.from('fg_conversation_index').select('*'));
+      // Most recently active first; a pair with no messages sorts last
+      // rather than to the top on a null date.
+      allConvos.sort((a, b) => {
+        const at = a.last_message_at ? Date.parse(a.last_message_at) : 0;
+        const bt = b.last_message_at ? Date.parse(b.last_message_at) : 0;
+        return bt - at;
+      });
+      return allConvos;
+    },
+    renderConvos,
+    { empty: 'No mentor matches yet - check back later.' });
+}
+window.loadConvos = loadConvos;
+
+function convoMatchesFilter(c, mode, q) {
+  if (q) {
+    const hay = [c.student_name, c.mentor_name, c.school].join(' ').toLowerCase();
+    if (!hay.includes(q)) return false;
+  }
+  if (mode === 'flagged') return c.flagged_count > 0;
+  if (mode === 'active')  return c.status === 'active';
+  if (mode === 'pending') return c.status !== 'active';
+  if (mode === 'quiet')   return !c.message_count;
+  return true;
+}
+
+function renderConvos() {
+  const el = document.getElementById('convoList');
+  if (!el) return;
+  const q    = (document.getElementById('convoSearch')?.value || '').trim().toLowerCase();
+  const mode = document.getElementById('convoFilter')?.value || 'all';
+  const rows = allConvos.filter(c => convoMatchesFilter(c, mode, q));
+
+  if (!rows.length) {
+    fgEmpty(el, q || mode !== 'all'
+      ? 'Nothing matches that filter.'
+      : 'No mentor matches yet - check back later.');
+    return;
+  }
+
+  el.innerHTML = rows.map(c => {
+    const open    = convoOpen.has(c.id);
+    const flagged = c.flagged_count > 0;
+    const sev     = c.worst_severity || 0;
+    const stripe  = !flagged ? 'var(--gray-200,#e2e6e2)'
+                  : sev >= 4 ? '#dc2626'
+                  : sev === 3 ? '#ea580c'
+                  : '#f59e0b';
+    const last = c.last_message_at
+      ? new Date(c.last_message_at).toLocaleDateString()
+      : 'never';
+
+    return `<div class="card" style="margin:0 0 10px;border-left:3px solid ${stripe};">
+      <div class="card-body" style="cursor:pointer;display:flex;gap:14px;align-items:center;flex-wrap:wrap;"
+           onclick="toggleConvo('${esc(c.id)}')">
+        <div style="flex:1;min-width:200px;">
+          <div class="text-serif fw-600" style="font-size:.95rem;color:var(--g900);">
+            ${esc(c.student_name)} <span class="text-muted" style="font-weight:400;">and</span> ${esc(c.mentor_name)}
+          </div>
+          <div class="text-xs text-muted" style="margin-top:2px;">
+            ${esc(c.school || 'School not listed')}${c.topic ? ' · ' + esc(c.topic) : ''}
+          </div>
+        </div>
+        <span class="chip chip-${c.status === 'active' ? 'active' : 'interest'}">${esc(c.status)}</span>
+        ${!c.teacher_assigned ? '<span class="chip chip-interest" title="Nobody at the school can read this thread">No teacher</span>' : ''}
+        <span class="text-xs text-muted" style="white-space:nowrap;">
+          ${c.message_count || 0} message${c.message_count === 1 ? '' : 's'} · last ${last}
+        </span>
+        ${flagged ? `<span class="chip" style="background:${stripe};color:#fff;">${c.flagged_count} flagged${sev ? ' · ' + SEV_LABEL[sev] : ''}</span>` : ''}
+        <span class="text-muted" style="font-size:1rem;width:14px;text-align:center;">${open ? '\u2212' : '+'}</span>
+      </div>
+      <div id="convo-${esc(c.id)}" style="display:${open ? 'block' : 'none'};border-top:1px solid var(--gray-100,#eef1ee);"></div>
+    </div>`;
+  }).join('');
+
+  // Re-fill any thread that was open before the re-render.
+  convoOpen.forEach(id => { if (rows.some(r => r.id === id)) loadConvoThread(id); });
+}
+window.renderConvos = renderConvos;
+
+function toggleConvo(id) {
+  if (convoOpen.has(id)) convoOpen.delete(id);
+  else                   convoOpen.add(id);
+  renderConvos();
+}
+window.toggleConvo = toggleConvo;
+
+async function loadConvoThread(id) {
+  const box = document.getElementById('convo-' + id);
+  if (!box) return;
+  if (box.dataset.loaded === '1') return;   // already filled this render
+  box.dataset.loaded = '1';
+  if (convoCache.has(id)) { box.innerHTML = convoCache.get(id); return; }
+  fgSpinner(box);
+
+  let msgs;
+  try {
+    msgs = fgRows(await sb.from('mentor_messages').select('*')
+      .eq('mentorship_id', id).order('created_at', { ascending: true }));
+  } catch (e) {
+    fgError(box, () => { box.dataset.loaded = ''; loadConvoThread(id); });
+    return;
+  }
+
+  if (!msgs.length) {
+    fgEmpty(box, 'Nothing has been said in this channel yet.');
+    return;
+  }
+
+  const html = `<div style="padding:14px 16px;max-height:460px;overflow-y:auto;">
+    ${msgs.map(renderConvoMessage).join('')}
+  </div>`;
+  convoCache.set(id, html);
+  box.innerHTML = html;
+}
+
+function renderConvoMessage(m) {
+  const mentor  = m.sender_role === 'mentor';
+  const detail  = Array.isArray(m.flag_detail) ? m.flag_detail : [];
+  const reasons = Array.isArray(m.flag_reasons) ? m.flag_reasons : [];
+  const sev     = m.flag_severity || 0;
+  const tone    = sev >= 4 ? '#dc2626' : sev === 3 ? '#ea580c' : '#f59e0b';
+
+  return `<div style="display:flex;flex-direction:column;align-items:${mentor ? 'flex-start' : 'flex-end'};margin-bottom:12px;">
+    <div style="max-width:76%;padding:10px 13px;white-space:pre-wrap;line-height:1.55;font-size:.84rem;
+                background:${mentor ? 'var(--gray-100,#eef1ee)' : 'var(--g600,#357a38)'};
+                color:${mentor ? 'var(--gray-700,#3d453d)' : '#fff'};
+                ${m.flagged ? 'border:1.5px solid ' + tone + ';' : ''}">${esc(m.body)}</div>
+    <div class="text-xs text-muted" style="margin-top:3px;">
+      ${esc(m.sender_name || m.sender_role)} · ${esc(m.sender_role)} · ${new Date(m.created_at).toLocaleString()}
+      ${m.reviewed_at ? ' · <span style="color:var(--g600);">reviewed</span>' : ''}
+    </div>
+    ${m.flagged ? `<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px;justify-content:${mentor ? 'flex-start' : 'flex-end'};">
+      ${(detail.length
+          ? detail.map(d => `<span style="font-size:.64rem;padding:1px 7px;border:1px solid ${tone};color:${tone};">${esc(d.category)}: &ldquo;${esc(d.term)}&rdquo;</span>`)
+          : reasons.map(r => `<span style="font-size:.64rem;padding:1px 7px;border:1px solid ${tone};color:${tone};">${esc(r)}</span>`)
+        ).join('')}
+    </div>` : ''}
+  </div>`;
+}

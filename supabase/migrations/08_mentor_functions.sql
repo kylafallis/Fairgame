@@ -796,7 +796,8 @@ select
   c.guardian_email
 from public.mentorships m
 left join public.guardian_consents c on c.id = m.consent_id
-where m.status in ('pending', 'paused');
+where public.fg_is_admin()
+  and m.status in ('pending', 'paused');
 
 comment on view public.fg_mentorship_readiness is
   'Every match not yet open, and exactly which gate is holding it up.';
@@ -822,7 +823,10 @@ select
   + (case when msg.sender_role = 'mentor' then 1 else 0 end) as severity
 from public.mentor_messages msg
 join public.mentorships m on m.id = msg.mentorship_id
-where msg.flagged and msg.reviewed_at is null;
+-- A view runs as its owner and does not inherit row level security from
+-- the tables underneath, so it has to gate itself.
+where public.fg_is_admin()
+  and msg.flagged and msg.reviewed_at is null;
 
 comment on view public.fg_message_review_queue is
   'Unreviewed flagged messages. Adult-sent safeguarding flags rank above everything else.';
