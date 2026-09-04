@@ -194,10 +194,19 @@ window.requestMentor = requestMentor;
 
 /* ── Community posts ── */
 async function loadCommunityPosts() {
-  if (!sb) { document.getElementById('noPostsMsg').style.display = 'block'; return; }
-  const { data: posts } = await sb.from('community_posts').select('*').eq('audience', 'student').order('created_at', { ascending: false }).limit(20);
+  // The standalone "no posts" node is redundant now that fgLoad owns the
+  // container and paints its own empty state.
+  const legacyEmpty = document.getElementById('noPostsMsg');
+  if (legacyEmpty) legacyEmpty.style.display = 'none';
+  if (!sb) { fgEmpty('communityPostsList', 'Nothing posted yet - check back later.'); return; }
+  return fgLoad('communityPostsList',
+    async () => fgRows(await sb.from('community_posts').select('*').eq('audience', 'student').order('created_at', { ascending: false }).limit(20)),
+    renderCommunityPosts,
+    { empty: 'Nothing posted yet - be the first, or check back later.' });
+}
+
+function renderCommunityPosts(posts) {
   const list = document.getElementById('communityPostsList');
-  if (!posts?.length) { document.getElementById('noPostsMsg').style.display = 'block'; return; }
   list.innerHTML = posts.map(p => {
     const initials = (p.author_name || 'U').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
     return `<div style="padding:14px;border:1.5px solid var(--gray-200,#e2e6e2);border-radius:3px;">
@@ -249,5 +258,19 @@ async function _submitPost(body, msgId) {
   loadCommunityPosts();
 }
 
-/* ── Load community posts on section open ── */
+/* ── Mentor channel ── */
+async function loadMentorSection() {
+  // A student may have been matched before they created an account, in
+  // which case the match carries their email but not their user id.
+  if (sb) { try { await sb.rpc('fg_link_own_mentorships'); } catch (e) {} }
+  // The thread panel markup lives in mentor-thread.js so the student
+  // and mentor portals cannot drift apart.
+  const mount = document.getElementById('mentorThreadMount');
+  if (mount && !mount.innerHTML.trim()) mount.innerHTML = mtThreadPanelHTML();
+  mtCloseThread();
+  await mtLoadMentorships('mentorMatchList', 'student');
+}
+
+/* ── Section loaders ── */
 onSectionLoad('community', loadCommunityPosts);
+onSectionLoad('mentor',    loadMentorSection);

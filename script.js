@@ -889,7 +889,7 @@ async function submitMentor() {
   const mh = document.getElementById('mHours'); if (mh) mh.value = '';
   const mf = document.getElementById('mFormat'); if (mf) mf.value = '';
 
-  msgEl.textContent = "Application received! Because mentors work with students, we personally review every application. If approved, you'll receive an invite to our moderated FairGame Discord - typically within 3–5 business days.";
+  msgEl.textContent = "Application received! Because mentors work with students, we personally review every application - typically within 3–5 business days. If approved, we'll email you, and you'll be matched to a student whose project fits your background.";
   msgEl.className   = 'form-msg success';
   logEvent('mentor_application', { field, hours });
 }

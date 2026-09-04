@@ -63,3 +63,57 @@
     @media (max-width: 500px) { .pair-form-grid { grid-template-columns: 1fr; } }
     .pair-form-label { font-size: 0.72rem; font-weight: 500; color: var(--gray-700); display: block; margin-bottom: 3px; }
     .pair-form-row { margin-bottom: 10px; }
+
+    /* ── Match finder ──────────────────────────────────────────────
+       Two-step: pick a student request, then pick from ranked mentors.
+       Wider than the manual-entry box because the reasons behind a
+       score are the point - an admin should not have to guess why a
+       mentor came out on top. */
+    .match-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center; padding: 20px; }
+    .match-modal.open { display: flex; }
+    .match-box { background: var(--white); border-top: 3px solid var(--green-600); max-width: 720px; width: 100%; max-height: 88vh; display: flex; flex-direction: column; }
+    .match-box-head { padding: 22px 26px 14px; border-bottom: 1px solid var(--gray-200); }
+    .match-box-head h3 { color: var(--green-900); margin-bottom: 4px; }
+    .match-box-head p { font-size: 0.82rem; color: var(--gray-500); }
+    .match-box-body { padding: 18px 26px; overflow-y: auto; flex: 1; }
+    .match-box-foot { padding: 14px 26px; border-top: 1px solid var(--gray-200); display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+
+    .match-step { display: none; }
+    .match-step.active { display: block; }
+
+    /* Step rail so it is always clear which half of the flow you are in. */
+    .match-rail { display: flex; gap: 6px; margin-top: 10px; }
+    .match-rail span { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--gray-300); padding: 3px 9px; border: 1px solid var(--gray-200); }
+    .match-rail span.on { color: var(--green-700); border-color: var(--green-600); font-weight: 600; }
+
+    .req-item { padding: 12px 14px; border: 1.5px solid var(--gray-200); margin-bottom: 8px; cursor: pointer; transition: border-color .12s, background .12s; }
+    .req-item:hover { border-color: var(--green-600); background: var(--green-50, #f1faf2); }
+    .req-item.active { border-color: var(--green-600); background: var(--green-50, #f1faf2); }
+    .req-name { font-weight: 600; font-size: 0.9rem; color: var(--green-900); }
+    .req-meta { font-size: 0.76rem; color: var(--gray-500); margin-top: 2px; }
+    .req-topics { font-size: 0.74rem; color: var(--green-700); margin-top: 5px; }
+
+    /* A candidate row leads with the score, because that is the thing
+       being ranked, then immediately justifies it. */
+    .cand { display: flex; gap: 14px; padding: 14px; border: 1.5px solid var(--gray-200); margin-bottom: 10px; align-items: flex-start; }
+    .cand-score { flex-shrink: 0; width: 46px; text-align: center; }
+    .cand-score-n { font-family: var(--ff-serif); font-size: 1.35rem; font-weight: 600; color: var(--green-700); line-height: 1; }
+    .cand-score-l { font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--gray-300); margin-top: 2px; }
+    .cand-main { flex: 1; min-width: 0; }
+    .cand-name { font-weight: 600; font-size: 0.9rem; color: var(--green-900); }
+    .cand-sub { font-size: 0.76rem; color: var(--gray-500); margin-top: 1px; }
+    .cand-bio { font-size: 0.76rem; color: var(--gray-700); margin-top: 6px; line-height: 1.5; }
+    .cand-reasons { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 8px; }
+    .cand-reason { font-size: 0.68rem; padding: 2px 8px; background: var(--green-50, #f1faf2); color: var(--green-700); border: 1px solid var(--green-100, #d6ecd8); }
+    /* A mismatch is not a footnote - it gets the warning colour so an
+       admin cannot skim past it. */
+    .cand-reason.warn { background: #fff8e1; color: #78350f; border-color: #f59e0b; }
+
+    /* Gate checklist shown after a match is created. */
+    .gate-list { list-style: none; padding: 0; margin: 12px 0 0; }
+    .gate-list li { display: flex; gap: 9px; align-items: flex-start; padding: 8px 0; border-bottom: 1px solid var(--gray-100, #eef1ee); font-size: 0.82rem; }
+    .gate-mark { flex-shrink: 0; width: 17px; height: 17px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; font-weight: 700; margin-top: 1px; }
+    .gate-mark.done { background: var(--green-600); color: #fff; }
+    .gate-mark.todo { background: #fff8e1; color: #78350f; border: 1px solid #f59e0b; }
+    .gate-text { color: var(--gray-700); line-height: 1.45; }
+    .gate-text strong { color: var(--green-900); }

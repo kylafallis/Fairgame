@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="fbdc0182-de28-426e-bd4f-9b22c5f8e220"></script>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mentor Portal - FairGame Initiative</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/portal.css" />
+</head>
+<body>
+
+<nav class="pnav">
+  <div class="pnav-logo">
+    <img src="/Images/logo.png" alt="" onerror="this.style.display='none'"/>
+    <div class="pnav-logo-text">
+      <div class="pnav-logo-name">FairGame</div>
+      <div class="pnav-logo-role">Mentor</div>
+    </div>
+  </div>
+  <div class="pnav-body">
+    <div class="pnav-section">Main</div>
+    <a class="pnav-link active" data-section="home"     data-label="Dashboard"      onclick="showSection('home',this)">Dashboard</a>
+    <a class="pnav-link"        data-section="students" data-label="My Students"    onclick="showSection('students',this)">My Students</a>
+    <a class="pnav-link"        data-section="sessions" data-label="Session Log"    onclick="showSection('sessions',this)">Session Log</a>
+    <div class="pnav-section">Required</div>
+    <a class="pnav-link"        data-section="policy"   data-label="Conduct Policy" onclick="showSection('policy',this)">Conduct Policy</a>
+    <div class="pnav-divider"></div>
+    <a class="pnav-link" href="/" style="font-size:.78rem;color:rgba(255,255,255,.3);">← Public site</a>
+  </div>
+  <div class="pnav-footer">
+    <div class="pnav-user-name" id="navUserName">–</div>
+    <div class="pnav-user-email" id="navUserEmail">–</div>
+    <button class="pnav-logout" onclick="portalLogout()">Sign out</button>
+  </div>
+</nav>
+<div class="pnav-overlay" onclick="closeMobileNav()"></div>
+
+<main class="portal-main">
+  <div class="portal-topbar">
+    <button class="pnav-toggle" onclick="openMobileNav()">☰</button>
+    <h1 id="topbarTitle">Dashboard</h1>
+  </div>
+
+  <div class="portal-content">
+
+    <!-- HOME -->
+    <div class="portal-section active" id="sec-home">
+      <div class="section-heading">
+        <h2>Welcome, <span id="welcomeName">mentor</span></h2>
+        <p>Thank you for giving a student your time</p>
+      </div>
+
+      <div class="kpi-row">
+        <div class="kpi-card"><div class="kpi-card-n" id="kStudents">–</div><div class="kpi-card-l">Students</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kHours">–</div><div class="kpi-card-l">Hours Logged</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kSessions">–</div><div class="kpi-card-l">Sessions</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kPolicy">–</div><div class="kpi-card-l">Policy Signed</div></div>
+      </div>
+
+      <!-- Shown until the conduct policy is signed. Until then no
+           channel can open, so this is the only thing that matters. -->
+      <div class="card" id="policyAlert" style="display:none;background:#fff8e1;border:1.5px solid #f59e0b;">
+        <div class="card-body" style="display:flex;gap:14px;align-items:center;flex-wrap:wrap;">
+          <div style="flex:1;min-width:200px;">
+            <div class="text-serif fw-600" style="font-size:.95rem;color:#78350f;margin-bottom:3px;">Sign the conduct policy</div>
+            <div class="text-sm" style="color:#78350f;line-height:1.5;">You cannot be connected to a student until you have read and agreed to it.</div>
+          </div>
+          <button class="btn-primary" onclick="showSection('policy',document.querySelector('[data-section=policy]'))" style="font-size:.8rem;padding:9px 16px;">Read and sign →</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h3>Your Students</h3></div>
+        <div class="card-body-flush" id="homeMatchList"></div>
+      </div>
+    </div>
+
+    <!-- MY STUDENTS -->
+    <div class="portal-section" id="sec-students">
+      <div class="section-heading">
+        <h2>My Students</h2>
+        <p>Supervised messaging - every message is on the record</p>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>Matches</h3></div>
+        <div class="card-body-flush" id="mentorMatchList"></div>
+      </div>
+      <div id="mentorThreadMount"></div>
+    </div>
+
+    <!-- SESSION LOG -->
+    <div class="portal-section" id="sec-sessions">
+      <div class="section-heading">
+        <h2>Session Log</h2>
+        <p>Record your time so FairGame can report on the program</p>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <div class="form-group">
+            <label class="form-label">Student</label>
+            <select id="sessPair"><option value="">– Choose –</option></select>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group"><label class="form-label">Date</label><input type="date" id="sessDate"/></div>
+            <div class="form-group"><label class="form-label">Hours</label><input type="number" id="sessHours" min="0.5" max="10" step="0.5" placeholder="1.5"/></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">What did you cover?</label>
+            <textarea id="sessNotes" rows="3" placeholder="What you worked on, and what the student's next step is."></textarea>
+          </div>
+          <button class="btn-primary" onclick="logMentorSession()" style="font-size:.8rem;padding:9px 18px;">Save Session</button>
+          <div class="msg-strip" id="sessMsg"></div>
+        </div>
+      </div>
+      <div class="card mt-16">
+        <div class="card-header"><h3>Recent Sessions</h3></div>
+        <div class="card-body-flush" id="sessionHistory"></div>
+      </div>
+    </div>
+
+    <!-- CONDUCT POLICY -->
+    <div class="portal-section" id="sec-policy">
+      <div class="section-heading">
+        <h2>Mentor Conduct Policy</h2>
+        <p>Required before you can be connected to any student</p>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <p class="text-sm text-muted" style="line-height:1.75;">
+            You are working with minors. These rules exist to protect the student, and to protect you - a mentor who follows them can never have their conduct credibly questioned, because there is a complete record of it.
+          </p>
+
+          <h4 class="text-serif fw-600 mt-16 mb-4" style="font-size:.9rem;color:var(--g900);">1. All contact stays inside FairGame</h4>
+          <p class="text-sm text-muted" style="line-height:1.7;">Use the messaging in this portal. Do not give a student your phone number, personal email, or social media, and do not ask for theirs. Do not connect with a student on any outside platform, even if they ask first.</p>
+
+          <h4 class="text-serif fw-600 mt-16 mb-4" style="font-size:.9rem;color:var(--g900);">2. Nothing you send is private</h4>
+          <p class="text-sm text-muted" style="line-height:1.7;">Every message is stored permanently and is readable by the FairGame team and the student's teacher. Messages cannot be edited or deleted. Write as though a parent is reading, because one may be.</p>
+
+          <h4 class="text-serif fw-600 mt-16 mb-4" style="font-size:.9rem;color:var(--g900);">3. Never meet a student alone</h4>
+          <p class="text-sm text-muted" style="line-height:1.7;">Any in-person meeting happens at the school, during school hours, with a teacher or parent present and with FairGame informed in advance. Never offer a student a ride. Never invite a student to your home or workplace without their guardian present.</p>
+
+          <h4 class="text-serif fw-600 mt-16 mb-4" style="font-size:.9rem;color:var(--g900);">4. No secrets</h4>
+          <p class="text-sm text-muted" style="line-height:1.7;">Never ask a student to keep anything from their parents, guardians, or teachers. If a student tells you something that suggests they are being harmed or are at risk, you must tell the FairGame team immediately. Do not promise to keep it confidential.</p>
+
+          <h4 class="text-serif fw-600 mt-16 mb-4" style="font-size:.9rem;color:var(--g900);">5. Mentor the work, not the person</h4>
+          <p class="text-sm text-muted" style="line-height:1.7;">Your role is the science fair project. Guide their thinking, ask questions, review their design - do not do the work for them. Keep conversation on the project. Do not discuss your personal life or ask about theirs beyond what the project requires.</p>
+
+          <h4 class="text-serif fw-600 mt-16 mb-4" style="font-size:.9rem;color:var(--g900);">6. Report anything that feels wrong</h4>
+          <p class="text-sm text-muted" style="line-height:1.7;">If a conversation drifts somewhere uncomfortable, or a student discloses something serious, stop and contact <a href="mailto:fairgameinitiative@outlook.com">fairgameinitiative@outlook.com</a>. Raising a concern is never held against you.</p>
+
+          <div style="background:var(--gray-50,#f7f9f7);border:1.5px solid var(--gray-200,#e2e6e2);padding:16px;margin-top:22px;">
+            <label style="display:flex;gap:10px;align-items:flex-start;cursor:pointer;">
+              <input type="checkbox" id="policyAgree" style="margin-top:3px;flex-shrink:0;"/>
+              <span class="text-sm" style="line-height:1.6;color:var(--gray-700,#3d453d);">
+                I have read this policy and I agree to follow it. I understand that all of my messages are permanently recorded and are read by FairGame staff and the student's teacher, and that breaking these rules ends my role as a mentor.
+              </span>
+            </label>
+            <button class="btn-primary" onclick="signPolicy()" style="font-size:.8rem;padding:9px 18px;margin-top:14px;">Sign the policy</button>
+            <div class="msg-strip" id="policyMsg"></div>
+            <div class="text-xs text-muted" id="policySigned" style="margin-top:8px;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/portal-shared.js"></script>
+<script src="/mentor-thread.js"></script>
+<script src="/portal-mentor.js"></script>
+</body>
+</html>

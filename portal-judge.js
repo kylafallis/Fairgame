@@ -137,8 +137,13 @@ const EMPTY_JOKES = [
 async function loadRequests() {
   let reqs = [];
   if (sb && judgeRecord?.id) {
-    const { data } = await sb.from('judge_requests').select('*').eq('judge_id', judgeRecord.id).order('created_at',{ascending:false});
-    reqs = data || [];
+    try { reqs = fgRows(await sb.from('judge_requests').select('*').eq('judge_id', judgeRecord.id).order('created_at',{ascending:false})); }
+    catch (e) {
+      console.warn('[Judge] request read failed:', e.message);
+      fgError('homeRequests', loadRequests);
+      fgError('requestsList', loadRequests);
+      return;
+    }
   } else if (!sb) {
     // dev/demo mode only
     reqs = DEMO_REQS;
@@ -185,16 +190,28 @@ async function respond(reqId, teacherEmail, status) {
 window.respond = respond;
 
 async function loadConfirmed() {
-  let reqs = [];
-  if (sb && judgeRecord?.id) {
-    const { data } = await sb.from('judge_requests').select('*').eq('judge_id', judgeRecord.id).eq('status','accepted').order('fair_date');
-    reqs = data || [];
-  }
-  document.getElementById('kConfirmed').textContent = reqs.length;
-  const hours = reqs.length * 4;
+  // Totals reset up front so an empty or failed read never leaves the
+  // previous count sitting next to an empty table.
+  setConfirmedTotals(0);
+  return fgLoad('confirmedTbody',
+    async () => {
+      if (!sb || !judgeRecord?.id) return [];
+      return fgRows(await sb.from('judge_requests').select('*')
+        .eq('judge_id', judgeRecord.id).eq('status','accepted').order('fair_date'));
+    },
+    renderConfirmed,
+    { empty: 'No confirmed fairs yet - check back later.' });
+}
+
+function setConfirmedTotals(n) {
+  document.getElementById('kConfirmed').textContent = n;
+  const hours = n * 4;
   document.getElementById('kHours').textContent     = hours + 'h';
   document.getElementById('totalHours').textContent = hours + ' hrs';
-  if (!reqs.length) return;
+}
+
+function renderConfirmed(reqs) {
+  setConfirmedTotals(reqs.length);
   document.getElementById('confirmedTbody').innerHTML = reqs.map(r => `<tr>
     <td class="col-name">${r.school}</td>
     <td class="col-sm">${r.fair_date||'TBD'}</td>

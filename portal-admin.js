@@ -45,7 +45,7 @@ function firstName(name) {
   return parts[0];
 }
 
-function approvalEmailFor(type, name, discordLink) {
+function approvalEmailFor(type, name) {
   const hi = 'Hi ' + firstName(name) + ',\n\n';
 
   if (type === 'teacher') {
@@ -72,11 +72,14 @@ function approvalEmailFor(type, name, discordLink) {
 
   if (type === 'mentor') {
     return {
-      subject: 'Welcome to the FairGame Community!',
+      subject: 'Your FairGame mentor application is approved',
       body: hi +
         'Great news - your FairGame mentor application has been approved.\n\n' +
-        'You are now part of our family. Here is your invite to the FairGame Discord, where students and teachers post questions and mentors like you help answer them. It is a low time commitment - jump in whenever you have a few minutes.\n\n' +
-        'Discord invite: ' + (discordLink || '[paste Discord invite link here]') + '\n\n' +
+        'Here is what happens next. Being approved means you are cleared to be matched; it does not connect you to a student yet. When we find a student whose project fits your background, we will introduce you by email and open a mentoring channel for the two of you inside the FairGame portal.\n\n' +
+        'Two things to know before that first message:\n' +
+        '  - All mentoring conversation happens inside the portal, never over personal email, phone, or social media. This protects you as much as it protects the student.\n' +
+        '  - Every message is visible to FairGame staff and to the student\u2019s teacher. Nothing you send is private, and nothing you receive is either.\n\n' +
+        'Sign in any time at\n' + PORTAL_URL + '\n\n' +
         'Thank you for giving back. We are so glad to have you.\n\n' + APPROVAL_SIGNOFF
     };
   }
@@ -98,8 +101,8 @@ function approvalEmailFor(type, name, discordLink) {
   };
 }
 
-function buildMailto(email, type, name, discordLink) {
-  const m = approvalEmailFor(type, name, discordLink);
+function buildMailto(email, type, name) {
+  const m = approvalEmailFor(type, name);
   return 'mailto:' + encodeURIComponent(email) +
          '?subject=' + encodeURIComponent(m.subject) +
          '&body='    + encodeURIComponent(m.body);
@@ -135,6 +138,8 @@ requireAuth('admin', () => {
   onSectionLoad('schools',   loadSchools);
   onSectionLoad('judges',    loadJudges);
   onSectionLoad('mentors',   loadMentors);
+  onSectionLoad('review',    loadReviewQueue);
+  refreshReviewBadge();
   onSectionLoad('settings',  loadStats);
 });
 
@@ -180,10 +185,15 @@ function setAlert(text, section) {
 }
 
 async function loadActivity() {
+  if (!sb) { fgEmpty('activityFeed', 'Connect Supabase to see live activity.'); return; }
+  return fgLoad('activityFeed',
+    async () => fgRows(await sb.from('events').select('*').order('ts',{ascending:false}).limit(40)),
+    renderActivity,
+    { empty: 'No activity yet - check back later.' });
+}
+
+function renderActivity(data) {
   const feed = document.getElementById('activityFeed');
-  if (!sb) { feed.innerHTML = '<div class="empty-state"><p>Connect Supabase to see live activity.</p></div>'; return; }
-  const { data } = await sb.from('events').select('*').order('ts',{ascending:false}).limit(40);
-  if (!data?.length) { feed.innerHTML = '<div class="empty-state"><p>No events recorded yet.</p></div>'; return; }
   const COLORS = { page_view:'var(--gray-100)', quiz_complete:'var(--g100)', judge_request:'#e0f2fe', portal_request:'#fef3c7', contact_form:'var(--g50)' };
   feed.innerHTML = data.map(e => `
     <div class="activity-item">
@@ -199,8 +209,16 @@ async function loadApprovals() {
       sb.from('portal_requests').select('*').order('created_at',{ascending:false}),
       sb.from('judges').select('name,email,expertise,status'),
     ]);
-    allApprovals = reqs.data || [];
-    allJudgesForMatch = (judges.data || []).filter(j => j.status !== 'inactive');
+    // A failed read must not read as "no requests" - that would hide a
+    // pending student behind an empty table.
+    try {
+      allApprovals      = fgRows(reqs);
+      allJudgesForMatch = fgRows(judges).filter(j => j.status !== 'inactive');
+    } catch (e) {
+      console.warn('[Admin] approvals read failed:', e.message);
+      fgError('approvalsTbody', loadApprovals);
+      return;
+    }
   } else {
     allApprovals = DEMO.approvals;
     allJudgesForMatch = DEMO.judges;
@@ -241,7 +259,9 @@ function renderApprovals() {
   const f = approvalFilter === 'pending'
     ? allApprovals.filter(a => PENDING_STATUSES.includes(a.status))
     : allApprovals.filter(a => a.type === approvalFilter && !PENDING_STATUSES.includes(a.status));
-  const emptyMsg = approvalFilter === 'pending' ? 'No pending requests right now.' : 'No history yet for this type.';
+  const emptyMsg = approvalFilter === 'pending'
+    ? 'No pending requests right now - check back later.'
+    : 'No history yet for this type - check back later.';
   document.getElementById('approvalsTbody').innerHTML = !f.length
     ? `<tr><td colspan="7"><div class="empty-state"><p>${emptyMsg}</p></div></td></tr>`
     : f.map(a => {
@@ -292,9 +312,8 @@ async function approveUser(id) {
     }
   }
 
-  // Every approved role gets a welcome email; mentors also get the Discord invite.
-  const discordLink = document.getElementById('discordLink')?.value.trim() || '';
-  const mailto = buildMailto(email, type, name, discordLink);
+  // Every approved role gets a welcome email.
+  const mailto = buildMailto(email, type, name);
   openMailto(mailto);
   approvalMsg(
     'Approved <strong>' + esc(email) + '</strong>. A welcome email is open in your mail app - ' +
@@ -317,10 +336,14 @@ async function rejectUser(id) {
 window.approveUser = approveUser; window.rejectUser = rejectUser;
 
 async function loadSchools() {
-  const data = sb ? (await sb.from('fairs').select('*').order('created_at',{ascending:false})).data||[] : DEMO.schools;
-  document.getElementById('schoolsTbody').innerHTML = !data.length
-    ? '<tr><td colspan="7"><div class="empty-state"><p>No schools registered yet.</p></div></td></tr>'
-    : data.map(s => `<tr>
+  return fgLoad('schoolsTbody',
+    async () => sb ? fgRows(await sb.from('fairs').select('*').order('created_at',{ascending:false})) : DEMO.schools,
+    renderSchools,
+    { empty: 'No schools registered yet - check back later.' });
+}
+
+function renderSchools(data) {
+  document.getElementById('schoolsTbody').innerHTML = data.map(s => `<tr>
         <td class="col-name">${s.school_name}</td>
         <td class="col-sm">${s.teacher_name}</td>
         <td class="col-sm">${s.program_type||'–'}</td>
@@ -332,10 +355,14 @@ async function loadSchools() {
 }
 
 async function loadJudges() {
-  const data = sb ? (await sb.from('judges').select('*').order('created_at',{ascending:false})).data||[] : DEMO.judges;
-  document.getElementById('judgesTbody').innerHTML = !data.length
-    ? '<tr><td colspan="7"><div class="empty-state"><p>No judges yet.</p></div></td></tr>'
-    : data.map(j => `<tr>
+  return fgLoad('judgesTbody',
+    async () => sb ? fgRows(await sb.from('judges').select('*').order('created_at',{ascending:false})) : DEMO.judges,
+    renderJudges,
+    { empty: 'No judges yet - check back later.' });
+}
+
+function renderJudges(data) {
+  document.getElementById('judgesTbody').innerHTML = data.map(j => `<tr>
         <td class="col-mono">${j.code||'–'}</td>
         <td class="col-name">${j.name}</td>
         <td class="col-sm">${(j.expertise||[]).join(', ')}</td>
@@ -360,10 +387,14 @@ async function deactivateJudge(id) {
 window.verifyJudge = verifyJudge; window.deactivateJudge = deactivateJudge;
 
 async function loadMentors() {
-  const data = sb ? (await sb.from('mentorships').select('*').order('created_at',{ascending:false})).data||[] : DEMO.mentors;
-  document.getElementById('mentorsTbody').innerHTML = !data.length
-    ? '<tr><td colspan="6"><div class="empty-state"><p>No mentorships yet.</p></div></td></tr>'
-    : data.map(m => `<tr>
+  return fgLoad('mentorsTbody',
+    async () => sb ? fgRows(await sb.from('mentorships').select('*').order('created_at',{ascending:false})) : DEMO.mentors,
+    renderMentors,
+    { empty: 'No mentor matches yet - check back later.' });
+}
+
+function renderMentors(data) {
+  document.getElementById('mentorsTbody').innerHTML = data.map(m => `<tr>
         <td class="col-name">${m.student_name}</td>
         <td class="col-sm">${m.mentor_name}</td>
         <td class="col-sm">${m.school||'–'}</td>
@@ -377,7 +408,10 @@ const STAT_KEYS   = ['schools_supported','students_reached','resources_count','t
 const STAT_LABELS = ['Schools Supported','Students Reached','Free Resources','Teacher Network'];
 async function loadStats() {
   let vals = { schools_supported:4, students_reached:500, resources_count:47, teachers_network:100 };
-  if (sb) { const { data } = await sb.from('stats').select('*'); (data||[]).forEach(r => vals[r.key] = r.value); }
+  if (sb) {
+    try { fgRows(await sb.from('stats').select('*')).forEach(r => vals[r.key] = r.value); }
+    catch (e) { console.warn('[Admin] stats read failed, using defaults:', e.message); }
+  }
   document.getElementById('statsForm').innerHTML = STAT_KEYS.map((k,i) => `
     <div class="form-group"><label class="form-label">${STAT_LABELS[i]}</label><input type="number" id="stat_${k}" value="${vals[k]}" min="0"/></div>`).join('');
 }
@@ -389,3 +423,104 @@ async function saveStats() {
   showMsg('statsMsg','Stats saved - homepage counters will update.','ok');
 }
 window.saveStats = saveStats;
+
+
+/* ══════════════════════════════════════════════════════════════════
+   MESSAGE REVIEW
+
+   Supervision that nobody looks at is not supervision. This is where
+   the flags raised in mentor_messages surface, ordered by the view
+   fg_message_review_queue, which ranks safeguarding language sent by
+   an adult above everything else.
+   ══════════════════════════════════════════════════════════════════ */
+
+const FLAG_LABELS = {
+  email_address:         'Shared an email address',
+  phone_number:          'Shared a phone number',
+  social_platform:       'Mentioned a social platform',
+  external_meeting_link: 'External meeting link',
+  secrecy_language:      'Asked to keep something secret',
+  in_person_meeting:     'Suggested meeting in person',
+  off_platform_contact:  'Pushed to move off the platform',
+};
+
+async function refreshReviewBadge() {
+  if (!sb) return;
+  try {
+    const { count } = await sb.from('mentor_messages')
+      .select('id', { count: 'exact', head: true })
+      .eq('flagged', true).is('reviewed_at', null);
+    const badge = document.getElementById('reviewBadge');
+    if (!badge) return;
+    if (count > 0) { badge.textContent = count; badge.style.display = 'inline-block'; }
+    else           { badge.style.display = 'none'; }
+  } catch (e) { /* table may not exist until migration 07 is applied */ }
+}
+
+async function loadReviewQueue() {
+  if (!sb) { fgEmpty('reviewQueue', 'Connect Supabase to review messages.'); return; }
+  return fgLoad('reviewQueue',
+    async () => fgRows(await sb.from('fg_message_review_queue').select('*')
+      .order('severity', { ascending: false })
+      .order('created_at', { ascending: false })
+      .limit(50)),
+    renderReviewQueue,
+    { empty: 'Nothing flagged for review - check back later.' });
+}
+window.loadReviewQueue = loadReviewQueue;
+
+function renderReviewQueue(rows) {
+  document.getElementById('reviewQueue').innerHTML = rows.map(r => {
+    const reasons = Array.isArray(r.flag_reasons) ? r.flag_reasons : [];
+    // Severity 3+ is safeguarding language; 4 means an adult sent it.
+    const urgent = r.severity >= 3;
+    const border = urgent ? '#dc2626' : '#f59e0b';
+    return `<div style="padding:14px 16px;border-bottom:1px solid var(--gray-100,#eef1ee);border-left:3px solid ${border};">
+      <div class="flex justify-between items-center mb-4" style="flex-wrap:wrap;gap:6px;">
+        <span class="fw-500 text-sm" style="color:var(--g900);">
+          ${esc(r.sender_name || r.sender_role)}
+          <span class="chip chip-${r.sender_role === 'mentor' ? 'interest' : 'active'}" style="margin-left:6px;">${esc(r.sender_role)}</span>
+        </span>
+        <span class="text-xs text-muted">${new Date(r.created_at).toLocaleString()}</span>
+      </div>
+      <div class="text-xs text-muted mb-4">${esc(r.student_name)} + ${esc(r.mentor_name)}${r.school ? ' · ' + esc(r.school) : ''}</div>
+      <div class="text-sm" style="background:var(--gray-50,#f7f9f7);padding:10px 12px;line-height:1.55;white-space:pre-wrap;color:var(--gray-700,#3d453d);margin-bottom:8px;">${esc(r.body)}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px;">
+        ${reasons.map(f => `<span style="font-size:.66rem;padding:2px 8px;background:${urgent ? '#fef2f2' : '#fff8e1'};color:${urgent ? '#7f1d1d' : '#78350f'};border:1px solid ${border};">${esc(FLAG_LABELS[f] || f)}</span>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn-xs approve" onclick="clearFlag('${esc(r.id)}')">Reviewed - no action</button>
+        <button class="btn-xs danger" onclick="pauseFromReview('${esc(r.mentorship_id)}','${esc(r.id)}')">Pause this mentorship</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function clearFlag(messageId) {
+  const { error } = await sb.from('mentor_messages')
+    .update({ reviewed_at: new Date().toISOString(), reviewed_by: currentUser.id })
+    .eq('id', messageId);
+  if (error) { alert('Could not record the review: ' + error.message); return; }
+  await loadReviewQueue();
+  await refreshReviewBadge();
+}
+window.clearFlag = clearFlag;
+
+async function pauseFromReview(mentorshipId, messageId) {
+  const note = prompt('Pausing closes the channel immediately. The transcript is kept.\n\nWhy are you pausing it?');
+  if (note === null) return;
+
+  const { error } = await sb.from('mentorships')
+    .update({ status: 'paused', closed_reason: note || 'Paused after message review' })
+    .eq('id', mentorshipId);
+  if (error) { alert('Could not pause: ' + error.message); return; }
+
+  await sb.from('mentor_messages')
+    .update({ reviewed_at: new Date().toISOString(), reviewed_by: currentUser.id, review_note: note })
+    .eq('id', messageId);
+
+  await loadReviewQueue();
+  await refreshReviewBadge();
+  await loadMentors();
+}
+window.pauseFromReview = pauseFromReview;

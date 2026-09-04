@@ -26,6 +26,7 @@ const ROLE_ROUTES = {
   ambassador: '/portal-ambassador.html',
   student:    '/portal-student.html',
   judge:      '/portal-judge.html',
+  mentor:     '/portal-mentor.html',
   admin:      '/portal-admin.html',
 };
 async function doSignOut() {
@@ -60,6 +61,19 @@ async function claimRole(role) {
 }
 window.claimRole = claimRole;
 
+/* Mentors cannot self-provision the way a student can - the role is
+   granted only when an admin has already approved a mentor application
+   on this exact email. The approval is the human decision; this just
+   delivers its effect on first sign-in, so an approved mentor is not
+   stuck at the login page waiting for someone to run a query by hand. */
+async function claimMentorRole() {
+  if (!sb) return null;
+  const { data, error } = await sb.rpc('fg_claim_mentor_role');
+  if (error) { console.warn('[Portal] claimMentorRole failed:', error.message); return null; }
+  return data;
+}
+window.claimMentorRole = claimMentorRole;
+
 /* ── Auth guard ──────────────────────────────────────────────── */
 function requireAuth(expectedRole, onReady) {
   const isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
@@ -91,6 +105,9 @@ function requireAuth(expectedRole, onReady) {
       const claimed = user.user_metadata?.role;
       if (claimed && SELF_PROVISION_ROLES.includes(claimed)) role = await claimRole(claimed);
     }
+    // Approved mentor with no role yet - the application was reviewed
+    // before they ever created an account.
+    if (!role) role = await claimMentorRole();
     if (!role) { window.location.replace('/login.html'); return; }
     if (role === 'admin' || role === expectedRole) {
       // Teacher and Ambassador accounts require admin approval before portal access
@@ -162,8 +179,102 @@ async function portalLogout() {
 }
 window.portalLogout = portalLogout;
 
-/* ── Section switcher ────────────────────────────────────────── */
-const _loaders = {};
+/* ── Load-state helpers ────────────────────────────
+   A spinner is a promise that something is coming. Every path out of a
+   fetch has to keep that promise ─ rows, "nothing yet", or a stated
+   error ─ so nothing is left spinning forever. fgLoad() is the only
+   thing that should ever paint a spinner: it owns the whole lifecycle. */
+
+const FG_EMPTY_TEXT = 'Nothing here yet ─ check back later.';
+const FG_LOAD_TIMEOUT_MS = 12000;
+
+/* Wraps whatever the caller renders so a <tbody> gets a full-width row
+   and a plain container gets a plain div. */
+function _fgWrap(el, inner) {
+  const tag = (el.tagName || '').toLowerCase();
+  if (tag === 'tbody') {
+    const cols = el.closest('table')?.querySelectorAll('thead th').length || 1;
+    return `<tr><td colspan="${cols}">${inner}</td></tr>`;
+  }
+  if (tag === 'select') return inner;
+  return inner;
+}
+
+function fgSpinner(el) {
+  if (!el) return;
+  el.innerHTML = _fgWrap(el, '<div class="spinner-wrap"><div class="spinner"></div></div>');
+}
+window.fgSpinner = fgSpinner;
+
+function fgEmpty(el, text) {
+  if (!el) return;
+  el.innerHTML = _fgWrap(el, `<div class="empty-state"><p>${text || FG_EMPTY_TEXT}</p></div>`);
+}
+window.fgEmpty = fgEmpty;
+
+function fgError(el, retryFn) {
+  if (!el) return;
+  const id = 'fgr' + Math.random().toString(36).slice(2, 8);
+  el.innerHTML = _fgWrap(el, `<div class="empty-state"><p>We couldn’t load this just now. <button id="${id}" class="btn-xs" type="button">Try again</button></p></div>`);
+  const btn = document.getElementById(id);
+  if (btn && typeof retryFn === 'function') btn.addEventListener('click', retryFn);
+}
+window.fgError = fgError;
+
+/* Rejects a hung request instead of letting it spin. Supabase queries are
+   thenable but not real promises, so Promise.race needs the resolve(). */
+function _fgTimeout(ms) {
+  return new Promise((_, reject) => setTimeout(() => reject(new Error('timeout')), ms));
+}
+
+/* The single entry point for "fetch something and put it on screen".
+     elId    ─ container to own for the whole cycle
+     fetchFn ─ async () => rows (array) or any value
+     renderFn─ (rows) => void, only called when there is something to show
+     opts    ─ { empty: 'custom text', timeout: ms }
+   Empty result → empty text. Thrown/rejected → error + Try again.
+   Either way the spinner is gone. */
+async function fgLoad(elId, fetchFn, renderFn, opts = {}) {
+  const el = typeof elId === 'string' ? document.getElementById(elId) : elId;
+  if (!el) return;
+  const retry = () => fgLoad(elId, fetchFn, renderFn, opts);
+  fgSpinner(el);
+  try {
+    const rows = await Promise.race([
+      Promise.resolve(fetchFn()),
+      _fgTimeout(opts.timeout || FG_LOAD_TIMEOUT_MS),
+    ]);
+    const isEmpty = rows == null || (Array.isArray(rows) && rows.length === 0);
+    if (isEmpty) { fgEmpty(el, opts.empty); return; }
+    renderFn(rows);
+  } catch (err) {
+    console.warn('[Portal] fgLoad failed for', elId, err?.message || err);
+    fgError(el, retry);
+  }
+}
+window.fgLoad = fgLoad;
+
+/* Unwraps a Supabase result. Throws on a real error so fgLoad can show
+   the retry path, but treats "table does not exist" as simply empty ─
+   an unbuilt feature should read as "nothing yet", not as a failure. */
+function fgRows(res) {
+  if (res?.error) {
+    const code = res.error.code || '';
+    const msg  = res.error.message || '';
+    if (code === '42P01' || code === 'PGRST205' || /does not exist|schema cache/i.test(msg)) return [];
+    throw new Error(msg || 'query failed');
+  }
+  return res?.data || [];
+}
+window.fgRows = fgRows;
+
+/* ── Section switcher ────────────────────────────
+   Loaders stay registered and re-run every time their section is opened,
+   so a section is never showing data from an hour ago. _inFlight stops a
+   double-click from firing the same fetch twice. */
+const _loaders  = {};
+const _inFlight = {};
+
 function showSection(id, linkEl) {
   document.querySelectorAll('.portal-section').forEach(s => s.classList.remove('active'));
   const target = document.getElementById('sec-' + id);
@@ -175,12 +286,35 @@ function showSection(id, linkEl) {
   if (titleEl && navLink) titleEl.textContent = navLink.dataset.label || navLink.textContent.trim();
   closeMobileNav();
   document.querySelector('.portal-main')?.scrollTo(0, 0);
-  if (_loaders[id]) { _loaders[id](); _loaders[id] = null; }
+  runSectionLoader(id);
 }
 window.showSection = showSection;
 
-function onSectionLoad(id, fn) { _loaders[id] = fn; }
+async function runSectionLoader(id) {
+  const fn = _loaders[id];
+  if (!fn || _inFlight[id]) return;
+  _inFlight[id] = true;
+  try { await fn(); }
+  catch (e) { console.warn('[Portal] section loader failed:', id, e?.message || e); }
+  finally { _inFlight[id] = false; }
+}
+window.runSectionLoader = runSectionLoader;
+
+function onSectionLoad(id, fn) {
+  _loaders[id] = fn;
+  // If this section is already the visible one, load it now rather than
+  // waiting for a nav click that may never come.
+  if (document.getElementById('sec-' + id)?.classList.contains('active')) runSectionLoader(id);
+}
 window.onSectionLoad = onSectionLoad;
+
+/* Re-runs the visible section when the tab regains focus, so a portal
+   left open in a background tab is not showing stale rows. */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) return;
+  const active = document.querySelector('.portal-section.active');
+  if (active?.id?.startsWith('sec-')) runSectionLoader(active.id.slice(4));
+});
 
 /* ── Mobile nav ──────────────────────────────────────────────── */
 function openMobileNav()  { document.querySelector('.pnav')?.classList.add('open'); document.querySelector('.pnav-overlay')?.classList.add('open'); }

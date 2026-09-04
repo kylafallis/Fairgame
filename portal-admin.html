@@ -30,6 +30,7 @@
     <a class="pnav-link"       data-section="schools"   data-label="Schools"       onclick="showSection('schools',this)">Schools</a>
     <a class="pnav-link"       data-section="judges"    data-label="Judges"        onclick="showSection('judges',this)">Judge Network</a>
     <a class="pnav-link"       data-section="mentors"   data-label="Mentorships"   onclick="showSection('mentors',this)">Mentorships</a>
+    <a class="pnav-link"       data-section="review"    data-label="Message Review" onclick="showSection('review',this)">Message Review <span class="pnav-badge" id="reviewBadge" style="display:none;"></span></a>
     <div class="pnav-section">Reports</div>
     <a class="pnav-link" href="/impactreport.html">Impact Report ↗</a>
     <a class="pnav-link" href="/mentorlog.html">Mentor Log ↗</a>
@@ -117,13 +118,9 @@
           <h3 class="text-serif fw-600 mb-16" style="font-size:.96rem;color:var(--g900);">How approvals work</h3>
           <p class="text-sm text-muted" style="line-height:1.7;">
             <strong>Teachers &amp; Ambassadors:</strong> Click Approve. Their account unlocks immediately - they can sign in to their portal right away with the password they set during signup.<br><br>
-            <strong>Every approval opens a pre-filled welcome email</strong> in your mail app, addressed to the person you just approved. Send it - the signup page promises they will hear from us.<br><br><strong>Mentors:</strong> Click Approve, then send them the Discord invite link from the field below. They will be welcomed into the moderated FairGame community where they can answer questions from students and teachers.<br><br>
+            <strong>Every approval opens a pre-filled welcome email</strong> in your mail app, addressed to the person you just approved. Send it - the signup page promises they will hear from us.<br><br><strong>Mentors:</strong> Approving a mentor only clears them to be matched. No student is connected until you create the match on the <a href="/mentorlog.html">Mentor Matching</a> page and the student's guardian has consented.<br><br>
             <strong>Rejections</strong> are also immediate - the user sees a "not approved" message when they try to sign in.
           </p>
-          <div class="form-group" style="margin-top:16px;max-width:420px;">
-            <label class="form-label">Discord invite link (sent to approved mentors)</label>
-            <input type="text" id="discordLink" placeholder="https://discord.gg/your-invite" style="width:100%;"/>
-          </div>
         </div>
       </div>
     </div>
@@ -155,6 +152,30 @@
     </div>
 
     <!-- MENTORSHIPS -->
+    <!-- MESSAGE REVIEW -->
+    <div class="portal-section" id="sec-review">
+      <div class="section-heading">
+        <h2>Message Review</h2>
+        <p>Flagged messages between mentors and students, most serious first</p>
+      </div>
+
+      <div class="card" style="background:#eff6ff;border:1.5px solid #3b82f6;">
+        <div class="card-body">
+          <p class="text-sm" style="color:#1e3a8a;line-height:1.65;margin:0;">
+            Messages are flagged automatically when they contain contact details, secrecy language, a suggestion to meet in person, or a push to move off the platform. <strong>A flag is not an accusation</strong> - a student sharing their school email with their own mentor lands here too. Read the thread before acting. Flags raised on messages sent by the adult rank above the same flag from a student.
+          </p>
+        </div>
+      </div>
+
+      <div class="card mt-16">
+        <div class="card-header">
+          <h3>Awaiting Review</h3>
+          <button class="btn-xs" onclick="loadReviewQueue()">Refresh</button>
+        </div>
+        <div class="card-body-flush" id="reviewQueue"></div>
+      </div>
+    </div>
+
     <div class="portal-section" id="sec-mentors">
       <div class="section-heading">
         <h2>Mentorships</h2>

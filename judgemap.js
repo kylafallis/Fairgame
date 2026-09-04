@@ -70,7 +70,9 @@ function renderJudges(judges) {
   document.getElementById('judgeCount').textContent = `${filtered.length} judge${filtered.length !== 1 ? 's' : ''} shown`;
 
   if (!filtered.length) {
-    list.innerHTML = '<div class="empty-state">No judges match the current filter.</div>';
+    list.innerHTML = allJudges.length
+      ? '<div class="empty-state">No judges match the current filter.</div>'
+      : '<div class="empty-state">No judges have joined the network yet - check back later.</div>';
     return;
   }
 
@@ -154,11 +156,23 @@ async function loadJudges() {
     renderJudges(allJudges);
     return;
   }
-  const { data, error } = await sb.from('judges').select('*').eq('status','active').order('created_at', { ascending: false });
-  if (error) { console.error('Failed to load judges:', error); return; }
-  allJudges = data || [];
+  try {
+    const { data, error } = await sb.from('judges').select('*').eq('status','active').order('created_at', { ascending: false });
+    if (error) throw new Error(error.message);
+    allJudges = data || [];
+  } catch (err) {
+    // Leaving "Loading judge network..." on screen would be a lie. Say what
+    // happened and give a way out.
+    console.warn('Failed to load judges:', err.message);
+    document.getElementById('judgeCount').textContent = 'Could not load judges';
+    document.getElementById('judgeList').innerHTML =
+      '<div class="empty-state">We couldn\u2019t load the judge network just now. ' +
+      '<button type="button" class="btn-xs" onclick="loadJudges()">Try again</button></div>';
+    return;
+  }
   renderJudges(allJudges);
 }
+window.loadJudges = loadJudges;
 
 function toggleRegister() {
   document.getElementById('registerPanel').classList.toggle('open');
@@ -257,3 +271,5 @@ document.addEventListener('DOMContentLoaded', () => {
   initMap();
   loadJudges();
 });
+
+document.addEventListener('visibilitychange', () => { if (!document.hidden) loadJudges(); });

@@ -91,16 +91,17 @@ async function loadJudgeSection() {
     grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><p>Register your fair and enter your county to see nearby judges.</p></div>';
     return;
   }
-  grid.innerHTML = '<div style="grid-column:1/-1;"><div class="spinner-wrap"><div class="spinner"></div></div></div>';
+  fgSpinner(grid);
 
   const schoolCity   = (document.getElementById('fCity')?.value.trim() || '').toLowerCase();
   const schoolCounty = savedCounty.toLowerCase();
 
   let judges = DEMO_JUDGES;
   if (sb) {
-    // Fetch all active judges - we'll filter by travel range client-side
-    const { data } = await sb.from('judges').select('*').eq('status','active');
-    if (data) judges = data;
+    // Fetch all active judges - we'll filter by travel range client-side.
+    // A failed read gets its own message; it is not "no judges nearby".
+    try { judges = fgRows(await sb.from('judges').select('*').eq('status','active')); }
+    catch (e) { console.warn('[Teacher] judge read failed:', e.message); fgError(grid, loadJudgeSection); return; }
   }
 
   // Filter: judge must be willing to travel to the school's county, OR be statewide
@@ -117,7 +118,7 @@ async function loadJudgeSection() {
   });
 
   if (!judges.length) {
-    grid.innerHTML = '<div class="empty-state" style="grid-column:1/-1;"><p>No judges have specified they can travel to your area yet. Try the custom invitation below to reach out directly.</p></div>';
+    fgEmpty(grid, 'No judges have listed your area yet - check back later, or use the custom invitation below to reach out directly.');
     return;
   }
 
@@ -197,15 +198,18 @@ async function sendCustomInvite() {
 window.sendCustomInvite = sendCustomInvite;
 
 async function loadTeacherStudents() {
-  if (!sb) { teacherStudents = []; renderTeacherStudentTable([]); return; }
-  const { data } = await sb.from('students').select('*').eq('teacher_user_id', teacherId).order('name');
-  teacherStudents = data || [];
-  renderTeacherStudentTable(teacherStudents);
+  return fgLoad('teacherStudentTbody',
+    async () => {
+      if (!sb) return [];
+      teacherStudents = fgRows(await sb.from('students').select('*').eq('teacher_user_id', teacherId).order('name'));
+      return teacherStudents;
+    },
+    renderTeacherStudentTable,
+    { empty: 'No students yet - add your first with the button above.' });
 }
 
 function renderTeacherStudentTable(students) {
   const tbody = document.getElementById('teacherStudentTbody');
-  if (!students.length) { tbody.innerHTML = '<tr><td colspan="6"><div class="empty-state"><p>No students yet.</p></div></td></tr>'; return; }
   tbody.innerHTML = students.map(s => `<tr>
     <td class="col-name">${s.name}</td>
     <td class="col-sm">${s.grade||'–'}</td>
@@ -228,10 +232,14 @@ async function saveTeacherStudent() {
 window.saveTeacherStudent = saveTeacherStudent;
 
 async function loadSchoolDocs() {
-  if (!sb) return;
-  const { data: docs } = await sb.from('documents').select('*').eq('owner_id', teacherId).eq('owner_type','teacher').order('uploaded_at',{ascending:false});
+  return fgLoad('schoolDocList',
+    async () => sb ? fgRows(await sb.from('documents').select('*').eq('owner_id', teacherId).eq('owner_type','teacher').order('uploaded_at',{ascending:false})) : [],
+    renderSchoolDocs,
+    { empty: 'No files uploaded yet - check back later.' });
+}
+
+function renderSchoolDocs(docs) {
   const list = document.getElementById('schoolDocList');
-  if (!docs?.length) return;
   list.innerHTML = docs.map(d => `
     <div class="flex items-center gap-12" style="padding:10px 0;border-bottom:var(--border,1px solid #e2e6e2);">
       <div style="flex:1;"><div class="fw-500 text-sm" style="color:var(--g900);">${d.file_name}</div><div class="text-xs text-muted">${d.file_type} · ${new Date(d.uploaded_at||d.created_at).toLocaleDateString()}</div></div>

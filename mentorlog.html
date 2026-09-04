@@ -66,7 +66,7 @@
       <div class="log-sidebar">
         <div class="log-sidebar-header">
           <h4>Active Pairs</h4>
-          <button class="btn btn-primary" onclick="openAddPair()" style="font-size:0.76rem;padding:7px 14px;">+ New Pair</button>
+          <button class="btn btn-primary" onclick="openMatchFinder()" style="font-size:0.76rem;padding:7px 14px;">Find a Match</button>
         </div>
         <div class="pair-list" id="pairList">
           <div style="padding:24px 18px;text-align:center;color:var(--gray-300);font-size:0.84rem;">Loading pairs...</div>
@@ -126,6 +126,46 @@
     </div>
   </div>
 </section>
+
+<!-- Match finder: pick a student request, then pick from ranked mentors -->
+<div class="match-modal" id="matchModal">
+  <div class="match-box">
+    <div class="match-box-head">
+      <h3 id="matchTitle">Find a Mentor Match</h3>
+      <p id="matchSubtitle">Pick the student whose request you are filling.</p>
+      <div class="match-rail">
+        <span id="rail1" class="on">1 &middot; Student</span>
+        <span id="rail2">2 &middot; Mentor</span>
+        <span id="rail3">3 &middot; Open channel</span>
+      </div>
+    </div>
+
+    <div class="match-box-body">
+      <!-- Step 1: open student requests -->
+      <div class="match-step active" id="matchStep1">
+        <div id="requestList"></div>
+      </div>
+
+      <!-- Step 2: ranked mentor candidates -->
+      <div class="match-step" id="matchStep2">
+        <div id="candidateList"></div>
+      </div>
+
+      <!-- Step 3: what still blocks the channel -->
+      <div class="match-step" id="matchStep3">
+        <div id="gateReport"></div>
+      </div>
+    </div>
+
+    <div class="match-box-foot">
+      <button class="modal-cancel" onclick="closeMatchFinder()" style="background:none;border:1.5px solid var(--gray-200);padding:9px 16px;font-size:0.8rem;font-family:var(--ff-sans);cursor:pointer;color:var(--gray-500);">Close</button>
+      <button class="modal-cancel" id="matchBackBtn" onclick="matchBack()" style="display:none;background:none;border:1.5px solid var(--gray-200);padding:9px 16px;font-size:0.8rem;font-family:var(--ff-sans);cursor:pointer;color:var(--gray-500);">&larr; Back</button>
+      <div style="flex:1;"></div>
+      <button class="btn" id="matchManualBtn" onclick="closeMatchFinder(); openAddPair();" style="background:none;border:1.5px solid var(--gray-200);padding:9px 16px;font-size:0.8rem;color:var(--gray-700);">Enter manually instead</button>
+      <span id="matchMsg" style="font-size:0.78rem;"></span>
+    </div>
+  </div>
+</div>
 
 <!-- Add pair modal -->
 <div class="add-pair-modal" id="addPairModal">

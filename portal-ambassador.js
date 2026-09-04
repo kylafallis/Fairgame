@@ -19,8 +19,13 @@ requireAuth('ambassador', async (user) => {
 async function loadStudents() {
   if (!sb) { allStudents = DEMO_STUDENTS; }
   else {
-    const { data } = await sb.from('students').select('*').eq('ambassador_id', ambassadorId).order('name');
-    allStudents = data || [];
+    try { allStudents = fgRows(await sb.from('students').select('*').eq('ambassador_id', ambassadorId).order('name')); }
+    catch (e) {
+      console.warn('[Ambassador] student read failed:', e.message);
+      fgError('studentTbody', loadStudents);
+      fgError('recentStudentsTable', loadStudents);
+      return;
+    }
   }
   renderStudentTable(allStudents);
   renderHomeStats(allStudents);
@@ -36,7 +41,7 @@ function renderHomeStats(students) {
 
 function renderRecentStudents(students) {
   const el = document.getElementById('recentStudentsTable');
-  if (!students.length) { el.innerHTML = '<div class="empty-state"><p>No students yet - add your first student using the button above.</p></div>'; return; }
+  if (!students.length) { fgEmpty(el, 'No students yet - add your first student using the button above.'); return; }
   el.innerHTML = `<table class="data-table">
     <thead><tr><th>Name</th><th>Project</th><th>Paperwork</th></tr></thead>
     <tbody>${students.map(s => `<tr>
@@ -51,7 +56,7 @@ function renderStudentTable(students) {
   const tbody = document.getElementById('studentTbody');
   document.getElementById('studentCountLabel').textContent = `${students.length} Student${students.length !== 1 ? 's' : ''}`;
   if (!students.length) {
-    tbody.innerHTML = '<tr><td colspan="7"><div class="empty-state"><p>No students yet. Use "+ Add Student" to get started.</p></div></td></tr>';
+    fgEmpty(tbody, 'No students yet. Use "+ Add Student" to get started.');
     return;
   }
   tbody.innerHTML = students.map(s => `<tr>
@@ -113,10 +118,14 @@ async function loadStudentDocs(studentId) {
   document.getElementById('uploadStudentId').value = studentId;
   document.getElementById('uploadFor').textContent = 'Uploading for: ' + (student?.name || '');
   const list = document.getElementById('docList');
-  list.innerHTML = '<div class="spinner-wrap"><div class="spinner"></div></div>';
-  if (!sb) { list.innerHTML = '<div class="empty-state"><p>Connect Supabase to view documents.</p></div>'; return; }
-  const { data: docs } = await sb.from('documents').select('*').eq('student_id', studentId).order('uploaded_at', { ascending: false });
-  if (!docs?.length) { list.innerHTML = '<div class="empty-state"><p>No files yet - click Upload File to add the first one.</p></div>'; return; }
+  if (!sb) { fgEmpty(list, 'Connect Supabase to view documents.'); return; }
+  return fgLoad(list,
+    async () => fgRows(await sb.from('documents').select('*').eq('student_id', studentId).order('uploaded_at', { ascending: false })),
+    (docs) => renderDocList(list, docs),
+    { empty: 'No files yet - click Upload File to add the first one.' });
+}
+
+function renderDocList(list, docs) {
   list.innerHTML = docs.map(d => `
     <div class="flex items-center gap-12" style="padding:10px 0;border-bottom:var(--border,1px solid #e2e6e2);">
       <div style="flex:1;">
