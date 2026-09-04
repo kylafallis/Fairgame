@@ -422,7 +422,13 @@ async function doSignup() {
 
   const { data, error } = await sb.auth.signUp({
     email, password: pw,
-    options: { data: metadata }
+    options: {
+      data: metadata,
+      // Only used when the project requires email confirmation. Without
+      // it the link lands on whatever Site URL happens to be set, which
+      // is rarely the page that can complete the sign-in.
+      emailRedirectTo: window.location.origin + '/portal-router.html',
+    }
   });
 
   if (error) {
@@ -446,17 +452,41 @@ async function doSignup() {
     msg('signupMsg',
       'Your account was created, but we could not file your access request automatically. Please email fairgameinitiative@outlook.com with your name and school so we can approve you by hand.',
       'err');
-  } else if (needsApproval) {
-    msg('signupMsg',
-      'Account created! Your request is now under review. We will contact you at ' + email + ' once your account has been approved - typically within 1–3 business days. Please also confirm your email address from the message we just sent.',
-      'ok');
-  } else if (isUnder13) {
-    msg('signupMsg',
-      'Account created! A consent request has been sent to your parent or guardian at ' + guardianEmail + '. Please also check ' + email + ' to confirm your email address.',
-      'ok');
-  } else {
-    msg('signupMsg', 'Account created! Check your email to confirm your address, then sign in.', 'ok');
+    return;
   }
+
+  // A session on the signUp result means the project does not require
+  // email confirmation, so the account is usable this second. No session
+  // means Supabase has sent a confirmation link and is waiting on it.
+  const signedInNow = !!data?.session;
+
+  if (isUnder13) {
+    msg('signupMsg',
+      'Account created! A consent request has been sent to your parent or guardian at ' + guardianEmail + '.'
+      + (signedInNow ? '' : ' Please also check ' + email + ' to confirm your email address.'),
+      'ok');
+    return;
+  }
+
+  if (signedInNow) {
+    // Hand straight to the router. For a teacher or ambassador that lands
+    // on the under-review screen, which is the only gate they should meet;
+    // for anyone else it opens their portal.
+    msg('signupMsg',
+      needsApproval
+        ? 'Account created. Taking you to your account status…'
+        : 'Account created. Signing you in…',
+      'ok');
+    await go(data.user);
+    return;
+  }
+
+  msg('signupMsg',
+    needsApproval
+      ? 'Account created! Confirm your email address using the link we just sent to ' + email
+        + ', then sign in. Your access request is already in our review queue - typically 1–3 business days.'
+      : 'Account created! Check your email to confirm your address, then sign in.',
+    'ok');
 }
 
 /* ── Google OAuth ─────────────────────────────────────────────

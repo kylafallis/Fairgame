@@ -707,22 +707,14 @@ async function regAmbassador() {
   logEvent('portal_request', { type: 'ambassador' });
 }
 
-async function magicLink(e) {
-  e.preventDefault();
-  const email = prompt('Enter your registered email address:');
-  if (!email) return;
-  if (sb) {
-    const { error } = await sb.auth.signInWithOtp({ email });
-    alert(error
-      ? 'Error: ' + error.message
-      : 'Magic link sent to ' + email + '! Check your inbox.'
-    );
-  } else {
-    alert('Portal coming soon! Email fairgameinitiative@outlook.com for early access.');
-  }
-}
+/* magicLink() lived here and was exported to window, but nothing on the
+   site ever called it. Teachers and ambassadors sign in with an email
+   address and a password; the only remaining one-time-link path is the
+   judge portal invite below, which judges need because they never set a
+   password. Keeping a second, unreachable sign-in route around only made
+   it harder to reason about how anyone actually gets in. */
 
-Object.assign(window, { regTeacher, regAmbassador, magicLink });
+Object.assign(window, { regTeacher, regAmbassador });
 
 
 /* ─────────────────────────────────────────────────────────────
