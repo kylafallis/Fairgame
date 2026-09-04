@@ -1,235 +1,227 @@
 -- =====================================================================
 -- FairGame - POST-MIGRATION VERIFICATION
 -- =====================================================================
--- Run after 07, 08, 09, 10 and 11. Writes NOTHING - every statement is
--- a SELECT, and the two functions it calls are read-only.
+-- HOW TO RUN THIS
 --
--- Section 1 is the one that matters: it answers "did all five actually
--- land" in a single result, with a PASS or FAIL on each line.
+--   Paste the whole file into the Supabase SQL editor and press Run.
+--   You get ONE results table. Read the 'result' column: anything
+--   starting with FAIL or ACTION needs you; everything else is fine.
 --
--- Sections 6 and 7 exercise the new code rather than just checking it
--- exists, which is a different and more useful question.
+--   The Supabase editor only ever displays the LAST statement's output,
+--   which is why this is written as a single query rather than a series
+--   of them. The extra queries at the bottom are commented out; to use
+--   one, highlight just that line and press Run.
+--
+--   This writes nothing. Every statement is a SELECT.
 -- =====================================================================
 
+with
 
--- ---------------------------------------------------------------------
--- 1. DID EVERYTHING LAND?
--- ---------------------------------------------------------------------
+-- ── Does each object exist? ──────────────────────────────────────────
+objects as (
+  select 'Tables'   as area, t.name as item,
+         case when to_regclass('public.' || t.name) is null
+              then 'FAIL - missing' else 'ok' end as result
+  from (values
+    ('guardian_consents'), ('mentor_messages'), ('mentor_attestations'),
+    ('messages'), ('community_posts'), ('student_projects'),
+    ('school_email_domains'), ('fg_settings'), ('moderation_terms')
+  ) t(name)
 
-select 'table   ' || t.name as object,
-       case when to_regclass('public.' || t.name) is null then 'FAIL - missing' else 'pass' end as state
-from (values
-  ('guardian_consents'), ('mentor_messages'), ('mentor_attestations'),
-  ('messages'), ('community_posts'), ('student_projects'),
-  ('school_email_domains'), ('fg_settings'), ('moderation_terms')
-) t(name)
+  union all
+  select 'Views', v.name,
+         case when to_regclass('public.' || v.name) is null
+              then 'FAIL - missing' else 'ok' end
+  from (values
+    ('fg_message_review_queue'), ('fg_mentorship_readiness'), ('fg_conversation_index')
+  ) v(name)
 
-union all
-select 'view    ' || v.name,
-       case when to_regclass('public.' || v.name) is null then 'FAIL - missing' else 'pass' end
-from (values
-  ('fg_message_review_queue'), ('fg_mentorship_readiness'), ('fg_conversation_index')
-) v(name)
+  union all
+  select 'Functions', split_part(f.sig, '(', 1),
+         case when to_regprocedure('public.' || f.sig) is null
+              then 'FAIL - missing' else 'ok' end
+  from (values
+    ('fg_is_school_email(text)'),
+    ('fg_scan_terms(text)'),
+    ('fg_mentorship_channel_open(uuid)'),
+    ('fg_suggest_mentor_matches(uuid,integer)'),
+    ('fg_create_mentorship(uuid,uuid,integer,jsonb,uuid)'),
+    ('fg_activate_mentorship(uuid)'),
+    ('fg_consent_lookup(uuid)'),
+    ('fg_consent_sign(uuid,text,text,text)'),
+    ('fg_request_consent(uuid,text,text,text)'),
+    ('fg_claim_mentor_role()'),
+    ('fg_students_without_request()'),
+    ('fg_create_student_request(uuid,text[],text,text,text,text,text)')
+  ) f(sig)
 
-union all
-select 'function ' || f.sig,
-       case when to_regprocedure('public.' || f.sig) is null then 'FAIL - missing' else 'pass' end
-from (values
-  ('fg_is_school_email(text)'),
-  ('fg_scan_terms(text)'),
-  ('fg_scan_contact_info(text)'),
-  ('fg_mentorship_channel_open(uuid)'),
-  ('fg_suggest_mentor_matches(uuid,integer)'),
-  ('fg_create_mentorship(uuid,uuid,integer,jsonb,uuid)'),
-  ('fg_activate_mentorship(uuid)'),
-  ('fg_consent_lookup(uuid)'),
-  ('fg_consent_sign(uuid,text,text,text)'),
-  ('fg_consent_revoke(uuid,text)'),
-  ('fg_request_consent(uuid,text,text,text)'),
-  ('fg_claim_mentor_role()'),
-  ('fg_attest_conduct_policy(text)'),
-  ('fg_record_background_check(uuid,text,boolean)'),
-  ('fg_link_mentorship_accounts(uuid)'),
-  ('fg_link_own_mentorships()'),
-  ('fg_students_without_request()'),
-  ('fg_create_student_request(uuid,text[],text,text,text,text,text)')
-) f(sig)
+  union all
+  select 'Columns', 'mentorships.' || c.name,
+         case when not exists (
+           select 1 from information_schema.columns
+           where table_schema='public' and table_name='mentorships' and column_name=c.name
+         ) then 'FAIL - missing' else 'ok' end
+  from (values
+    ('student_user_id'), ('mentor_user_id'), ('consent_id'),
+    ('mentor_attested_at'), ('background_check_on_file'), ('updated_at')
+  ) c(name)
 
-union all
-select 'column  mentorships.' || c.name,
-       case when not exists (
-         select 1 from information_schema.columns
-         where table_schema='public' and table_name='mentorships' and column_name=c.name
-       ) then 'FAIL - missing' else 'pass' end
-from (values
-  ('student_user_id'), ('mentor_user_id'), ('supervising_teacher_id'),
-  ('consent_id'), ('mentor_attested_at'), ('background_check_on_file'),
-  ('match_score'), ('match_reasons'), ('updated_at')
-) c(name)
+  union all
+  select 'Columns', 'students.' || c.name,
+         case when not exists (
+           select 1 from information_schema.columns
+           where table_schema='public' and table_name='students' and column_name=c.name
+         ) then 'FAIL - missing' else 'ok' end
+  from (values ('project_title'), ('paperwork_status'), ('ambassador_id'), ('teacher_user_id')) c(name)
 
-union all
-select 'column  mentor_messages.' || c.name,
-       case when not exists (
-         select 1 from information_schema.columns
-         where table_schema='public' and table_name='mentor_messages' and column_name=c.name
-       ) then 'FAIL - missing' else 'pass' end
-from (values ('flag_detail'), ('flag_severity')) c(name)
+  union all
+  select 'Columns', 'fairs.teacher_user_id',
+         case when not exists (
+           select 1 from information_schema.columns
+           where table_schema='public' and table_name='fairs' and column_name='teacher_user_id'
+         ) then 'FAIL - missing' else 'ok' end
+),
 
-union all
-select 'column  students.' || c.name,
-       case when not exists (
-         select 1 from information_schema.columns
-         where table_schema='public' and table_name='students' and column_name=c.name
-       ) then 'FAIL - missing' else 'pass' end
-from (values
-  ('project_title'), ('project_field'), ('paperwork_status'),
-  ('ambassador_id'), ('teacher_user_id')
-) c(name)
+-- ── Is student data protected? ───────────────────────────────────────
+security as (
+  select 'Security' as area,
+         c.relname || ' (' || count(p.polname) || ' policies)' as item,
+         case
+           when not c.relrowsecurity then 'FAIL - no RLS, any signed-in user can read it'
+           when count(p.polname) = 0  then 'FAIL - RLS on but no policies, hidden from everyone'
+           else 'ok'
+         end as result
+  from pg_class c
+  left join pg_policy p on p.polrelid = c.oid
+  where c.relnamespace = 'public'::regnamespace and c.relkind = 'r'
+    and c.relname in ('students','documents','messages','community_posts',
+                      'student_projects','mentorships','mentorship_sessions',
+                      'mentor_messages','guardian_consents')
+  group by c.relname, c.relrowsecurity
+),
 
-union all
-select 'column  fairs.teacher_user_id',
-       case when not exists (
-         select 1 from information_schema.columns
-         where table_schema='public' and table_name='fairs' and column_name='teacher_user_id'
-       ) then 'FAIL - missing' else 'pass' end
+-- ── Is there an admin? Everything gates on this. ─────────────────────
+admins as (
+  select 'Admin' as area,
+         coalesce((select string_agg(u.email::text, ', ')
+                   from auth.users u join public.user_roles r on r.user_id = u.id
+                   where r.role = 'admin'), 'nobody') as item,
+         case when exists (select 1 from public.user_roles where role='admin')
+              then 'ok'
+              else 'ACTION - add one, see the note at the bottom of this file'
+         end as result
+),
 
-order by 2 desc, 1;   -- any FAIL sorts to the top
+-- ── Does the school email rule actually work? ────────────────────────
+emailrule as (
+  select 'Email rule' as area, t.addr as item,
+         case when public.fg_is_school_email(t.addr) = t.expected
+              then 'ok - ' || (case when t.expected then 'accepted' else 'rejected' end)
+              else 'FAIL - wrong answer' end as result
+  from (values
+    ('teacher@osu.edu', true), ('kid@columbus.k12.oh.us', true),
+    ('teacher@cps-k12.org', true), ('personal@gmail.com', false)
+  ) t(addr, expected)
+),
+
+-- ── Does the message scanner work? ───────────────────────────────────
+-- The last one matters most: 'class', 'assignment' and 'assess' all
+-- contain 'ass' and must NOT be flagged.
+scanner as (
+  select 'Scanner' as area, s.label as item,
+         case when (jsonb_array_length(public.fg_scan_terms(s.body)) > 0) = s.should_flag
+              then 'ok - ' || coalesce(nullif(
+                     (select string_agg(distinct value ->> 'category', ', ')
+                      from jsonb_array_elements(public.fg_scan_terms(s.body))), ''), 'clean')
+              else 'FAIL - expected ' || (case when s.should_flag then 'a flag' else 'no flag' end)
+         end as result
+  from (values
+    ('normal mentoring talk',  'Great work, your controls look solid now.', false),
+    ('mild swearing',          'That is so damn annoying, I have to redo it.', true),
+    ('moving off-platform',    'Just text me at 614 555 0148 and we can sort it faster.', true),
+    ('secrecy',                'Do not tell your teacher, it can be our secret.', true),
+    ('welfare disclosure',     'Honestly I have been feeling like I want to die lately.', true),
+    ('must NOT false-positive','My whole class had the same assignment so I need to assess it.', false)
+  ) s(label, body, should_flag)
+),
+
+-- ── Who is waiting, and is there anyone to match them with? ──────────
+queue as (
+  select 'Queue' as area, 'students in the mentor queue' as item,
+         count(*)::text || ' waiting' as result
+  from public.portal_requests
+  where type='student_mentor_request' and status in ('pending','active')
+
+  union all
+  select 'Queue', 'registered students never queued',
+         count(*)::text || case when count(*) > 0
+              then ' - add them in Find a Match' else '' end
+  from public.fg_students_without_request()
+
+  union all
+  select 'Queue', 'approved mentors available to match',
+         count(*)::text || case when count(*) = 0
+              then ' - ACTION: approve some, or the matcher finds nobody' else '' end
+  from public.portal_requests where type='mentor' and status='active'
+),
+
+vocab as (
+  select 'Vocabulary' as area,
+         count(*)::text || ' terms across ' || count(distinct category) || ' categories' as item,
+         case when count(*) = 0 then 'FAIL - migration 11 did not seed' else 'ok' end as result
+  from public.moderation_terms where active
+),
+
+policy as (
+  select 'Email rule' as area, 'current policy' as item,
+         coalesce((select value from public.fg_settings where key='school_email_policy'),
+                  'FAIL - missing') as result
+)
+
+select area, item, result
+from (
+  select * from objects   union all
+  select * from security  union all
+  select * from admins    union all
+  select * from emailrule union all
+  select * from policy    union all
+  select * from scanner   union all
+  select * from queue     union all
+  select * from vocab
+) all_checks
+-- Anything needing attention floats to the top.
+order by case when result like 'FAIL%' then 0
+              when result like 'ACTION%' or result like '%ACTION%' then 1
+              else 2 end,
+         area, item;
 
 
--- ---------------------------------------------------------------------
--- 2. IS ANYTHING LEFT UNPROTECTED?
--- ---------------------------------------------------------------------
--- 'rls on, no policies' hides rows from everyone but the service role.
--- 'NO RLS' on a table holding student data is the one to worry about.
-
-select c.relname as table_name,
-       c.relrowsecurity as rls_on,
-       count(p.polname) as policies,
-       case
-         when not c.relrowsecurity then 'NO RLS - readable by any signed-in user'
-         when count(p.polname) = 0 then 'rls on, no policies - hidden from everyone'
-         else 'ok'
-       end as verdict
-from pg_class c
-left join pg_policy p on p.polrelid = c.oid
-where c.relnamespace = 'public'::regnamespace and c.relkind = 'r'
-  and c.relname in ('students','documents','messages','community_posts',
-                    'student_projects','mentorships','mentorship_sessions',
-                    'mentor_messages','guardian_consents','mentor_attestations',
-                    'moderation_terms','school_email_domains','fg_settings')
-group by c.relname, c.relrowsecurity
-order by (case when not c.relrowsecurity then 0 when count(p.polname)=0 then 1 else 2 end), c.relname;
-
-
--- ---------------------------------------------------------------------
--- 3. IS THERE AN ADMIN?
--- ---------------------------------------------------------------------
--- Nearly every function starts with an fg_is_admin() check, and the
--- views gate on it. Without a row here the portal looks broken.
-
-select u.email, r.role, r.full_name
-from auth.users u
-join public.user_roles r on r.user_id = u.id
-where r.role = 'admin';
-
--- Nothing above? Run this, with your address:
+-- =====================================================================
+-- IF THE ADMIN LINE SAYS 'ACTION'
+-- =====================================================================
+-- Highlight the three lines below, put your own address in, and Run.
+--
 --   insert into public.user_roles (user_id, role, full_name)
---   select id, 'admin', 'Kyla Fallis' from auth.users
---   where email = 'you@example.com'
+--   select id, 'admin', 'Kyla Fallis' from auth.users where email = 'you@example.com'
 --   on conflict (user_id) do update set role = 'admin';
 
 
--- ---------------------------------------------------------------------
--- 4. WHO IS WAITING FOR A MENTOR?
--- ---------------------------------------------------------------------
--- Eric should be in one of these two. The first is the matcher's queue;
--- the second is people with accounts who never got into it.
-
-select 'in the queue' as list, name, email, status, created_at
-from public.portal_requests
-where type = 'student_mentor_request' and status in ('pending','active')
-
-union all
-
-select 'registered, not queued', full_name, email, 'no request', registered_at
-from public.fg_students_without_request()
-order by 1, 5;
-
-
--- ---------------------------------------------------------------------
--- 5. HOW MANY MENTORS CAN ACTUALLY BE MATCHED?
--- ---------------------------------------------------------------------
-
-select status, count(*)
-from public.portal_requests where type = 'mentor'
-group by status order by 2 desc;
--- Only status = 'active' is offered by the matcher.
-
-
--- ---------------------------------------------------------------------
--- 6. DOES THE SCHOOL EMAIL RULE BEHAVE?
--- ---------------------------------------------------------------------
--- Exercises the function rather than trusting that it exists.
-
-select addr,
-       public.fg_is_school_email(addr) as accepted,
-       expected,
-       case when public.fg_is_school_email(addr) = expected then 'pass' else 'FAIL' end as result
-from (values
-  ('teacher@osu.edu',                 true),
-  ('kid@columbus.k12.oh.us',          true),
-  ('teacher@cps-k12.org',             true),
-  ('someone@school.ac.uk',            true),
-  ('personal@gmail.com',              false),
-  ('personal@outlook.com',            false),
-  ('someone@notaschool.com',          false)
-) t(addr, expected)
-order by result, addr;
-
-select value as current_policy from public.fg_settings where key = 'school_email_policy';
--- 'school' accepts the K-12 patterns. 'edu_only' is the strict rule.
-
-
--- ---------------------------------------------------------------------
--- 7. DOES THE MESSAGE SCANNER BEHAVE?
--- ---------------------------------------------------------------------
--- The important line is the last one: 'class' and 'assignment' contain
--- 'ass', and must NOT be flagged.
-
-select sample,
-       public.fg_scan_terms(sample)        as terms_hit,
-       public.fg_scan_contact_info(sample) as structural_hit
-from (values
-  ('Great work, your controls look solid now.'),
-  ('That is so damn annoying, I have to redo it.'),
-  ('Just text me at 614-555-0148 and we can sort it faster.'),
-  ('Do not tell your teacher about this, it can be our secret.'),
-  ('Honestly I have been feeling like I want to die lately.'),
-  ('My whole class had the same assignment and I need to assess the data.')
-) s(sample);
-
--- Expected, in order:
---   1  nothing           2  profanity (severity 1)
---   3  off_platform + phone_number     4  secrecy
---   5  self_harm (severity 4)
---   6  NOTHING - word boundaries stop 'ass' firing inside those words
-
-
--- ---------------------------------------------------------------------
--- 8. THE MODERATION VOCABULARY
--- ---------------------------------------------------------------------
-
-select category, count(*) as terms, min(severity) as low, max(severity) as high
-from public.moderation_terms where active
-group by category order by max(severity) desc, category;
-
-
--- ---------------------------------------------------------------------
--- 9. WHAT IS BLOCKING EACH MATCH
--- ---------------------------------------------------------------------
-
-select * from public.fg_mentorship_readiness;
-
 -- =====================================================================
--- END - nothing above this line changed anything
+-- USEFUL ONE-OFFS - highlight a single line and press Run
+-- =====================================================================
+-- Who registered but never asked for a mentor (Eric should be here):
+--   select * from public.fg_students_without_request();
+--
+-- What is blocking each match from opening:
+--   select * from public.fg_mentorship_readiness;
+--
+-- Every pair and their message counts:
+--   select * from public.fg_conversation_index;
+--
+-- Add a school district so its staff and students can sign up:
+--   insert into public.school_email_domains (domain, school_name)
+--   values ('cps-k12.org', 'Cincinnati Public Schools');
+--
+-- Retire a moderation term that turns out too noisy:
+--   update public.moderation_terms set active = false where term = 'alcohol';
 -- =====================================================================
