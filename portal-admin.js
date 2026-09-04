@@ -435,11 +435,29 @@ window.saveStats = saveStats;
    an adult above everything else.
    ══════════════════════════════════════════════════════════════════ */
 
+/* Two vocabularies land in flag_reasons. The structural ones come from
+   fg_scan_contact_info and are fixed; the rest are the categories in
+   moderation_terms, which migration 11 renamed - secrecy_language became
+   secrecy, and so on. Both sets are mapped here so nothing renders as a
+   raw slug. */
 const FLAG_LABELS = {
+  // Structural, from fg_scan_contact_info
   email_address:         'Shared an email address',
   phone_number:          'Shared a phone number',
   social_platform:       'Mentioned a social platform',
   external_meeting_link: 'External meeting link',
+  contact:               'Shared contact details',
+  // Vocabulary, from moderation_terms
+  self_harm:             'Possible welfare concern',
+  sexual:                'Sexual content',
+  off_platform:          'Pushed to move off the platform',
+  secrecy:               'Asked to keep something secret',
+  meeting:               'Suggested meeting in person',
+  substances:            'Alcohol or drugs',
+  violence:              'Threat or violence',
+  profanity:             'Swearing',
+  other:                 'Flagged phrase',
+  // Retired names, kept so older rows still read properly
   secrecy_language:      'Asked to keep something secret',
   in_person_meeting:     'Suggested meeting in person',
   off_platform_contact:  'Pushed to move off the platform',

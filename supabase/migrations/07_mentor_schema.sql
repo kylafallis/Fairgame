@@ -426,8 +426,25 @@ set search_path = public
 as $$
 declare
   v_reasons jsonb;
+  v_terms   jsonb := '[]'::jsonb;
+  v_sev     smallint := 0;
 begin
-  v_reasons := public.fg_scan_contact_info(new.body) || public.fg_scan_safeguarding(new.body);
+  v_reasons := public.fg_scan_contact_info(new.body);
+
+  -- Migration 11 moves the vocabulary into an editable table and adds a
+  -- severity rating. If it has already run, defer to it. Without this
+  -- check, re-running 07 on its own would quietly revert flagging to the
+  -- smaller built-in list, and nothing would say so.
+  if to_regprocedure('public.fg_scan_terms(text)') is not null then
+    execute 'select public.fg_scan_terms($1)' into v_terms using new.body;
+    v_reasons := v_reasons || (
+      select coalesce(jsonb_agg(distinct value ->> 'category'), '[]'::jsonb)
+      from jsonb_array_elements(v_terms));
+    select coalesce(max((value ->> 'severity')::smallint), 0) into v_sev
+    from jsonb_array_elements(v_terms);
+  else
+    v_reasons := v_reasons || public.fg_scan_safeguarding(new.body);
+  end if;
 
   -- A student sharing their own school email with their assigned mentor
   -- is a far smaller matter than an adult soliciting it. Both are
@@ -435,6 +452,18 @@ begin
   -- apart, and the review queue ranks on exactly that.
   new.flag_reasons := v_reasons;
   new.flagged      := jsonb_array_length(v_reasons) > 0;
+
+  -- These columns only exist once migration 11 has run.
+  if to_regclass('public.mentor_messages') is not null
+     and exists (select 1 from information_schema.columns
+                 where table_schema='public' and table_name='mentor_messages'
+                   and column_name='flag_severity') then
+    if jsonb_array_length(public.fg_scan_contact_info(new.body)) > 0 then
+      v_sev := greatest(v_sev, 3);
+    end if;
+    new.flag_severity := v_sev;
+    new.flag_detail   := v_terms;
+  end if;
 
   -- Set by review, never by the sender.
   new.reviewed_at := null;
