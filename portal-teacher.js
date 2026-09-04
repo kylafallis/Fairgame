@@ -201,7 +201,7 @@ async function loadTeacherStudents() {
   return fgLoad('teacherStudentTbody',
     async () => {
       if (!sb) return [];
-      teacherStudents = fgRows(await sb.from('students').select('*').eq('teacher_user_id', teacherId).order('name'));
+      teacherStudents = fgRows(await sb.from('students').select('*').eq('teacher_user_id', teacherId).order('full_name'));
       return teacherStudents;
     },
     renderTeacherStudentTable,
@@ -211,8 +211,8 @@ async function loadTeacherStudents() {
 function renderTeacherStudentTable(students) {
   const tbody = document.getElementById('teacherStudentTbody');
   tbody.innerHTML = students.map(s => `<tr>
-    <td class="col-name">${s.name}</td>
-    <td class="col-sm">${s.grade||'–'}</td>
+    <td class="col-name">${s.full_name}</td>
+    <td class="col-sm">${s.grade_level||'–'}</td>
     <td class="col-sm">${s.project_title||'<em class="text-muted">Not set</em>'}</td>
     <td class="col-sm">${s.project_field||'–'}</td>
     <td><span class="chip chip-${s.paperwork_status||'pending'}">${s.paperwork_status||'pending'}</span></td>
@@ -224,7 +224,7 @@ async function saveTeacherStudent() {
   const name  = document.getElementById('tsnName').value.trim();
   if (!name) { showMsg('addTeacherStudentMsg','Name required.','err'); return; }
   showMsg('addTeacherStudentMsg','Saving…','info');
-  const row = { name, grade: document.getElementById('tsnGrade').value.trim(), email: document.getElementById('tsnEmail').value.trim(), project_field: document.getElementById('tsnField').value, project_title: document.getElementById('tsnTitle').value.trim(), teacher_user_id: teacherId, paperwork_status: 'pending' };
+  const row = { full_name: name, grade_level: document.getElementById('tsnGrade').value.trim(), email: document.getElementById('tsnEmail').value.trim(), project_field: document.getElementById('tsnField').value, project_title: document.getElementById('tsnTitle').value.trim(), teacher_user_id: teacherId, paperwork_status: 'pending' };
   if (sb) { const { error } = await sb.from('students').insert([row]); if (error) { showMsg('addTeacherStudentMsg', error.message, 'err'); return; } }
   showMsg('addTeacherStudentMsg','Student added!','ok');
   setTimeout(() => { closeModal('addTeacherStudentModal'); loadTeacherStudents(); }, 1200);
@@ -233,7 +233,7 @@ window.saveTeacherStudent = saveTeacherStudent;
 
 async function loadSchoolDocs() {
   return fgLoad('schoolDocList',
-    async () => sb ? fgRows(await sb.from('documents').select('*').eq('owner_id', teacherId).eq('owner_type','teacher').order('uploaded_at',{ascending:false})) : [],
+    async () => sb ? fgRows(await sb.from('documents').select('*').eq('owner_id', teacherId).eq('owner_type','teacher').order('created_at',{ascending:false})) : [],
     renderSchoolDocs,
     { empty: 'No files uploaded yet - check back later.' });
 }
@@ -242,8 +242,8 @@ function renderSchoolDocs(docs) {
   const list = document.getElementById('schoolDocList');
   list.innerHTML = docs.map(d => `
     <div class="flex items-center gap-12" style="padding:10px 0;border-bottom:var(--border,1px solid #e2e6e2);">
-      <div style="flex:1;"><div class="fw-500 text-sm" style="color:var(--g900);">${d.file_name}</div><div class="text-xs text-muted">${d.file_type} · ${new Date(d.uploaded_at||d.created_at).toLocaleDateString()}</div></div>
-      <button class="btn-xs" onclick="dlDoc('${d.file_path}')">Download</button>
+      <div style="flex:1;"><div class="fw-500 text-sm" style="color:var(--g900);">${d.file_name}</div><div class="text-xs text-muted">${d.file_type} · ${new Date(d.created_at).toLocaleDateString()}</div></div>
+      <button class="btn-xs" onclick="dlDoc('${d.storage_path}')">Download</button>
     </div>`).join('');
 }
 
@@ -261,7 +261,7 @@ async function uploadTeacherDoc() {
   if (sb) {
     const { error } = await uploadPortalFile('student-docs', path, file);
     if (error) { showMsg('teacherDocMsg','Upload failed.','err'); return; }
-    await sb.from('documents').insert([{ owner_id: teacherId, owner_type:'teacher', file_path: path, file_name: file.name, file_type: docType, uploaded_at: new Date().toISOString() }]);
+    await sb.from('documents').insert([{ owner_id: teacherId, owner_type:'teacher', storage_path: path, file_name: file.name, file_type: docType, size_bytes: file.size }]);
   }
   showMsg('teacherDocMsg','Uploaded!','ok');
   fileInput.value = ''; document.getElementById('teacherDocPreview').textContent = '';

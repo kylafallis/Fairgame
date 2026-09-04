@@ -3,10 +3,10 @@ let allStudents = [], ambassadorId = null;
 let activeDocStudentId = null;
 
 const DEMO_STUDENTS = [
-  { id:'s1', name:'Priya Sharma',  grade:'10th', project_title:'Microplastics in Olentangy River', project_field:'Environmental Science', paperwork_status:'uploaded', mentor_id:'m1' },
-  { id:'s2', name:'Marcus Lee',    grade:'9th',  project_title:'Solar Cell Efficiency Optimizer',  project_field:'Physics / Engineering',  paperwork_status:'pending',  mentor_id:null },
-  { id:'s3', name:'Sofia Reyes',   grade:'11th', project_title:'CRISPR in E. Coli',                project_field:'Biology / Life Sciences',paperwork_status:'verified', mentor_id:'m2' },
-  { id:'s4', name:'James Okafor',  grade:'9th',  project_title:null,                               project_field:null,                     paperwork_status:'pending',  mentor_id:null },
+  { id:'s1', full_name:'Priya Sharma',  grade_level:'10th', project_title:'Microplastics in Olentangy River', project_field:'Environmental Science', paperwork_status:'uploaded', mentor_id:'m1' },
+  { id:'s2', full_name:'Marcus Lee',    grade_level:'9th',  project_title:'Solar Cell Efficiency Optimizer',  project_field:'Physics / Engineering',  paperwork_status:'pending',  mentor_id:null },
+  { id:'s3', full_name:'Sofia Reyes',   grade_level:'11th', project_title:'CRISPR in E. Coli',                project_field:'Biology / Life Sciences',paperwork_status:'verified', mentor_id:'m2' },
+  { id:'s4', full_name:'James Okafor',  grade_level:'9th',  project_title:null,                               project_field:null,                     paperwork_status:'pending',  mentor_id:null },
 ];
 
 /* ── Init ── */
@@ -19,7 +19,7 @@ requireAuth('ambassador', async (user) => {
 async function loadStudents() {
   if (!sb) { allStudents = DEMO_STUDENTS; }
   else {
-    try { allStudents = fgRows(await sb.from('students').select('*').eq('ambassador_id', ambassadorId).order('name')); }
+    try { allStudents = fgRows(await sb.from('students').select('*').eq('ambassador_id', ambassadorId).order('full_name')); }
     catch (e) {
       console.warn('[Ambassador] student read failed:', e.message);
       fgError('studentTbody', loadStudents);
@@ -45,7 +45,7 @@ function renderRecentStudents(students) {
   el.innerHTML = `<table class="data-table">
     <thead><tr><th>Name</th><th>Project</th><th>Paperwork</th></tr></thead>
     <tbody>${students.map(s => `<tr>
-      <td class="col-name">${s.name}</td>
+      <td class="col-name">${s.full_name}</td>
       <td class="col-sm text-muted">${s.project_title || '<em>Not set</em>'}</td>
       <td><span class="chip chip-${s.paperwork_status||'pending'}">${s.paperwork_status||'pending'}</span></td>
     </tr>`).join('')}</tbody>
@@ -60,15 +60,15 @@ function renderStudentTable(students) {
     return;
   }
   tbody.innerHTML = students.map(s => `<tr>
-    <td class="col-name">${s.name}</td>
-    <td class="col-sm">${s.grade || '–'}</td>
+    <td class="col-name">${s.full_name}</td>
+    <td class="col-sm">${s.grade_level || '–'}</td>
     <td class="col-sm" style="max-width:200px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.project_title || '<span class="text-muted"><em>Not set</em></span>'}</td>
     <td class="col-sm text-muted">${s.project_field || '–'}</td>
     <td><span class="chip chip-${s.paperwork_status||'pending'}">${s.paperwork_status||'pending'}</span></td>
     <td class="col-sm">${s.mentor_id ? '<span class="text-green">Assigned</span>' : '<span class="text-muted">None</span>'}</td>
     <td style="white-space:nowrap;">
-      <button class="btn-xs" onclick="openUploadFor('${s.id}','${s.name.replace(/'/g,"\\'")}')">Upload</button>
-      <button class="btn-xs" onclick="viewDocSection('${s.id}','${s.name.replace(/'/g,"\\'")}')">Files</button>
+      <button class="btn-xs" onclick="openUploadFor('${s.id}','${(s.full_name||'').replace(/'/g,"\\'")}')">Upload</button>
+      <button class="btn-xs" onclick="viewDocSection('${s.id}','${(s.full_name||'').replace(/'/g,"\\'")}')">Files</button>
     </td>
   </tr>`).join('');
 }
@@ -76,7 +76,7 @@ function renderStudentTable(students) {
 function filterStudents(q) {
   const f = q.toLowerCase();
   renderStudentTable(q ? allStudents.filter(s =>
-    s.name?.toLowerCase().includes(f) || s.project_title?.toLowerCase().includes(f) || s.project_field?.toLowerCase().includes(f)
+    s.full_name?.toLowerCase().includes(f) || s.project_title?.toLowerCase().includes(f) || s.project_field?.toLowerCase().includes(f)
   ) : allStudents);
 }
 window.filterStudents = filterStudents;
@@ -91,7 +91,7 @@ async function saveStudent() {
   const desc  = document.getElementById('snDesc').value.trim();
   if (!name) { showMsg('addStudentMsg','Student name is required.','err'); return; }
   showMsg('addStudentMsg','Saving…','info');
-  const row = { name, grade, email, project_field: field, project_title: title, abstract: desc, ambassador_id: ambassadorId, paperwork_status: 'pending' };
+  const row = { full_name: name, grade_level: grade, email, project_field: field, project_title: title, abstract: desc, ambassador_id: ambassadorId, paperwork_status: 'pending' };
   if (sb) {
     const { error } = await sb.from('students').insert([row]);
     if (error) { showMsg('addStudentMsg', error.message, 'err'); return; }
@@ -106,7 +106,7 @@ window.saveStudent = saveStudent;
 function populateDocSelect() {
   const sel = document.getElementById('docStudentSelect');
   sel.innerHTML = '<option value="">– Choose a student –</option>' +
-    allStudents.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
+    allStudents.map(s => `<option value="${s.id}">${s.full_name}</option>`).join('');
 }
 
 async function loadStudentDocs(studentId) {
@@ -120,7 +120,7 @@ async function loadStudentDocs(studentId) {
   const list = document.getElementById('docList');
   if (!sb) { fgEmpty(list, 'Connect Supabase to view documents.'); return; }
   return fgLoad(list,
-    async () => fgRows(await sb.from('documents').select('*').eq('student_id', studentId).order('uploaded_at', { ascending: false })),
+    async () => fgRows(await sb.from('documents').select('*').eq('student_id', studentId).order('created_at', { ascending: false })),
     (docs) => renderDocList(list, docs),
     { empty: 'No files yet - click Upload File to add the first one.' });
 }
@@ -130,9 +130,9 @@ function renderDocList(list, docs) {
     <div class="flex items-center gap-12" style="padding:10px 0;border-bottom:var(--border,1px solid #e2e6e2);">
       <div style="flex:1;">
         <div class="fw-500" style="font-size:.86rem;color:#1c3a1c;">${d.file_name}</div>
-        <div class="text-xs text-muted">${d.file_type} · ${new Date(d.uploaded_at||d.created_at).toLocaleDateString()}</div>
+        <div class="text-xs text-muted">${d.file_type} · ${new Date(d.created_at).toLocaleDateString()}</div>
       </div>
-      <button class="btn-xs" onclick="downloadDoc('${d.file_path}')">Download</button>
+      <button class="btn-xs" onclick="downloadDoc('${d.storage_path}')">Download</button>
     </div>`).join('');
 }
 window.loadStudentDocs = loadStudentDocs;
@@ -170,7 +170,7 @@ async function doUpload() {
   if (sb) {
     const { error: upErr } = await uploadPortalFile('student-docs', path, file);
     if (upErr) { showMsg('uploadMsg','Upload failed - check file type and size.','err'); return; }
-    await sb.from('documents').insert([{ owner_id: ambassadorId, owner_type: 'ambassador', student_id: studentId, file_path: path, file_name: file.name, file_type: docType, uploaded_at: new Date().toISOString() }]);
+    await sb.from('documents').insert([{ owner_id: ambassadorId, owner_type: 'ambassador', student_id: studentId, storage_path: path, file_name: file.name, file_type: docType, size_bytes: file.size }]);
     await sb.from('students').update({ paperwork_status: 'uploaded' }).eq('id', studentId);
   }
   showMsg('uploadMsg','Uploaded successfully!','ok');
