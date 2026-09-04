@@ -117,3 +117,23 @@
     .gate-mark.todo { background: #fff8e1; color: #78350f; border: 1px solid #f59e0b; }
     .gate-text { color: var(--gray-700); line-height: 1.45; }
     .gate-text strong { color: var(--green-900); }
+
+    /* ── Queue grouping in the match finder ────────────────────────
+       Two lists that mean different things: people who asked for a
+       mentor, and people who registered and were never queued. Keeping
+       them visually distinct stops the second group reading as a
+       backlog of requests that it is not. */
+    .req-group-head {
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.1em;
+      text-transform: uppercase; color: var(--gray-500);
+      margin: 18px 0 8px; padding-bottom: 5px;
+      border-bottom: 1px solid var(--gray-200);
+    }
+    .req-group-head:first-child { margin-top: 0; }
+    .req-group-note {
+      font-size: 0.78rem; color: var(--gray-500);
+      line-height: 1.5; margin: 0 0 12px;
+    }
+    /* Not clickable, so it must not look clickable. */
+    .req-item-quiet { cursor: default; background: var(--gray-50, #f7f9f7); }
+    .req-item-quiet:hover { border-color: var(--gray-200); background: var(--gray-50, #f7f9f7); }

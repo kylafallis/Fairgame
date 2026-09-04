@@ -175,19 +175,27 @@ window.scheduleCall = scheduleCall;
 async function requestMentor() {
   showMsg('mentorMsg', 'Sending…', 'info');
   const name  = currentUser?.user_metadata?.name || currentUser?.email || 'A student';
-  const field = projectData.field || 'General';
-  const title = projectData.title || '(not set)';
+  const field = projectData.field || '';
+  const title = projectData.title || '';
+
+  // This used to send a message and open a mailto, which meant a student
+  // could press it and never appear in the matching queue - the queue
+  // reads portal_requests, and nothing here ever wrote one. It does now.
   if (sb) {
-    await sb.from('messages').insert([{
-      from_user_id: studentId, from_role: 'student', to_role: 'admin',
-      subject: 'Mentor Request',
-      body: `${name} is requesting a mentor.\nProject: ${title}\nField: ${field}`
-    }]).catch(() => {});
+    const { error } = await sb.rpc('fg_create_student_request', {
+      p_topics: field ? [field] : null,
+      p_format: projectData.format || null,
+      p_title:  title || null,
+      p_desc:   projectData.description || null,
+      p_grade:  projectData.grade || null,
+      p_school: projectData.school || null,
+    });
+    if (error) { showMsg('mentorMsg', error.message, 'err'); return; }
   }
-  const sub = encodeURIComponent('FairGame Mentor Request');
-  const bod = encodeURIComponent(`Hi FairGame Team,\n\nI'd like to be connected with a mentor for my project.\n\nProject: ${title}\nField: ${field}\n\n- ${name}`);
-  window.open(`mailto:fairgameinitiative@outlook.com?subject=${sub}&body=${bod}`);
-  showMsg('mentorMsg', "Mentor request sent! We'll be in touch shortly.", 'ok');
+
+  showMsg('mentorMsg',
+    "You're in the queue. We match on your project's field, so fill in My Project if you haven't - it makes a better match.",
+    'ok');
   portalLog('mentor_requested', { field, title });
 }
 window.requestMentor = requestMentor;

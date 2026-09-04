@@ -118,14 +118,10 @@ async function logSession() {
 
   if (sb && currentPairId) {
     const { error: sErr } = await sb.from('mentorship_sessions').insert([{ pair_id: currentPairId, date, hours, notes }]);
-    if (sErr) { msg.textContent = 'Error - try again.'; msg.style.color = '#c0392b'; return; }
-    // Update totals
-    const pair = allPairs.find(p => p.id === currentPairId);
-    await sb.from('mentorships').update({
-      total_hours:   (pair?.total_hours || 0) + hours,
-      session_count: (pair?.session_count || 0) + 1,
-      last_session:  date
-    }).eq('id', currentPairId);
+    if (sErr) { msg.textContent = sErr.message; msg.style.color = '#c0392b'; return; }
+    // total_hours, session_count and last_session are recomputed from the
+    // sessions table by a trigger. Writing them here as well would
+    // overwrite the correct sum with a stale one.
   }
 
   msg.textContent = 'Session saved!'; msg.style.color = 'var(--green-600)';
@@ -266,29 +262,76 @@ window.matchBack = matchBack;
 async function loadOpenRequests() {
   if (!sb) { fgEmpty('requestList', 'Connect Supabase to load student requests.'); return; }
   return fgLoad('requestList',
-    async () => fgRows(await sb.from('portal_requests')
-      .select('*')
-      .eq('type', 'student_mentor_request')
-      .in('status', ['pending', 'active'])
-      .order('created_at', { ascending: true })),
+    async () => {
+      const queued = fgRows(await sb.from('portal_requests')
+        .select('*')
+        .eq('type', 'student_mentor_request')
+        .in('status', ['pending', 'active'])
+        .order('created_at', { ascending: true }));
+
+      // Registered students with no request on file. Signing up and
+      // asking for a mentor were separate acts, so a student could do
+      // the first and wait forever without ever reaching this screen.
+      let unqueued = [];
+      try {
+        const { data, error } = await sb.rpc('fg_students_without_request');
+        if (!error) unqueued = data || [];
+      } catch (_) { /* migration 10 not applied yet */ }
+
+      return (queued.length || unqueued.length) ? { queued, unqueued } : [];
+    },
     renderOpenRequests,
-    { empty: 'No student mentor requests waiting - check back later.' });
+    { empty: 'Nobody is waiting for a mentor - check back later.' });
 }
 
-function renderOpenRequests(reqs) {
-  document.getElementById('requestList').innerHTML = reqs.map(r => {
-    const d = r.data || {};
-    const topics = Array.isArray(d.topics) ? d.topics : [];
-    // Oldest first, and the wait is shown, because a student who
-    // applied five weeks ago should not be buried under a new one.
-    const waited = Math.floor((Date.now() - new Date(r.created_at)) / 86400000);
-    return `<div class="req-item" onclick="pickRequest('${esc(r.id)}')">
-      <div class="req-name">${esc(r.name)}</div>
-      <div class="req-meta">${esc(r.school || 'School not given')} &middot; ${esc(d.grade || '-')} &middot; ${esc(d.format || 'Format not set')} &middot; waiting ${waited} day${waited === 1 ? '' : 's'}</div>
-      ${topics.length ? `<div class="req-topics">${topics.map(esc).join(' &middot; ')}</div>` : ''}
-      ${d.title ? `<div class="req-meta" style="font-style:italic;margin-top:4px;">${esc(d.title)}</div>` : ''}
-    </div>`;
-  }).join('');
+function renderOpenRequests(groups) {
+  const { queued = [], unqueued = [] } = groups;
+  const parts = [];
+
+  if (queued.length) {
+    parts.push('<div class="req-group-head">In the queue</div>' + queued.map(requestItemHTML).join(''));
+  }
+
+  if (unqueued.length) {
+    parts.push(
+      '<div class="req-group-head">Registered, but never asked for a mentor</div>' +
+      '<p class="req-group-note">These students have accounts but no request on file, so the matcher cannot see them. ' +
+      'Adding one puts them in the queue - it does not match or contact anyone.</p>' +
+      unqueued.map(u => `<div class="req-item req-item-quiet">
+        <div class="req-name">${esc(u.full_name || u.email)}</div>
+        <div class="req-meta">${esc(u.email)}${u.school ? ' &middot; ' + esc(u.school) : ''}${u.grade ? ' &middot; ' + esc(u.grade) : ''} &middot; registered ${new Date(u.registered_at).toLocaleDateString()}</div>
+        ${u.project_title ? `<div class="req-topics">${esc(u.project_title)}${u.project_field ? ' &middot; ' + esc(u.project_field) : ''}</div>`
+                          : '<div class="req-meta" style="font-style:italic;">No project filled in yet - the match will be weaker without one.</div>'}
+        <button class="btn-xs" style="margin-top:8px;" onclick="queueStudent('${esc(u.user_id)}')">Add to the queue →</button>
+      </div>`).join(''));
+  }
+
+  document.getElementById('requestList').innerHTML = parts.join('');
+}
+
+/* Raises the request the matcher reads, on the student's behalf. */
+async function queueStudent(userId) {
+  const msg = document.getElementById('matchMsg');
+  msg.textContent = 'Adding…'; msg.style.color = 'var(--gray-500)';
+  const { error } = await sb.rpc('fg_create_student_request', { p_user_id: userId });
+  if (error) { msg.textContent = error.message; msg.style.color = '#c0392b'; return; }
+  msg.textContent = '';
+  await loadOpenRequests();
+}
+window.queueStudent = queueStudent;
+
+function requestItemHTML(r) {
+  const d = r.data || {};
+  const topics = Array.isArray(d.topics) ? d.topics : [];
+  // Oldest first, and the wait is shown, because a student who
+  // applied five weeks ago should not be buried under a new one.
+  const waited = Math.floor((Date.now() - new Date(r.created_at)) / 86400000);
+  return `<div class="req-item" onclick="pickRequest('${esc(r.id)}')">
+    <div class="req-name">${esc(r.name)}</div>
+    <div class="req-meta">${esc(r.school || 'School not given')} &middot; ${esc(d.grade || '-')} &middot; ${esc(d.format || 'Format not set')} &middot; waiting ${waited} day${waited === 1 ? '' : 's'}</div>
+    ${topics.length ? `<div class="req-topics">${topics.map(esc).join(' &middot; ')}</div>` : ''}
+    ${d.title ? `<div class="req-meta" style="font-style:italic;margin-top:4px;">${esc(d.title)}</div>` : ''}
+  </div>`;
 }
 
 async function pickRequest(id) {

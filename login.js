@@ -8,6 +8,41 @@ const ROUTES = { teacher:'/portal-teacher.html', ambassador:'/portal-ambassador.
 // Roles that require admin approval before portal access
 const APPROVAL_ROLES = ['teacher', 'ambassador'];
 
+/* Roles that must sign up with a school address. Ambassadors are left
+   out deliberately - a student ambassador is often organising a club
+   before the district has issued them anything. */
+const SCHOOL_EMAIL_ROLES = ['student', 'teacher'];
+
+/* Mirrors fg_is_school_email() in migration 10. This copy exists to tell
+   someone what is wrong while they are still typing; the database is
+   what actually enforces it, so the two disagreeing is a UX problem
+   rather than a hole. .edu alone would turn away almost every US K-12
+   school, which is why the K-12 patterns are here too. */
+function looksLikeSchoolEmail(email) {
+  const domain = String(email || '').trim().toLowerCase().split('@')[1];
+  if (!domain) return false;
+  if (domain.endsWith('.edu')) return true;               // US higher ed
+  if (/\.k12\.[a-z]{2}\.us$/.test(domain)) return true;    // columbus.k12.oh.us
+  if (/(^|[.-])k12([.-]|$)/.test(domain)) return true;    // cps-k12.org
+  if (/\.(ac|edu|sch)\.[a-z]{2}$/.test(domain)) return true; // ac.uk, edu.au
+  return false;
+}
+
+/* The allowlist lives in the database so an admin can add a district
+   without a deploy. Unreachable here means we let the signup proceed and
+   leave the decision to the server, rather than blocking on a lookup. */
+async function isAllowlistedDomain(email) {
+  const domain = String(email || '').trim().toLowerCase().split('@')[1];
+  if (!domain || !sb) return false;
+  try {
+    const { data } = await sb.from('school_email_domains').select('domain');
+    return (data || []).some(d => {
+      const allowed = String(d.domain).toLowerCase();
+      return domain === allowed || domain.endsWith('.' + allowed);
+    });
+  } catch (_) { return false; }
+}
+
 // Roles the signup form lets a person pick without review. These are the
 // only roles fg_self_provision_role() will write.
 const SELF_PROVISION_ROLES = ['student', 'ambassador', 'teacher'];
@@ -394,6 +429,17 @@ async function doSignup() {
 
   if (!name || !email || !pw) { msg('signupMsg','All fields are required.','err'); return; }
   if (pw.length < 8) { msg('signupMsg','Password must be at least 8 characters.','err'); return; }
+
+  if (SCHOOL_EMAIL_ROLES.includes(selectedRole)
+      && !looksLikeSchoolEmail(email)
+      && !(await isAllowlistedDomain(email))) {
+    msg('signupMsg',
+      'Please use your school email address - a personal address like Gmail or Outlook will not work for a '
+      + selectedRole + ' account. If you are using your school address and still see this, email '
+      + 'fairgameinitiative@outlook.com and we will add your school.',
+      'err');
+    return;
+  }
   if (!termsChecked) { msg('signupMsg','You must agree to the Terms of Service and Privacy Policy.','err'); return; }
 
   const isUnder13 = !ageChecked;
@@ -498,6 +544,12 @@ async function doGoogle(context) {
 
   if (context === 'signup') {
     if (!selectedRole) { msg('signupMsg','Please select your role above before continuing with Google.','err'); return; }
+    if (SCHOOL_EMAIL_ROLES.includes(selectedRole)) {
+      // The address is not known until after the redirect, so this is a
+      // heads-up rather than a check. fg_self_provision_role refuses on
+      // the way back if the account turns out not to be a school one.
+      msg('signupMsg', 'Choose your school Google account on the next screen - a personal one will not be accepted.', 'info');
+    }
     if (selectedRole === 'judge') { msg('signupMsg','Judge and mentor accounts are created through the volunteer registration form.','err'); return; }
     if (!document.getElementById('termsCheck')?.checked) { msg('signupMsg','You must agree to the Terms of Service and Privacy Policy.','err'); return; }
     if (!document.getElementById('ageCheck')?.checked) {
