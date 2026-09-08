@@ -99,6 +99,7 @@
         <div class="card-header">
           <h3>Requests</h3>
           <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <span class="text-sm text-muted" style="align-self:center;margin-right:6px;font-size:.72rem;">Click a row for the full application</span>
             <button class="btn-xs active" style="font-weight:700;" onclick="filterApp('pending',this)">Pending</button>
             <span style="width:1px;background:var(--g100);margin:0 2px;"></span>
             <button class="btn-xs" onclick="filterApp('teacher',this)">Teacher History</button>
@@ -702,6 +703,14 @@
 
   </div>
 </div>
+</div>
+
+<!-- Full portfolio for one request - opened by clicking its row in User Approvals -->
+<div class="modal-overlay" id="portfolioModal" onclick="if(event.target===this)closeModal('portfolioModal')">
+  <div class="modal-box modal-box-wide">
+    <div id="portfolioBody"></div>
+    <div class="modal-actions" id="portfolioActions"></div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

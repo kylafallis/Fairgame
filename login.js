@@ -71,36 +71,68 @@ let routingGuard = false;
 /* ── Pending-role stash ───────────────────────────────────────────
    Google OAuth cannot carry user_metadata through the redirect, so we
    remember the role the visitor picked and apply it when they come back. */
-const PENDING_ROLE_KEY = 'fg_pending_role';
-const PENDING_NAME_KEY = 'fg_pending_name';
+const PENDING_ROLE_KEY    = 'fg_pending_role';
+const PENDING_NAME_KEY    = 'fg_pending_name';
+const PENDING_DETAILS_KEY = 'fg_pending_details';
 
-function stashPendingRole(role, name) {
+function stashPendingRole(role, name, details) {
   try {
     localStorage.setItem(PENDING_ROLE_KEY, role);
     if (name) localStorage.setItem(PENDING_NAME_KEY, name);
+    // The school fields are filled in before the redirect and would
+    // otherwise be lost on the way back, leaving the queue row blank.
+    if (details) localStorage.setItem(PENDING_DETAILS_KEY, JSON.stringify(details));
   } catch (_) {}
 }
 function readPendingRole() { try { return localStorage.getItem(PENDING_ROLE_KEY); } catch (_) { return null; } }
 function readPendingName() { try { return localStorage.getItem(PENDING_NAME_KEY); } catch (_) { return null; } }
+function readPendingDetails() {
+  try { return JSON.parse(localStorage.getItem(PENDING_DETAILS_KEY) || 'null'); } catch (_) { return null; }
+}
 function clearPendingRole() {
-  try { localStorage.removeItem(PENDING_ROLE_KEY); localStorage.removeItem(PENDING_NAME_KEY); } catch (_) {}
+  try {
+    localStorage.removeItem(PENDING_ROLE_KEY);
+    localStorage.removeItem(PENDING_NAME_KEY);
+    localStorage.removeItem(PENDING_DETAILS_KEY);
+  } catch (_) {}
+}
+
+/* Accepts a district address typed the way people actually type one -
+   "bathschools.org", "www.bathschools.org/", with or without a scheme.
+   Returns null when it is not a web address at all. */
+function normalizeWebsite(raw) {
+  const typed  = (raw || '').trim().replace(/\s+/g, '');
+  const scheme = /^http:\/\//i.test(typed) ? 'http://' : 'https://';
+  const bare   = typed.replace(/^https?:\/\//i, '').replace(/\/+$/, '');
+  if (!/^[a-z0-9][a-z0-9-]*(\.[a-z0-9-]+)*\.[a-z]{2,}(\/\S*)?$/i.test(bare)) return null;
+  // Some district sites are still http-only, so an address typed that way
+  // is left alone rather than upgraded into a link that will not open.
+  return scheme + bare;
 }
 
 /* ── portal_requests row (the admin approval queue) ───────────────
    Shared by the password and Google signup paths. Returns {ok}. A failure
    here means the request is invisible to the admin, so callers must say so
    rather than telling the user their account is under review. */
-async function ensurePortalRequest(email, name, role) {
+async function ensurePortalRequest(email, name, role, details) {
   if (!sb || !APPROVAL_ROLES.includes(role)) return { ok: true };
   const { data: existing, error: selErr } = await sb.from('portal_requests')
     .select('id,status').eq('email', email).eq('type', role).limit(1);
   if (!selErr && existing && existing.length) return { ok: true, existing: existing[0] };
+  const d = details || {};
   const { error: insErr } = await sb.from('portal_requests').insert([{
     name:   name || email,
     email:  email,
-    school: '',
+    school: d.school || '',
     type:   role,
-    status: 'pending'
+    status: 'pending',
+    // The admin reviews these by hand, so everything the person told us
+    // travels with the request rather than sitting only on the auth user.
+    data:   {
+      school: d.school || '',
+      ...(d.district_website ? { district_website: d.district_website } : {}),
+      source: d.source || 'signup_form'
+    }
   }]);
   if (insErr) {
     console.error('[FairGame] portal_requests insert failed:', insErr.message || insErr);
@@ -138,7 +170,18 @@ async function go(user) {
     if (!role) {
       const pending = readPendingRole();
       if (pending && pending !== 'judge') {
-        role = await applyRole(user, pending);
+        // No school on file means the stash predates the school fields, or
+        // was never written. Ask rather than create another account with a
+        // blank school on it.
+        const stashed = readPendingDetails();
+        if (!stashed?.school) {
+          showRoleChooser(user);
+          return;
+        }
+        role = await applyRole(user, pending, {
+          school: stashed.school,
+          ...(stashed.district_website ? { district_website: stashed.district_website } : {})
+        }, stashed);
         if (!role) return;
       } else {
         showRoleChooser(user);
@@ -180,7 +223,7 @@ async function go(user) {
 }
 
 /* ── Attach a role to an account that has none (Google path) ──── */
-async function applyRole(user, role, extra) {
+async function applyRole(user, role, extra, details) {
   const name = user.user_metadata?.name
             || user.user_metadata?.full_name
             || readPendingName()
@@ -198,7 +241,9 @@ async function applyRole(user, role, extra) {
   });
   if (error) { showRoleError(error.message); return null; }
 
-  const req = await ensurePortalRequest(user.email, name, role);
+  const req = await ensurePortalRequest(user.email, name, role, {
+    ...(details || {}), source: 'google_signup'
+  });
   clearPendingRole();
   await sb.auth.refreshSession();
 
@@ -228,18 +273,31 @@ function showRoleChooser(user) {
       </div>
     </div>
     <div class="role-grid" id="chooserGrid">
-      <button type="button" class="role-card" onclick="chooseRole('student')">
+      <button type="button" class="role-card" onclick="chooseRole('student',this)">
         <span class="role-card-title">Student</span>
         <span class="role-card-desc">Science fair participant</span>
       </button>
-      <button type="button" class="role-card" onclick="chooseRole('ambassador')">
+      <button type="button" class="role-card" onclick="chooseRole('ambassador',this)">
         <span class="role-card-title">Student Ambassador</span>
         <span class="role-card-desc">Lead science fair at your school</span>
       </button>
-      <button type="button" class="role-card" onclick="chooseRole('teacher')">
+      <button type="button" class="role-card" onclick="chooseRole('teacher',this)">
         <span class="role-card-title">Teacher</span>
         <span class="role-card-desc">Organize a school science fair</span>
       </button>
+    </div>
+    <div id="chooserDetails" style="display:none;margin-top:16px;">
+      <p class="form-hint" style="margin-bottom:12px;">Both fields are required.</p>
+      <div class="form-group">
+        <label class="form-label">School name</label>
+        <input type="text" id="chooserSchool" placeholder="Bath High School" autocomplete="organization"/>
+      </div>
+      <div class="form-group" id="chooserDistrictGroup" style="display:none;">
+        <label class="form-label">School district website</label>
+        <input type="url" id="chooserDistrict" placeholder="https://www.bathschools.org"/>
+        <span class="form-hint">The district or school site that lists your school - we use it to confirm you teach there before approving the account.</span>
+      </div>
+      <button class="btn-main" id="chooserContinue" onclick="confirmChooserRole()">Continue &rarr;</button>
     </div>
     <div class="msg" id="chooserMsg"></div>
     <p style="font-size:.78rem;color:var(--gray-500);line-height:1.6;margin:14px 0 16px;">
@@ -260,7 +318,33 @@ function handleChooserAge(cb) {
 }
 window.handleChooserAge = handleChooserAge;
 
-async function chooseRole(role) {
+/* Picking a card only opens the second step. OAuth accounts used to be
+   created straight from the click, which is how they arrived with no
+   school on them - the queue then had nothing to review. */
+let chooserRole = null;
+
+function chooseRole(role, el) {
+  chooserRole = role;
+  document.querySelectorAll('#chooserGrid .role-card').forEach(c => c.classList.remove('selected'));
+  if (el) el.classList.add('selected');
+
+  const details = document.getElementById('chooserDetails');
+  if (details) details.style.display = 'block';
+  const districtGroup = document.getElementById('chooserDistrictGroup');
+  if (districtGroup) {
+    districtGroup.style.display = role === 'teacher' ? 'block' : 'none';
+    if (role !== 'teacher') { const d = document.getElementById('chooserDistrict'); if (d) d.value = ''; }
+  }
+  const el2 = document.getElementById('chooserMsg');
+  if (el2) { el2.textContent = ''; el2.className = 'msg'; }
+  document.getElementById('chooserSchool')?.focus();
+}
+window.chooseRole = chooseRole;
+
+async function confirmChooserRole() {
+  const role = chooserRole;
+  if (!role) { showRoleError('Please choose which one you are first.'); return; }
+
   // Same COPPA gate the email signup uses - OAuth skips it otherwise.
   const ageOk    = document.getElementById('chooserAge')?.checked;
   const guardian = document.getElementById('chooserGuardian')?.value.trim() || '';
@@ -282,19 +366,49 @@ async function chooseRole(role) {
     };
   }
 
+  const school = document.getElementById('chooserSchool')?.value.trim() || '';
+  if (!school) {
+    showRoleError('Please enter your school name - we cannot place an account without it.');
+    return;
+  }
+  extra.school = school;
+
+  let districtWebsite = '';
+  if (role === 'teacher') {
+    const districtRaw = document.getElementById('chooserDistrict')?.value.trim() || '';
+    if (!districtRaw) {
+      showRoleError('Please add your school district website so we can confirm you teach there.');
+      return;
+    }
+    districtWebsite = normalizeWebsite(districtRaw);
+    if (!districtWebsite) {
+      showRoleError('That district website does not look like a web address. It should look like https://www.bathschools.org');
+      return;
+    }
+    extra.district_website = districtWebsite;
+  }
+
   const grid = document.getElementById('chooserGrid');
   if (grid) grid.querySelectorAll('button').forEach(b => b.disabled = true);
+  const cont = document.getElementById('chooserContinue');
+  if (cont) { cont.disabled = true; cont.textContent = 'Please wait…'; }
   msg('chooserMsg', 'Setting up your account…', 'ok');
   const { data } = await sb.auth.getUser();
   const user = data?.user;
   if (!user) { window.location.reload(); return; }
-  const applied = await applyRole(user, role, extra);
-  if (!applied) return;
+  const applied = await applyRole(user, role, extra, { school, district_website: districtWebsite });
+  if (!applied) {
+    // applyRole has already said what went wrong; hand the form back so
+    // the person can fix it rather than leaving them on a dead screen.
+    if (grid) grid.querySelectorAll('button').forEach(b => b.disabled = false);
+    if (cont) { cont.disabled = false; cont.textContent = 'Continue →'; }
+    return;
+  }
   suppressAutoRedirect = false;
   const { data: fresh } = await sb.auth.getUser();
   await go(fresh?.user || user);
 }
-window.chooseRole = chooseRole;
+window.confirmChooserRole = confirmChooserRole;
 
 function showRoleError(text) {
   const el = document.getElementById('chooserMsg');
@@ -373,6 +487,14 @@ function selectRole(role, el) {
   approvalNotice.style.display = APPROVAL_ROLES.includes(role) ? 'block' : 'none';
   judgeRedirect.style.display  = role === 'judge' ? 'block' : 'none';
   formFields.style.display     = role === 'judge' ? 'none' : 'block';
+
+  // Only a teacher can be checked against a district site, so only a
+  // teacher is asked for one.
+  const districtGroup = document.getElementById('districtGroup');
+  if (districtGroup) {
+    districtGroup.style.display = role === 'teacher' ? 'block' : 'none';
+    if (role !== 'teacher') { const d = document.getElementById('signupDistrict'); if (d) d.value = ''; }
+  }
 }
 window.selectRole = selectRole;
 
@@ -423,12 +545,34 @@ async function doSignup() {
   const name         = document.getElementById('signupName').value.trim();
   const email        = document.getElementById('signupEmail').value.trim();
   const pw           = document.getElementById('signupPw').value;
+  const school       = document.getElementById('signupSchool')?.value.trim() || '';
+  const districtRaw  = document.getElementById('signupDistrict')?.value.trim() || '';
   const ageChecked   = document.getElementById('ageCheck').checked;
   const termsChecked = document.getElementById('termsCheck').checked;
   const guardianEmail= document.getElementById('guardianEmail')?.value.trim() || '';
 
   if (!name || !email || !pw) { msg('signupMsg','All fields are required.','err'); return; }
   if (pw.length < 8) { msg('signupMsg','Password must be at least 8 characters.','err'); return; }
+
+  // Accounts kept arriving with no school on them, which leaves the
+  // approval queue with nothing to check and no way to place the person.
+  if (!school) {
+    msg('signupMsg','Please enter your school name - we cannot place an account without it.','err');
+    return;
+  }
+
+  let districtWebsite = '';
+  if (selectedRole === 'teacher') {
+    if (!districtRaw) {
+      msg('signupMsg','Please add your school district website so we can confirm you teach there.','err');
+      return;
+    }
+    districtWebsite = normalizeWebsite(districtRaw);
+    if (!districtWebsite) {
+      msg('signupMsg','That district website does not look like a web address. It should look like https://www.bathschools.org','err');
+      return;
+    }
+  }
 
   if (SCHOOL_EMAIL_ROLES.includes(selectedRole)
       && !looksLikeSchoolEmail(email)
@@ -459,6 +603,8 @@ async function doSignup() {
   const metadata = {
     name,
     role: selectedRole,
+    school,
+    ...(districtWebsite ? { district_website: districtWebsite } : {}),
     age_confirmed: ageChecked,
     terms_accepted: true,
     terms_accepted_at: new Date().toISOString(),
@@ -487,7 +633,9 @@ async function doSignup() {
   // For teacher/ambassador: file the portal_requests row the admin queue reads.
   let requestOk = true;
   if (needsApproval && data?.user) {
-    const res = await ensurePortalRequest(email, name, selectedRole);
+    const res = await ensurePortalRequest(email, name, selectedRole, {
+      school, district_website: districtWebsite
+    });
     requestOk = res.ok;
   }
 
@@ -556,7 +704,20 @@ async function doGoogle(context) {
       msg('signupMsg','If you are under 13, please use the email form above so we can collect a parent or guardian email address.','err');
       return;
     }
-    stashPendingRole(selectedRole, document.getElementById('signupName')?.value.trim() || '');
+    const gSchool = document.getElementById('signupSchool')?.value.trim() || '';
+    if (!gSchool) { msg('signupMsg','Please enter your school name before continuing with Google.','err'); return; }
+    let gDistrict = '';
+    if (selectedRole === 'teacher') {
+      const raw = document.getElementById('signupDistrict')?.value.trim() || '';
+      if (!raw) { msg('signupMsg','Please add your school district website before continuing with Google.','err'); return; }
+      gDistrict = normalizeWebsite(raw);
+      if (!gDistrict) { msg('signupMsg','That district website does not look like a web address. It should look like https://www.bathschools.org','err'); return; }
+    }
+    stashPendingRole(selectedRole, document.getElementById('signupName')?.value.trim() || '', {
+      school: gSchool,
+      ...(gDistrict ? { district_website: gDistrict } : {}),
+      source: 'google_signup'
+    });
   }
 
   await sb.auth.signInWithOAuth({

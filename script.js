@@ -764,8 +764,20 @@ async function submitJudge() {
   const msgEl     = document.getElementById('judgeMsg');
   if (!msgEl) return;
 
-  if (!name || !email || !city || !county || !travelSel) {
-    msgEl.textContent = 'Please fill out all required fields (name, email, city, county, and travel range).';
+  // Every field is required: half-filled judge records cannot be matched
+  // to a fair, and chasing the rest by email never worked.
+  if (!name || !email || !org || !city || !county || !travelSel || !level || !notes) {
+    msgEl.textContent = 'Please fill out every field - all of them are required.';
+    msgEl.className   = 'form-msg error';
+    return;
+  }
+  if (travelSel === 'other' && !travelNum) {
+    msgEl.textContent = 'Please enter how many miles you are willing to travel.';
+    msgEl.className   = 'form-msg error';
+    return;
+  }
+  if (!expertise.length) {
+    msgEl.textContent = 'Please select at least one area of expertise.';
     msgEl.className   = 'form-msg error';
     return;
   }
@@ -831,6 +843,16 @@ async function submitJudge() {
   logEvent('judge_application', { level, expertise, code });
 }
 
+/* Mentors are matched with minors, so an application has to point at a
+   profile the review can actually open. Accepts a pasted address with or
+   without the scheme, and country subdomains like uk.linkedin.com.
+   Returns null when it is not a LinkedIn address at all. */
+function normalizeLinkedIn(raw) {
+  const host = (raw || '').trim().replace(/\/+$/, '').replace(/^https?:\/\//i, '');
+  if (!/^([a-z0-9-]+\.)?linkedin\.com\/\S+$/i.test(host)) return null;
+  return 'https://' + (/^[a-z0-9-]+\.linkedin\.com/i.test(host) ? host : 'www.' + host);
+}
+
 async function submitMentor() {
   const name   = document.getElementById('mName')?.value.trim();
   const email  = document.getElementById('mEmail')?.value.trim();
@@ -839,11 +861,24 @@ async function submitMentor() {
   const hours  = document.getElementById('mHours')?.value;
   const format = document.getElementById('mFormat')?.value;
   const bio    = document.getElementById('mBio')?.value.trim();
+  const liRaw  = document.getElementById('mLinkedIn')?.value.trim();
   const msgEl  = document.getElementById('mentorMsg');
   if (!msgEl) return;
 
-  if (!name || !email || !field || !bio) {
-    msgEl.textContent = 'Please fill out all required fields including your bio.';
+  if (!name || !email || !role || !field || !hours || !format || !bio) {
+    msgEl.textContent = 'Please fill out every field - all of them are required, including your bio.';
+    msgEl.className   = 'form-msg error';
+    return;
+  }
+
+  if (!liRaw) {
+    msgEl.textContent = 'Please include your LinkedIn profile - we review it before matching you with a student.';
+    msgEl.className   = 'form-msg error';
+    return;
+  }
+  const linkedin = normalizeLinkedIn(liRaw);
+  if (!linkedin) {
+    msgEl.textContent = 'That does not look like a LinkedIn profile address. It should look like https://www.linkedin.com/in/yourname';
     msgEl.className   = 'form-msg error';
     return;
   }
@@ -858,7 +893,7 @@ async function submitMentor() {
       school: role || '',
       type:   'mentor',
       status: 'pending',
-      data:   { field, hours, format, bio, source: 'volunteer_form' }
+      data:   { field, hours, format, bio, linkedin, source: 'volunteer_form' }
     }]);
     if (error) {
       msgEl.textContent = 'Error submitting - please email fairgameinitiative@outlook.com';
@@ -873,11 +908,11 @@ async function submitMentor() {
       form_type:  'Mentor / FairGame Family Application',
       from_name:  name,
       from_email: email,
-      details:    `Role/Title: ${role || 'N/A'} | STEM Field: ${field} | Hours/month: ${hours || 'N/A'} | Format: ${format || 'N/A'} | Bio: ${bio}`
+      details:    `Role/Title: ${role || 'N/A'} | STEM Field: ${field} | LinkedIn: ${linkedin} | Hours/month: ${hours || 'N/A'} | Format: ${format || 'N/A'} | Bio: ${bio}`
     }, VOL_EJS_KEY).catch(() => {});
   }
 
-  ['mName','mEmail','mRole','mField','mBio'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['mName','mEmail','mRole','mField','mLinkedIn','mBio'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   const mh = document.getElementById('mHours'); if (mh) mh.value = '';
   const mf = document.getElementById('mFormat'); if (mf) mf.value = '';
 
@@ -914,8 +949,13 @@ async function submitStudentMentorRequest() {
   const msgEl   = document.getElementById('srMsg');
   if (!msgEl) return;
 
-  if (!name || !email || !school || !grade || !state || !desc || !topics.length) {
-    msgEl.textContent = 'Please fill out all required fields, including at least one topic of interest.';
+  if (!name || !email || !school || !grade || !state || !format || !title || !desc || !help) {
+    msgEl.textContent = 'Please fill out every field - all of them are required.';
+    msgEl.className   = 'form-msg error';
+    return;
+  }
+  if (!topics.length) {
+    msgEl.textContent = 'Please select at least one topic of interest.';
     msgEl.className   = 'form-msg error';
     return;
   }
@@ -1250,7 +1290,13 @@ async function submitContactForm(type) {
     school  = document.getElementById('ctSchool')?.value.trim();
     message = document.getElementById('ctMsg')?.value.trim();
   }
-  if (!name || !email) { msgEl.textContent = 'Name and email are required.'; msgEl.style.color = '#c0392b'; return; }
+  // School is required on both tabs - too many enquiries arrived with no
+  // school on them, which leaves nothing to follow up on.
+  if (!name || !email || !school || !message) {
+    msgEl.textContent = 'Please fill out every field - all of them are required.';
+    msgEl.style.color = '#c0392b';
+    return;
+  }
   msgEl.textContent = 'Sending...'; msgEl.style.color = 'var(--gray-500)';
 
   if (sb) {

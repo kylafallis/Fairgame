@@ -1,14 +1,25 @@
 /* ── Demo data ── */
 const DEMO = {
   approvals: [
-    { id:'a1', name:'Ms. Williams', email:'mwilliams@bath.edu', school:'Bath High School', type:'teacher',    status:'pending',  created_at:'2026-03-10T10:00:00Z' },
-    { id:'a2', name:'Priya Sharma', email:'priya@walnut.edu',  school:'Walnut Hills HS',  type:'ambassador', status:'interest', created_at:'2026-03-12T14:30:00Z' },
-    { id:'a3', name:'Mr. Davis',    email:'tdavis@lima.edu',   school:'Lima Senior HS',   type:'teacher',    status:'active',   created_at:'2026-03-01T09:00:00Z' },
+    { id:'a1', name:'Ms. Williams', email:'mwilliams@bath.edu', school:'Bath High School', type:'teacher',    status:'pending',  created_at:'2026-03-10T10:00:00Z',
+      data:{ district_website:'https://www.bathschools.org', source:'signup_form' } },
+    { id:'a2', name:'Priya Sharma', email:'priya@walnut.edu',  school:'Walnut Hills HS',  type:'ambassador', status:'interest', created_at:'2026-03-12T14:30:00Z',
+      data:{ source:'signup_form' } },
+    { id:'a3', name:'Mr. Davis',    email:'tdavis@lima.edu',   school:'Lima Senior HS',   type:'teacher',    status:'active',   created_at:'2026-03-01T09:00:00Z',
+      data:{ district_website:'https://www.limacityschools.org', source:'signup_form' } },
     { id:'a4', name:'Jordan Lee',   email:'jordan@school.edu', school:'Sacramento High School', type:'student_mentor_request', status:'pending', created_at:'2026-03-14T16:00:00Z',
-      data:{ grade:'11th', state:'Sacramento, CA', title:'Low-cost water quality biosensor', topics:['Environmental Science','Chemistry / Biochemistry'] } },
-    { id:'a5', name:'Dr. Sarah Chen', email:'schen@example.com', school:'',                 type:'mentor',      status:'active',   created_at:'2026-02-18T11:00:00Z' },
+      data:{ grade:'11th', state:'Sacramento, CA', format:'Virtual only', title:'Low-cost water quality biosensor',
+             desc:'I want to build a nitrate sensor cheap enough for a school to hand out, and test it against the creek behind our campus.',
+             help:'Experimental design', topics:['Environmental Science','Chemistry / Biochemistry'], source:'mentor_request_form' } },
+    { id:'a5', name:'Dr. Sarah Chen', email:'schen@example.com', school:'Ohio State University', type:'mentor',      status:'active',   created_at:'2026-02-18T11:00:00Z',
+      data:{ role:'Research Scientist', field:'Environmental Engineering', linkedin:'https://www.linkedin.com/in/sarahchen',
+             hours:'3 to 4 hours', format:'Either works',
+             bio:'Fifteen years in water quality monitoring. I mentored two ISEF finalists at my last post and would like to keep doing it.',
+             source:'volunteer_form' } },
     { id:'a6', name:'Alex Rivera',   email:'alex@school.edu',   school:'Bath High School',  type:'student_mentor_request', status:'active', created_at:'2026-02-20T13:00:00Z',
-      data:{ grade:'10th', state:'Columbus, OH', title:'Soil pH and crop yield', topics:['Biology / Life Sciences'] } },
+      data:{ grade:'10th', state:'Columbus, OH', format:'Either works', title:'Soil pH and crop yield',
+             desc:'Testing whether lime treatment changes radish yield in three plots at the school garden.',
+             help:'Data analysis', topics:['Biology / Life Sciences'], source:'mentor_request_form' } },
   ],
   schools: [
     { school_name:'Bath High School',    teacher_name:'Ms. Williams', program_type:'School fair only', fair_date:'2026-03-14', student_count:35, county:'Allen County',    status:'planning' },
@@ -266,14 +277,14 @@ function renderApprovals() {
   document.getElementById('approvalsTbody').innerHTML = !f.length
     ? `<tr><td colspan="7"><div class="empty-state"><p>${emptyMsg}</p></div></td></tr>`
     : f.map(a => {
-        const row = `<tr>
+        const row = `<tr class="row-click" title="Open the full application" onclick="openPortfolio('${esc(a.id)}')">
         <td class="col-name">${esc(a.name)}</td>
         <td class="col-sm">${esc(a.email)}</td>
-        <td class="col-sm">${esc(a.school)}</td>
+        <td class="col-sm">${a.school ? esc(a.school) : '<span style="color:var(--red);font-style:italic;">Not given</span>'}</td>
         <td><span class="chip chip-interest">${esc(a.type)}</span></td>
         <td class="col-sm">${new Date(a.created_at).toLocaleDateString()}</td>
         <td><span class="chip chip-${esc(a.status)}">${esc(a.status)}</span></td>
-        <td style="white-space:nowrap;display:flex;gap:6px;">
+        <td style="white-space:nowrap;display:flex;gap:6px;" onclick="event.stopPropagation();">
           ${a.status==='pending'||a.status==='interest' ? `<button class="btn-xs approve" onclick="approveUser('${esc(a.id)}')">Approve</button>` : ''}
           <button class="btn-xs danger" onclick="rejectUser('${esc(a.id)}')">Reject</button>
         </td>
@@ -283,18 +294,170 @@ function renderApprovals() {
         const topics  = a.data?.topics || [];
         const matches = matchMentorsForTopics(topics);
         const pairUrl = `/mentorlog.html?student=${encodeURIComponent(a.name||'')}&email=${encodeURIComponent(a.email||'')}&school=${encodeURIComponent(a.school||'')}&topic=${encodeURIComponent(a.data?.title || topics.join(', '))}`;
-        const detail = `<tr class="row-detail">
+        const detail = `<tr class="row-detail row-click" onclick="openPortfolio('${esc(a.id)}')">
         <td colspan="7" style="background:var(--g50,#f7faf7);padding:10px 16px;font-size:.8rem;color:var(--gray-600);">
           <strong>Topics:</strong> ${topics.map(esc).join(', ') || '–'}
           &nbsp;&middot;&nbsp;
           <strong>Suggested mentors:</strong> ${matches.length ? matches.map(m => esc(m.name) + (m.email ? ' ('+esc(m.email)+')' : '')).join(', ') : 'No overlap found yet - check the mentor list manually.'}
           &nbsp;&middot;&nbsp;
-          <a href="${pairUrl}" class="btn-xs" style="text-decoration:none;">Create Pair in Mentor Log →</a>
+          <a href="${pairUrl}" class="btn-xs" style="text-decoration:none;" onclick="event.stopPropagation();">Create Pair in Mentor Log →</a>
         </td>
       </tr>`;
         return row + detail;
       }).join('');
 }
+
+/* -- The portfolio sheet ------------------------------------------
+   The table has room for six columns; an application carries far more
+   than that, and approving someone off a name and an email is how bad
+   matches happen. Clicking a row opens everything that person actually
+   submitted, with their LinkedIn and district site as live links so the
+   check can be made before the Approve button is pressed. */
+
+const PF_LABELS = {
+  field: 'STEM field',         role: 'Role / title',      hours: 'Hours per month',
+  format: 'Format preference', bio: 'Bio / background',   linkedin: 'LinkedIn profile',
+  district_website: 'School district website',            school: 'School',
+  grade: 'Grade',              state: 'City / State',     title: 'Project title',
+  desc: 'Project description', help: 'Help needed most',  topics: 'Topics of interest',
+  message: 'Message',          source: 'Submitted through',
+};
+
+/* Where the row came from, in words rather than a form id. */
+const PF_SOURCES = {
+  volunteer_form:      'Volunteer page - mentor application',
+  mentor_request_form: 'Mentor request form',
+  student_portal:      'Student portal',
+  admin_on_behalf:     'Added by an admin',
+  contact_form:        'Homepage contact form',
+  signup_form:         'Account signup',
+  google_signup:       'Account signup (Google)',
+};
+
+/* Read top to bottom the way the application was filled in. Anything not
+   listed here still shows, alphabetically, after these - a field added to
+   a form later must never go missing from the review. */
+const PF_ORDER = ['role','field','linkedin','district_website','grade','state','format',
+                  'hours','topics','title','desc','help','bio','message','source'];
+
+/* Long-form answers read better stacked under their label. */
+const PF_BLOCK = ['bio','desc','message','title'];
+
+/* What each kind of application is supposed to carry. Listed fields are
+   printed even when empty, so a gap shows up as a gap rather than simply
+   not being there. */
+const PF_EXPECTED = {
+  mentor:                 ['role','field','linkedin','hours','format','bio'],
+  teacher:                ['district_website'],
+  student_mentor_request: ['grade','state','format','topics','title','desc','help'],
+};
+
+function pfLabel(key) {
+  return PF_LABELS[key] || key.replace(/_/g, ' ').replace(/^./, c => c.toUpperCase());
+}
+
+function pfMissing(text) {
+  return `<span class="pf-missing">${esc(text || 'Not provided')}</span>`;
+}
+
+/* Addresses become links - being able to open the LinkedIn or the
+   district site from here is the whole reason for collecting them. */
+function pfValueHTML(key, value) {
+  if (Array.isArray(value)) return value.length ? value.map(esc).join(' &middot; ') : pfMissing();
+  if (value == null || value === '') return pfMissing();
+  if (typeof value === 'object') return esc(JSON.stringify(value));
+  const str = String(value).trim();
+  if (!str) return pfMissing();
+  if (key === 'source') return esc(PF_SOURCES[str] || str);
+  if (/^https?:\/\//i.test(str)) {
+    return `<a href="${esc(str)}" target="_blank" rel="noopener noreferrer">${esc(str)}</a>`;
+  }
+  return esc(str);
+}
+
+function pfRow(key, value) {
+  const block = PF_BLOCK.includes(key) || (typeof value === 'string' && value.length > 90);
+  return `<div class="pf-row${block ? ' pf-row-block' : ''}">
+    <div class="pf-key">${esc(pfLabel(key))}</div>
+    <div class="pf-val${block ? ' pf-text' : ''}">${pfValueHTML(key, value)}</div>
+  </div>`;
+}
+
+function pfPlainRow(label, valueHTML) {
+  return `<div class="pf-row"><div class="pf-key">${esc(label)}</div><div class="pf-val">${valueHTML}</div></div>`;
+}
+
+function openPortfolio(id) {
+  const a = allApprovals.find(r => String(r.id) === String(id));
+  if (!a) return;
+  const data = (a.data && typeof a.data === 'object') ? a.data : {};
+
+  // The school has its own column on the row; printing data.school again
+  // under Application would just be the same answer twice.
+  const keys = new Set(Object.keys(data).filter(k => k !== 'school'));
+  (PF_EXPECTED[a.type] || []).forEach(k => keys.add(k));
+
+  const ordered = [...keys].sort((x, y) => {
+    const ix = PF_ORDER.indexOf(x), iy = PF_ORDER.indexOf(y);
+    return (ix < 0 ? 99 : ix) - (iy < 0 ? 99 : iy) || x.localeCompare(y);
+  });
+
+  const submitted = new Date(a.created_at);
+  const waited    = Math.floor((Date.now() - submitted) / 86400000);
+  const age       = waited <= 0 ? 'today' : waited + ' day' + (waited === 1 ? '' : 's') + ' ago';
+
+  const parts = [`
+    <div class="pf-head">
+      <h3 style="margin:0;">${esc(a.name || 'No name given')}</h3>
+      <div class="pf-chips">
+        <span class="chip chip-interest">${esc(a.type)}</span>
+        <span class="chip chip-${esc(a.status)}">${esc(a.status)}</span>
+      </div>
+    </div>
+    <div class="pf-group">
+      <div class="pf-group-title">Request</div>
+      ${pfPlainRow('Email', a.email ? `<a href="mailto:${esc(a.email)}">${esc(a.email)}</a>` : pfMissing())}
+      ${pfPlainRow('School', a.school ? esc(a.school) : pfMissing('Not given - ask before approving'))}
+      ${pfPlainRow('Submitted', esc(submitted.toLocaleDateString() + ' - ' + age))}
+    </div>
+    <div class="pf-group">
+      <div class="pf-group-title">Application</div>
+      ${ordered.length ? ordered.map(k => pfRow(k, data[k])).join('')
+                       : '<p class="pf-empty">Nothing else was submitted with this request.</p>'}
+    </div>`];
+
+  // A student request is only half a decision without the mentors it
+  // could be filled by, so the matching work stays on the same sheet.
+  if (a.type === 'student_mentor_request') {
+    const matches = matchMentorsForTopics(data.topics || []);
+    const pairUrl = `/mentorlog.html?student=${encodeURIComponent(a.name || '')}&email=${encodeURIComponent(a.email || '')}&school=${encodeURIComponent(a.school || '')}&topic=${encodeURIComponent(data.title || (data.topics || []).join(', '))}`;
+    parts.push(`
+    <div class="pf-group">
+      <div class="pf-group-title">Matching</div>
+      ${pfPlainRow('Suggested mentors', matches.length
+          ? matches.map(m => esc(m.name) + (m.email ? ' (' + esc(m.email) + ')' : '')).join('<br/>')
+          : '<span class="pf-empty">No overlap found yet - check the mentor list by hand.</span>')}
+      <div style="margin-top:10px;">
+        <a href="${pairUrl}" class="btn-xs" style="text-decoration:none;">Create Pair in Mentor Log &rarr;</a>
+      </div>
+    </div>`);
+  }
+
+  document.getElementById('portfolioBody').innerHTML = parts.join('');
+  document.getElementById('portfolioActions').innerHTML = `
+    <button class="btn-ghost" onclick="closeModal('portfolioModal')">Close</button>
+    <button class="btn-xs danger" onclick="rejectUser('${esc(a.id)}')">Reject</button>
+    ${PENDING_STATUSES.includes(a.status)
+      ? `<button class="btn-primary" style="font-size:.8rem;padding:8px 14px;" onclick="approveUser('${esc(a.id)}')">Approve &rarr;</button>`
+      : ''}`;
+  openModal('portfolioModal');
+}
+window.openPortfolio = openPortfolio;
+
+// Escape closes the sheet, the same as clicking outside it.
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal('portfolioModal');
+});
 
 async function approveUser(id) {
   const rec = allApprovals.find(a => String(a.id) === String(id));
@@ -304,6 +467,7 @@ async function approveUser(id) {
     ? `Mark ${email}'s mentor request as matched? This sends them a confirmation email.`
     : `Approve ${email} as ${type}? They will be able to sign in immediately.`;
   if (!confirm(confirmMsg)) return;
+  closeModal('portfolioModal');
 
   if (sb) {
     const { error } = await sb.from('portal_requests').update({ status:'active' }).eq('id', id);
@@ -327,6 +491,7 @@ async function approveUser(id) {
 }
 async function rejectUser(id) {
   if (!confirm('Reject this request?')) return;
+  closeModal('portfolioModal');
   if (sb) {
     const { error } = await sb.from('portal_requests').update({ status:'rejected' }).eq('id', id);
     if (error) { approvalMsg('Could not reject - ' + esc(error.message), 'err'); return; }

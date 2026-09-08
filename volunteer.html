@@ -128,6 +128,7 @@
     }
     .form-box input[type="text"],
     .form-box input[type="email"],
+    .form-box input[type="url"],
     .form-box select,
     .form-box textarea {
       width: 100%; box-sizing: border-box;
@@ -143,6 +144,10 @@
       box-shadow: 0 0 0 3px rgba(74,144,74,0.1);
     }
     .form-box textarea { resize: vertical; min-height: 80px; }
+    .form-hint {
+      display: block; margin-top: 6px;
+      font-size: 0.78rem; color: var(--gray-500); line-height: 1.5;
+    }
     .checkbox-row {
       display: flex; align-items: center; gap: 9px;
       padding: 5px 0; font-size: 0.88rem; color: var(--gray-600);
@@ -267,9 +272,10 @@
       <div class="form-box">
         <h3>Judge Application</h3>
         <p>Fill out this form to join our judge network. We'll reach out when a fair near you needs judges in your expertise area.</p>
+        <p style="margin-top:-14px;"><strong>Every field is required.</strong></p>
         <div class="form-row"><label class="form-label">Full name *</label><input type="text" id="jName" placeholder="Dr. Jane Smith" /></div>
         <div class="form-row"><label class="form-label">Email address *</label><input type="email" id="jEmail" placeholder="jsmith@company.com" /></div>
-        <div class="form-row"><label class="form-label">Organization / Employer</label><input type="text" id="jOrg" placeholder="University or Company" /></div>
+        <div class="form-row"><label class="form-label">Organization / Employer *</label><input type="text" id="jOrg" placeholder="University or Company" /></div>
         <div class="form-row"><label class="form-label">City *</label><input type="text" id="jCity" placeholder="Columbus" /></div>
         <div class="form-row"><label class="form-label">County *</label><input type="text" id="jCounty" placeholder="Franklin County" /></div>
         <div class="form-row">
@@ -295,10 +301,10 @@
           <div class="checkbox-row"><input type="checkbox" id="je6"><label for="je6">Medicine / Health Sciences</label></div>
         </div>
         <div class="form-row">
-          <label class="form-label">Preferred level</label>
+          <label class="form-label">Preferred level *</label>
           <select id="jLevel"><option value="">Select...</option><option>School fair</option><option>District fair</option><option>State fair</option><option>Any level</option></select>
         </div>
-        <div class="form-row"><label class="form-label">Notes (availability, etc.)</label><textarea id="jNotes" rows="2" placeholder="e.g. Available weekdays only"></textarea></div>
+        <div class="form-row"><label class="form-label">Availability / notes *</label><textarea id="jNotes" rows="2" placeholder="e.g. Available weekdays only"></textarea></div>
         <button class="btn btn-primary" onclick="submitJudge()" style="width:100%;justify-content:center;">Submit Judge Application &rarr;</button>
         <div id="judgeMsg" class="form-msg"></div>
       </div>
@@ -309,17 +315,23 @@
         <div style="background:#fff8e1;border:1.5px solid #f59e0b;border-radius:4px;padding:11px 13px;margin-bottom:14px;font-size:0.82rem;color:#78350f;line-height:1.55;">
           <strong style="display:block;margin-bottom:3px;">Applications are reviewed before matching.</strong>
           Because students are minors, all mentor applications are personally reviewed by the FairGame team before any student connection is made. If approved, we match you with a student and open a mentoring channel inside the FairGame portal. All mentoring happens there - never over personal email, phone, or social media - and every message is visible to FairGame staff and the student's teacher.
+          <span style="display:block;margin-top:8px;">Every field is required - a partial application cannot be reviewed.</span>
         </div>
         <div class="form-row"><label class="form-label">Full name *</label><input type="text" id="mName" placeholder="Dr. Jane Smith" /></div>
         <div class="form-row"><label class="form-label">Email address *</label><input type="email" id="mEmail" placeholder="jsmith@company.com" /></div>
-        <div class="form-row"><label class="form-label">Current role / title</label><input type="text" id="mRole" placeholder="Research Scientist, Environmental Engineer, etc." /></div>
+        <div class="form-row"><label class="form-label">Current role / title *</label><input type="text" id="mRole" placeholder="Research Scientist, Environmental Engineer, etc." /></div>
         <div class="form-row"><label class="form-label">STEM field *</label><input type="text" id="mField" placeholder="e.g. Environmental Engineering, Molecular Biology" /></div>
         <div class="form-row">
-          <label class="form-label">Hours available per month</label>
+          <label class="form-label">LinkedIn profile *</label>
+          <input type="url" id="mLinkedIn" placeholder="https://www.linkedin.com/in/janesmith" />
+          <span class="form-hint">Required. Because mentors work with minors, we check every applicant's professional background against a real profile before matching.</span>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Hours available per month *</label>
           <select id="mHours"><option value="">Select...</option><option>1 to 2 hours</option><option>3 to 4 hours</option><option>5+ hours</option></select>
         </div>
         <div class="form-row">
-          <label class="form-label">Format preference</label>
+          <label class="form-label">Format preference *</label>
           <select id="mFormat"><option value="">Select...</option><option>Virtual only</option><option>In-person (local)</option><option>Either works</option></select>
         </div>
         <div class="form-row"><label class="form-label">Brief bio / relevant background *</label><textarea id="mBio" rows="4" placeholder="Tell us about your background and why you want to mentor a student. This helps us with our review."></textarea></div>

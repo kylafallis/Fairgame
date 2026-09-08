@@ -646,6 +646,27 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg widt
   overflow-y: auto;
   box-shadow: var(--shadow-lg);
 }
+.modal-box-wide { max-width: 640px; }
+
+/* ── Portfolio sheet (one person's whole submission) ─────────── */
+.data-table tr.row-click { cursor: pointer; }
+.pf-head { border-bottom: var(--border); padding-bottom: 14px; margin-bottom: 16px; }
+.pf-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.pf-group { margin-bottom: 20px; }
+.pf-group:last-of-type { margin-bottom: 0; }
+.pf-group-title {
+  font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.08em;
+  font-weight: 700; color: var(--gray-400);
+  padding-bottom: 6px; margin-bottom: 10px; border-bottom: var(--border);
+}
+.pf-row { display: flex; gap: 14px; padding: 6px 0; font-size: 0.83rem; align-items: baseline; }
+.pf-row.pf-row-block { flex-direction: column; gap: 4px; }
+.pf-key { flex: 0 0 148px; color: var(--gray-500); font-size: 0.76rem; }
+.pf-val { flex: 1; color: var(--gray-900); line-height: 1.6; word-break: break-word; }
+.pf-val a { color: var(--g700); }
+.pf-val.pf-missing { color: var(--red, #c0392b); font-style: italic; }
+.pf-val.pf-text { white-space: pre-wrap; }
+.pf-empty { font-size: 0.82rem; color: var(--gray-400); font-style: italic; }
 .modal-box h3 {
   font-family: var(--ff-serif);
   font-size: 1.15rem;

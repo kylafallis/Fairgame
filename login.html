@@ -110,6 +110,8 @@
       <!-- ─── STEP 2: ACCOUNT DETAILS (hidden until role selected) ─── -->
       <div id="signupFormFields" style="display:none;">
 
+        <p class="form-hint" style="margin-bottom:14px;">Every field below is required.</p>
+
         <div class="form-group">
           <label class="form-label">Full name</label>
           <input type="text" id="signupName" placeholder="Your name" autocomplete="name"/>
@@ -117,6 +119,15 @@
         <div class="form-group">
           <label class="form-label">Email address</label>
           <input type="email" id="signupEmail" placeholder="you@school.edu" autocomplete="email"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">School name</label>
+          <input type="text" id="signupSchool" placeholder="Bath High School" autocomplete="organization"/>
+        </div>
+        <div class="form-group" id="districtGroup" style="display:none;">
+          <label class="form-label">School district website</label>
+          <input type="url" id="signupDistrict" placeholder="https://www.bathschools.org"/>
+          <span class="form-hint">The district or school site that lists your school - we use it to confirm you teach there before approving the account.</span>
         </div>
         <div class="form-group">
           <label class="form-label">Password (min 8 characters)</label>

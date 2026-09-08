@@ -404,19 +404,6 @@
       <div class="tpl-card">
         <div class="tpl-card-type">
           <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-          Canva Template
-        </div>
-        <div class="tpl-card-title">Science Fair Timeline Poster</div>
-        <div class="tpl-card-desc">Classroom-printable 11x17 poster showing the full school-year timeline for science fair. Visual and student-facing - hang in your classroom.</div>
-        <div class="tpl-card-footer">
-          <span class="tpl-card-for">Teachers</span>
-          <button class="tpl-dl-btn canva" onclick="trackDownload('CANVA_PLACEHOLDER','Science Fair Timeline Poster')">Open in Canva</button>
-        </div>
-      </div>
-
-      <div class="tpl-card">
-        <div class="tpl-card-type">
-          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
           Spreadsheet
         </div>
         <div class="tpl-card-title">Student Project Tracker</div>
@@ -424,19 +411,6 @@
         <div class="tpl-card-footer">
           <span class="tpl-card-for">Teachers</span>
           <button class="tpl-dl-btn" onclick="trackDownload('files/classroom/fairgame-visual-classroom-progress-tracker.xlsx','Student Project Tracker')">Download</button>
-        </div>
-      </div>
-
-      <div class="tpl-card">
-        <div class="tpl-card-type">
-          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-          PDF
-        </div>
-        <div class="tpl-card-title">Science Fair Timeline Poster (Print)</div>
-        <div class="tpl-card-desc">Printable PDF version of the school-year science fair timeline. No Canva account needed - print directly.</div>
-        <div class="tpl-card-footer">
-          <span class="tpl-card-for">Teachers</span>
-          <button class="tpl-dl-btn" onclick="trackDownload('resources/teacher/setup-guide/science-fair-timeline-poster.pdf','Science Fair Timeline Poster')">Download</button>
         </div>
       </div>
 
@@ -612,19 +586,6 @@
         </div>
       </div>
 
-      <div class="tpl-card">
-        <div class="tpl-card-type">
-          <svg class="type-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
-          Canva Template
-        </div>
-        <div class="tpl-card-title">Judge Outreach Letter (Editable)</div>
-        <div class="tpl-card-desc">Beautifully designed outreach letter in Canva. Branded FairGame template you can customize with your school name, fair date, and contact info. Export as PDF to send.</div>
-        <div class="tpl-card-footer">
-          <span class="tpl-card-for">Teachers</span>
-          <button class="tpl-dl-btn canva" onclick="trackDownload('CANVA_PLACEHOLDER','Judge Outreach Letter')">Open in Canva</button>
-        </div>
-      </div>
-
     </div>
   </div>
 
@@ -645,7 +606,7 @@
         <div class="tpl-card-desc">Official OAS 2026 vertical-layout scoring rubrics for all project categories. One sheet per student project. Print-ready.</div>
         <div class="tpl-card-footer">
           <span class="tpl-card-for">Judges</span>
-          <button class="tpl-dl-btn" onclick="trackDownload('Documents/2026-Judging-Score-Cards-Vertical-layout.pdf','2026 Score Cards Vertical')">Download</button>
+          <button class="tpl-dl-btn" onclick="trackDownload('files/judges/2026-Judging-Score-Cards-Vertical-layout.pdf','2026 Score Cards Vertical')">Download</button>
         </div>
       </div>
 
@@ -658,7 +619,7 @@
         <div class="tpl-card-desc">Same official OAS 2026 scoring rubrics in horizontal layout. Alternative format - use whichever prints better on your printer.</div>
         <div class="tpl-card-footer">
           <span class="tpl-card-for">Judges</span>
-          <button class="tpl-dl-btn" onclick="trackDownload('Documents/2026-Judging-Score-Cards-Horizontal-layout.pdf','2026 Score Cards Horizontal')">Download</button>
+          <button class="tpl-dl-btn" onclick="trackDownload('files/judges/2026-Judging-Score-Cards-Horizontal-layout.pdf','2026 Score Cards Horizontal')">Download</button>
         </div>
       </div>
 
@@ -775,11 +736,6 @@
         page: window.location.pathname,
         ts: new Date().toISOString()
       }]).then(() => {}).catch(() => {});
-    }
-    // CANVA_PLACEHOLDER = design not yet published - show coming-soon message
-    if (path === 'CANVA_PLACEHOLDER') {
-      alert('This Canva template is coming soon! Email fairgameinitiative@outlook.com to request early access.');
-      return;
     }
     // Real Canva URL or any http URL - open directly
     if (path.startsWith('http')) {
