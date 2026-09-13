@@ -33,7 +33,12 @@ function routeTo(role) {
 }
 
 async function resolveRole(user) {
-  let role = await getRole(user.id);
+  // A standing admin grant is applied before anything else is read, so it
+  // wins over a role the signup form self-provisioned on the way in.
+  let role = await claimAdminRole();
+  if (role) return role;
+
+  role = await getRole(user.id);
   if (!role) {
     const claimed = user.user_metadata?.role;
     if (claimed && SELF_PROVISION_ROLES.includes(claimed)) role = await claimRole(claimed);
@@ -41,6 +46,11 @@ async function resolveRole(user) {
   // An approved mentor arriving for the first time has no role until
   // they claim it, and the claim is gated on that admin approval.
   if (!role) role = await claimMentorRole();
+  // The judge counterpart, gated on the admin's Activate click. The
+  // portal pages have tried this since migration 12; this page never
+  // did, so an activated judge who came in through a magic link was
+  // told they had no portal access.
+  if (!role) role = await claimJudgeRole();
   return role;
 }
 

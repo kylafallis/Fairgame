@@ -21,6 +21,11 @@
     <h2>Welcome back</h2>
     <p class="login-sub">Sign in to your portal account.</p>
 
+    <!-- Filled in by readAuthHashError() when an email link arrives dead.
+         Without it the fragment is silently dropped and the person is
+         left at a password form with no idea why the link failed. -->
+    <div id="linkErrorBox" class="link-error" style="display:none;"></div>
+
     <!-- Tab switcher -->
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchTab('login',this)">Sign In</button>
@@ -49,6 +54,10 @@
       <div class="msg" id="loginMsg"></div>
 
       <div class="divider">or</div>
+      <button class="btn-alt" onclick="showCodeStep(event)">Email me a sign-in code</button>
+      <p class="form-hint" style="margin:8px 0 0;">Use this if you have no password yet, or if a link we emailed you did not work.</p>
+
+      <div class="divider">or</div>
       <button class="btn-google" onclick="doGoogle('login')">
         <svg class="google-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
@@ -65,6 +74,57 @@
         <a href="/terms.html" target="_blank">Terms of Service</a> and
         <a href="/privacy.html" target="_blank">Privacy Policy</a>.
       </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- SIGN-IN CODE panel                        -->
+    <!-- A typed code cannot be spent by a mail     -->
+    <!-- security scanner the way a clicked link    -->
+    <!-- can, which is what was burning the links.  -->
+    <!-- ══════════════════════════════════════════ -->
+    <div class="auth-panel" id="panel-code">
+      <div class="form-group">
+        <label class="form-label">Email address</label>
+        <input type="email" id="codeEmail" placeholder="you@school.edu" autocomplete="email"/>
+      </div>
+      <button class="btn-main" id="codeSendBtn" onclick="sendSignInCode()">Email me a code →</button>
+
+      <div id="codeEntry" style="display:none;margin-top:18px;">
+        <div class="form-group">
+          <label class="form-label">6-digit code</label>
+          <input type="text" id="codeToken" placeholder="123456" inputmode="numeric" autocomplete="one-time-code"
+                 maxlength="6" style="letter-spacing:.35em;font-size:1.1rem;text-align:center;"/>
+          <span class="form-hint">Check your inbox for a 6-digit code. It expires shortly, so request a new one if you have been waiting.</span>
+        </div>
+        <button class="btn-main" id="codeVerifyBtn" onclick="verifySignInCode()">Sign in →</button>
+        <button class="btn-alt" style="margin-top:8px;" onclick="sendSignInCode()">Send another code</button>
+      </div>
+
+      <div class="msg" id="codeMsg"></div>
+      <button class="btn-alt" style="margin-top:14px;" onclick="showPasswordStep(event)">← Back to password sign-in</button>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- NEW PASSWORD panel (password recovery)     -->
+    <!-- Reached from a recovery code. Before this   -->
+    <!-- the reset flow signed people in and never   -->
+    <!-- let them change the password.               -->
+    <!-- ══════════════════════════════════════════ -->
+    <div class="auth-panel" id="panel-newpw">
+      <p class="login-sub" style="margin-bottom:18px;">Choose a new password for <strong id="newPwEmail"></strong>.</p>
+      <div class="form-group">
+        <label class="form-label">New password (min 8 characters)</label>
+        <div class="pw-wrap">
+          <input type="password" id="resetPw" placeholder="Create a password" autocomplete="new-password"/>
+          <button class="pw-toggle" onclick="togglePw('resetPw',this)" type="button">Show</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm new password</label>
+        <input type="password" id="resetPwConfirm" placeholder="Repeat password" autocomplete="new-password"/>
+      </div>
+      <button class="btn-main" id="resetPwBtn" onclick="submitNewPassword()">Save password and continue →</button>
+      <div class="msg" id="resetPwMsg"></div>
     </div>
 
     <!-- ══════════════════════════════════════════ -->

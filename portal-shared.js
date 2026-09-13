@@ -74,6 +74,64 @@ async function claimMentorRole() {
 }
 window.claimMentorRole = claimMentorRole;
 
+/* Admin is granted ahead of the account existing - an existing admin
+   records the grant against an email address, and this turns it into a
+   user_roles row on that person's first sign-in. Unlike the two claims
+   below it is tried before the existing role is read, because the signup
+   form has no admin option: a new admin may well have picked teacher or
+   student on their way in, and the grant has to outrank that. The grant
+   is spent when it is claimed, so this cannot re-promote someone who was
+   deliberately removed later. */
+async function claimAdminRole() {
+  if (!sb) return null;
+  const { data, error } = await sb.rpc('fg_claim_admin_role');
+  if (error) { console.warn('[Portal] claimAdminRole failed:', error.message); return null; }
+  return data;
+}
+window.claimAdminRole = claimAdminRole;
+
+/* The judge counterpart. Same shape as claimMentorRole - the admin's
+   Activate click on the judges row is the approval, and this only
+   delivers its effect. Before migration 12 nothing granted 'judge' at
+   all, so every judge was bounced to the login page no matter how well
+   their sign-in link worked. */
+async function claimJudgeRole() {
+  if (!sb) return null;
+  const { data, error } = await sb.rpc('fg_claim_judge_role');
+  if (error) { console.warn('[Portal] claimJudgeRole failed:', error.message); return null; }
+  return data;
+}
+window.claimJudgeRole = claimJudgeRole;
+
+/* Distinguishes a judge waiting on activation from someone who never
+   applied. Both have no role, and without this both get redirected to
+   the login page, which is indistinguishable from the sign-in failing. */
+async function judgeStatus() {
+  if (!sb) return null;
+  const { data, error } = await sb.rpc('fg_judge_status');
+  if (error) { console.warn('[Portal] fg_judge_status failed:', error.message); return null; }
+  return data;
+}
+window.judgeStatus = judgeStatus;
+
+/* ── Sign-in link failures ───────────────────────────────────────
+   Supabase reports a dead email link in the URL fragment and does not
+   raise it through getSession(), so without reading it here the page
+   just finds no session and redirects to the login form - which tells
+   the person nothing and sends them back to request another link. */
+function readAuthHashError() {
+  const raw = (window.location.hash || '').replace(/^#/, '');
+  if (!raw || raw.indexOf('error') === -1) return null;
+  const p = new URLSearchParams(raw);
+  const code = p.get('error_code') || p.get('error');
+  if (!code) return null;
+  return {
+    code,
+    description: (p.get('error_description') || '').replace(/\+/g, ' ')
+  };
+}
+window.readAuthHashError = readAuthHashError;
+
 /* ── Auth guard ──────────────────────────────────────────────── */
 function requireAuth(expectedRole, onReady) {
   const isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
@@ -93,7 +151,15 @@ function requireAuth(expectedRole, onReady) {
     return;
   }
   sb.auth.getSession().then(async ({ data: { session }, error }) => {
-    if (error || !session?.user) { window.location.replace('/login.html'); return; }
+    if (error || !session?.user) {
+      // A dead sign-in link lands here with the reason in the fragment.
+      // Redirecting would throw that reason away and leave the person
+      // staring at a password form they have no password for.
+      const linkErr = readAuthHashError();
+      if (linkErr) { _showLinkExpired(linkErr); return; }
+      window.location.replace('/login.html');
+      return;
+    }
     // Refresh token so a fresh session is on hand before we look up the role
     const { data: refreshed } = await sb.auth.refreshSession();
     const user = refreshed?.session?.user || session.user;
@@ -108,7 +174,19 @@ function requireAuth(expectedRole, onReady) {
     // Approved mentor with no role yet - the application was reviewed
     // before they ever created an account.
     if (!role) role = await claimMentorRole();
-    if (!role) { window.location.replace('/login.html'); return; }
+    // Activated judge arriving for the first time. Nothing granted this
+    // role before migration 12, which is why working sign-in links still
+    // ended at the login page.
+    if (!role) role = await claimJudgeRole();
+    if (!role) {
+      // An application on file but not yet activated is a waiting judge,
+      // not a failed sign-in. Bouncing them to /login.html is what made
+      // this look like a broken link for weeks.
+      const jStatus = await judgeStatus();
+      if (jStatus && jStatus !== 'active') { _showJudgePending(user.email, jStatus); return; }
+      window.location.replace('/login.html');
+      return;
+    }
     if (role === 'admin' || role === expectedRole) {
       // Teacher and Ambassador accounts require admin approval before portal access
       if ((role === 'teacher' || role === 'ambassador') && role !== 'admin') {
@@ -160,6 +238,50 @@ function _showPortalRejected(email) {
           Your account request was not approved. If you believe this is an error, please <a href="/#contact" style="color:#7f1d1d;">contact us</a>.
         </div>
         <button onclick="portalLogout()" style="width:100%;padding:10px;background:none;border:1.5px solid #c8cec8;border-radius:3px;font-size:.82rem;color:#6b756b;cursor:pointer;">Sign out</button>
+      </div>
+    </div>`;
+}
+
+/* An activated judge gets in on their own; this is for the interval
+   between applying and an admin pressing Activate. */
+function _showJudgePending(email, status) {
+  document.body.style.opacity = '1';
+  const inactive = status === 'inactive';
+  document.body.innerHTML = `
+    <div style="font-family:'DM Sans',system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f1faf2;padding:24px;">
+      <div style="max-width:440px;width:100%;background:#fff;padding:36px 40px;border-top:3px solid #357a38;box-shadow:0 4px 20px rgba(0,0,0,.1);">
+        <div style="font-size:1.3rem;font-family:'Playfair Display',serif;font-weight:600;color:#1a1e1a;margin-bottom:8px;">${inactive ? 'Judge Account Paused' : 'Application Under Review'}</div>
+        <p style="font-size:.84rem;color:#6b756b;margin-bottom:20px;">Signed in as <strong>${email}</strong></p>
+        <div style="background:#fff8e1;border:1.5px solid #f59e0b;border-radius:4px;padding:14px 16px;font-size:.84rem;color:#78350f;line-height:1.6;margin-bottom:20px;">
+          ${inactive
+            ? `Your judge account is currently set to inactive, so the portal is closed. Email <a href="mailto:fairgameinitiative@outlook.com?subject=Judge%20account" style="color:#78350f;">fairgameinitiative@outlook.com</a> to have it reopened.`
+            : `<strong style="display:block;margin-bottom:4px;">Your judge application is being reviewed.</strong>
+               We check every judge personally before opening the portal, because judges see student work and school contact details. You'll get an email at <strong>${email}</strong> once you're approved - typically within 1&ndash;3 business days.`}
+        </div>
+        <p style="font-size:.78rem;color:#6b756b;line-height:1.6;margin-bottom:18px;">Your sign-in worked - there is nothing wrong with your link, and you do not need to request another one.</p>
+        <button onclick="portalLogout()" style="width:100%;padding:10px;background:none;border:1.5px solid #c8cec8;border-radius:3px;font-size:.82rem;color:#6b756b;cursor:pointer;">Sign out</button>
+      </div>
+    </div>`;
+}
+
+/* Shown when the fragment carries an auth error instead of a token. The
+   resend button is the point of the screen - the old behaviour dropped
+   people on a password form, and a judge or a magic-link user has no
+   password to type into it. */
+function _showLinkExpired(err) {
+  document.body.style.opacity = '1';
+  const expired = /expired|invalid/i.test(err.code + ' ' + err.description);
+  document.body.innerHTML = `
+    <div style="font-family:'DM Sans',system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f1faf2;padding:24px;">
+      <div style="max-width:440px;width:100%;background:#fff;padding:36px 40px;border-top:3px solid #357a38;box-shadow:0 4px 20px rgba(0,0,0,.1);">
+        <div style="font-size:1.3rem;font-family:'Playfair Display',serif;font-weight:600;color:#1a1e1a;margin-bottom:8px;">${expired ? 'This sign-in link has expired' : 'We could not sign you in'}</div>
+        <div style="background:#fef2f2;border:1.5px solid #dc2626;border-radius:4px;padding:14px 16px;font-size:.84rem;color:#7f1d1d;line-height:1.6;margin:16px 0 20px;">
+          ${expired
+            ? `Sign-in links work once and only for a short while. If your school or workplace filters email, its security scanner may also have opened the link before you did, which uses it up.`
+            : `The sign-in attempt was rejected: ${err.description || err.code}`}
+        </div>
+        <p style="font-size:.84rem;color:#6b756b;line-height:1.6;margin-bottom:18px;">Sign in with your email address and a code instead - codes are typed in, so nothing can use one up before you do.</p>
+        <a href="/login.html?code=1" style="display:block;text-align:center;width:100%;padding:11px;background:#357a38;color:#fff;text-decoration:none;border-radius:3px;font-size:.86rem;font-weight:600;">Email me a sign-in code &rarr;</a>
       </div>
     </div>`;
 }

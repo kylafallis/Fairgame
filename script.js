@@ -70,10 +70,12 @@ function updateNavAuthState() {
     if (session?.user) {
       btn.classList.add('logged-in');
       btn.setAttribute('title', session.user.email);
-      // Route to the right dashboard based on role stored in user metadata
-      const role = session.user.user_metadata?.role || 'student';
-      const dashMap = { teacher: '/portal-teacher.html', ambassador: '/portal-ambassador.html', student: '/portal-student.html', admin: '/portal-admin.html' };
-      btn.href = dashMap[role] || '/portal-student.html';
+      /* The router resolves the portal from user_roles, which is the only
+         thing that decides a role. Choosing it here from user_metadata sent
+         people to the wrong portal whenever the two disagreed - metadata
+         keeps whatever the signup form wrote, so an account promoted later
+         still pointed at the portal it first signed up for. */
+      btn.href = '/portal-router.html';
     }
   });
 }
@@ -760,6 +762,8 @@ async function submitJudge() {
     : (parseInt(travelSel) || 10);
   const level     = document.getElementById('jLevel')?.value;
   const notes     = document.getElementById('jNotes')?.value.trim();
+  const pw        = document.getElementById('jPw')?.value || '';
+  const pwConfirm = document.getElementById('jPwConfirm')?.value || '';
   const expertise = getExpertise();
   const msgEl     = document.getElementById('judgeMsg');
   if (!msgEl) return;
@@ -778,6 +782,16 @@ async function submitJudge() {
   }
   if (!expertise.length) {
     msgEl.textContent = 'Please select at least one area of expertise.';
+    msgEl.className   = 'form-msg error';
+    return;
+  }
+  if (pw.length < 8) {
+    msgEl.textContent = 'Please choose a password of at least 8 characters.';
+    msgEl.className   = 'form-msg error';
+    return;
+  }
+  if (pw !== pwConfirm) {
+    msgEl.textContent = 'Those two passwords do not match.';
     msgEl.className   = 'form-msg error';
     return;
   }
@@ -815,11 +829,29 @@ async function submitJudge() {
       return;
     }
 
-    // Send magic-link portal invite - non-blocking, failure is not fatal
-    sb.auth.signInWithOtp({
+    /* Create the account with the password they just chose. This used to
+       send a one-time magic link instead, which left the judge with no
+       password and no second way in once the link was spent - and for a
+       filtered inbox the scanner often spent it first. A password is the
+       durable credential; the 6-digit code on the login page is the
+       fallback. Failure here is reported, because a judge who cannot sign
+       in has no way of discovering that themselves. */
+    const { error: authErr } = await sb.auth.signUp({
       email,
-      options: { data: { name, role: 'judge' }, emailRedirectTo: window.location.origin + '/portal-judge.html' }
-    }).catch(() => {});
+      password: pw,
+      options: {
+        data: { name, role: 'judge' },
+        emailRedirectTo: window.location.origin + '/login.html'
+      }
+    });
+
+    if (authErr && !/already registered|already exists/i.test(authErr.message || '')) {
+      msgEl.innerHTML = 'Your application was saved, but we could not create your portal account: '
+        + authErr.message
+        + '<br>Please email fairgameinitiative@outlook.com and we will set it up by hand.';
+      msgEl.className = 'form-msg error';
+      return;
+    }
   }
 
   // Notify admin via EmailJS (fire-and-forget)
@@ -832,13 +864,20 @@ async function submitJudge() {
     }, VOL_EJS_KEY).catch(() => {});
   }
 
-  ['jName','jEmail','jOrg','jCity','jCounty','jNotes','jTravelOther'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['jName','jEmail','jOrg','jCity','jCounty','jNotes','jTravelOther','jPw','jPwConfirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   ['je1','je2','je3','je4','je5','je6'].forEach(id => { const el = document.getElementById(id); if (el) el.checked = false; });
   const lvl = document.getElementById('jLevel'); if (lvl) lvl.value = '';
   const trv = document.getElementById('jTravel'); if (trv) trv.value = '';
   const trvOther = document.getElementById('jTravelOther'); if (trvOther) trvOther.style.display = 'none';
 
-  msgEl.textContent = `Application received! Check your email for a sign-in link to your judge portal. Your judge code is: ${code}`;
+  /* No longer "check your email for a link" - the portal opens when an
+     admin approves the application, and the judge signs in with the
+     password they just set. Promising immediate access was what sent
+     people back to the login page again and again. */
+  msgEl.innerHTML = `Application received! Your judge code is <strong>${code}</strong>.<br><br>`
+    + `We review every judge application personally, because judges see student work and school contact details. `
+    + `You will get an email once you are approved - typically 1&ndash;3 business days. `
+    + `After that, sign in at <a href="/login.html">the portal</a> with this email address and the password you just chose.`;
   msgEl.className   = 'form-msg success';
   logEvent('judge_application', { level, expertise, code });
 }
@@ -1333,13 +1372,6 @@ window.submitContactForm = submitContactForm;
 (function() {
   const SB_URL = 'https://buzcxrbjutexiofetgvn.supabase.co';
   const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ1emN4cmJqdXRleGlvZmV0Z3ZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3Nzc1NTEsImV4cCI6MjA4OTM1MzU1MX0.ifMup4fCcfHaf7Q4TYfi1X1V-J8tQpu2JwaqvjBcsBQ';
-  const ROUTES = {
-    teacher: '/portal-teacher.html',
-    ambassador: '/portal-ambassador.html',
-    student: '/portal-student.html',
-    judge: '/portal-judge.html',
-    admin: '/portal-admin.html'
-  };
   try {
     const sb = window.supabase
       ? window.supabase.createClient(SB_URL, SB_KEY)
@@ -1348,8 +1380,9 @@ window.submitContactForm = submitContactForm;
       sb.auth.getSession().then(({ data: { session } }) => {
         const btn = document.getElementById('navUserBtn');
         if (session?.user && btn) {
-          const role = session.user.user_metadata?.role || 'ambassador';
-          btn.href = ROUTES[role] || '/portal-ambassador.html';
+          // Same reason as the nav button above: user_roles decides this,
+          // and only the router reads it.
+          btn.href = '/portal-router.html';
           btn.title = 'Go to my portal';
           btn.classList.add('logged-in');
         }

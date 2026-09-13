@@ -3,7 +3,9 @@ const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJ
 let sb = null;
 try { if (SB_URL !== 'YOUR_SUPABASE_URL') sb = window.supabase.createClient(SB_URL, SB_KEY, { auth: { detectSessionInUrl: true } }); } catch(e) {}
 
-const ROUTES = { teacher:'/portal-teacher.html', ambassador:'/portal-ambassador.html', student:'/portal-student.html', judge:'/portal-judge.html', admin:'/portal-admin.html' };
+/* mentor was missing here, so a mentor signing in fell through to the
+   student portal, which then bounced them back for having the wrong role. */
+const ROUTES = { teacher:'/portal-teacher.html', ambassador:'/portal-ambassador.html', student:'/portal-student.html', judge:'/portal-judge.html', mentor:'/portal-mentor.html', admin:'/portal-admin.html' };
 
 // Roles that require admin approval before portal access
 const APPROVAL_ROLES = ['teacher', 'ambassador'];
@@ -47,19 +49,56 @@ async function isAllowlistedDomain(email) {
 // only roles fg_self_provision_role() will write.
 const SELF_PROVISION_ROLES = ['student', 'ambassador', 'teacher'];
 
+/* Holds why the last claim was refused. fg_self_provision_role raises for
+   a non-school address, and discarding that was what put Google signups
+   in a loop: the chooser accepted the role, wrote it to metadata, the
+   database refused it, and the chooser came back with nothing said. */
+let lastProvisionError = null;
+
 /* Role lives in user_roles, not user_metadata - a signed-in user can
    rewrite their own metadata from the browser, so it is never trusted
    for routing. A first login after signup has no user_roles row yet,
    so claim one from whatever they picked on the signup form. */
 async function fetchOrProvisionRole(user) {
+  lastProvisionError = null;
+
+  /* An admin grant recorded against this address before the account
+     existed. Tried first, not last: the signup form has no admin option,
+     so someone arriving to claim one may have picked teacher or student
+     on the way in, and the grant has to outrank that. It is spent on the
+     first claim, so this is a one-time upgrade, not a standing override. */
+  const { data: adminRole } = await sb.rpc('fg_claim_admin_role');
+  if (adminRole) return adminRole;
+
   const { data: row } = await sb.from('user_roles').select('role').eq('user_id', user.id).maybeSingle();
   if (row?.role) return row.role;
   const claimed = user.user_metadata?.role;
   if (claimed && SELF_PROVISION_ROLES.includes(claimed)) {
     const { data, error } = await sb.rpc('fg_self_provision_role', { p_role: claimed });
+    if (error) lastProvisionError = error.message || String(error);
     if (!error && data) return data;
   }
+
+  /* Judge and mentor cannot be self-provisioned - both are granted only
+     against an approval an admin has already given. The portal pages have
+     always tried these; this page never did, so a judge or mentor signing
+     in here was handed the student/teacher/ambassador role chooser
+     instead of their portal. */
+  const { data: judgeRole } = await sb.rpc('fg_claim_judge_role');
+  if (judgeRole) return judgeRole;
+
+  const { data: mentorRole } = await sb.rpc('fg_claim_mentor_role');
+  if (mentorRole) return mentorRole;
+
   return null;
+}
+
+/* Distinguishes a judge waiting on approval from someone who never
+   applied, so the former is told to wait rather than being asked which
+   kind of student they are. */
+async function pendingJudgeStatus() {
+  const { data } = await sb.rpc('fg_judge_status');
+  return data || null;
 }
 
 // Set to true during signup to prevent the onAuthStateChange listener from auto-redirecting
@@ -67,6 +106,58 @@ let suppressAutoRedirect = false;
 
 // Guards re-entry: auth events can fire while we are already routing.
 let routingGuard = false;
+
+/* ── What the email link left in the fragment ─────────────────────
+   Supabase reports both outcomes in the URL fragment and neither one
+   reaches us through getSession(): a failure is not raised as an error,
+   and a recovery token looks exactly like an ordinary sign-in. Both have
+   to be read here, synchronously, before any auth event fires - a
+   recovery arriving as SIGNED_IN would otherwise be routed straight into
+   a portal, which is why "Forgot password?" never once let anyone
+   change their password. */
+function readAuthHash() {
+  const raw = (window.location.hash || '').replace(/^#/, '');
+  if (!raw) return {};
+  const p = new URLSearchParams(raw);
+  const code = p.get('error_code') || p.get('error');
+  return {
+    type: p.get('type'),
+    error: code ? { code, description: (p.get('error_description') || '').replace(/\+/g, ' ') } : null
+  };
+}
+
+const authHash = readAuthHash();
+
+/* A recovery link must land on the new-password form, not a portal. */
+let pendingRecovery = authHash.type === 'recovery';
+if (pendingRecovery) suppressAutoRedirect = true;
+
+/* ── Dead sign-in link ────────────────────────────────────────── */
+function showLinkError(err) {
+  const box = document.getElementById('linkErrorBox');
+  if (!box) return;
+  const expired = /expired|invalid/i.test(err.code + ' ' + err.description);
+  box.innerHTML = expired
+    ? `<strong>That sign-in link has already expired.</strong>
+       Links work once and only for a short while. If your school or workplace filters
+       email, its security scanner may also have opened the link before you did, which
+       uses it up. Ask for a <a href="#" onclick="showCodeStep(event)">6-digit code</a>
+       instead - a code is typed in, so nothing can spend it before you do.`
+    : `<strong>We could not complete that sign-in.</strong>
+       ${err.description || err.code}`;
+  box.style.display = 'block';
+  // Leaving the fragment in place means a refresh re-reports a failure
+  // that has already been explained.
+  try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch (_) {}
+}
+
+if (authHash.error) {
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => showLinkError(authHash.error));
+  } else {
+    showLinkError(authHash.error);
+  }
+}
 
 /* ── Pending-role stash ───────────────────────────────────────────
    Google OAuth cannot carry user_metadata through the redirect, so we
@@ -144,6 +235,9 @@ async function ensurePortalRequest(email, name, role, details) {
 /* ── Already signed-in check ──────────────────────────────────── */
 if (sb) sb.auth.getSession().then(async ({ data: { session } }) => {
   if (session?.user) {
+    // A recovery link also produces a session. Routing on it is what
+    // sent people into their portal with the old password still live.
+    if (pendingRecovery) { showNewPasswordStep(session.user); return; }
     const { data: refreshed } = await sb.auth.refreshSession();
     const user = refreshed?.session?.user || session.user;
     await go(user);
@@ -152,7 +246,16 @@ if (sb) sb.auth.getSession().then(async ({ data: { session } }) => {
 
 /* ── Auth state listener ──────────────────────────────────────── */
 if (sb) sb.auth.onAuthStateChange(async (event, session) => {
-  if (suppressAutoRedirect) return;
+  // Supabase raises this for a recovery token whether it arrived as a
+  // link or a typed code. Either way the only correct next screen is the
+  // new-password form.
+  if (event === 'PASSWORD_RECOVERY' && session?.user) {
+    pendingRecovery = true;
+    suppressAutoRedirect = true;
+    showNewPasswordStep(session.user);
+    return;
+  }
+  if (suppressAutoRedirect || pendingRecovery) return;
   if ((event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') && session?.user) {
     await go(session.user);
   }
@@ -168,6 +271,14 @@ async function go(user) {
     // Google sign-in creates the account with no role attached. Apply the role
     // chosen before the redirect, and ask rather than guess if we do not have one.
     if (!role) {
+      /* An approved judge already has their role by now, so an application
+         still on file means it has not been activated yet. Say so - the
+         role chooser only offers student, ambassador and teacher, and
+         offering it to a waiting judge is how this looked like a failed
+         sign-in rather than a queue. */
+      const jStatus = await pendingJudgeStatus();
+      if (jStatus) { showPendingScreen(user.email, 'judge'); return; }
+
       const pending = readPendingRole();
       if (pending && pending !== 'judge') {
         // No school on file means the stash predates the school fields, or
@@ -308,6 +419,13 @@ function showRoleChooser(user) {
       Sign out and switch accounts
     </button>
   `;
+
+  /* Second and later visits to this screen mean a claim was refused.
+     Saying so is the whole difference between a form and a loop. */
+  if (lastProvisionError) {
+    showRoleError(lastProvisionError.replace(/^[A-Z_]+:\s*/, ''));
+    lastProvisionError = null;
+  }
 }
 
 function handleChooserAge(cb) {
@@ -372,6 +490,23 @@ async function confirmChooserRole() {
     return;
   }
   extra.school = school;
+
+  /* The same check the email signup form has always made. Without it the
+     Google path let a personal address through, and the refusal only
+     surfaced from the database afterwards - where it was discarded. The
+     address is fixed by the time we get here, so the only useful thing
+     to do is say which account they need to use. */
+  const { data: whoami } = await sb.auth.getUser();
+  const addr = whoami?.user?.email || '';
+  if (SCHOOL_EMAIL_ROLES.includes(role)
+      && !looksLikeSchoolEmail(addr)
+      && !(await isAllowlistedDomain(addr))) {
+    showRoleError(
+      'A ' + role + ' account needs a school email address, and ' + addr + ' is not one we recognise. '
+      + 'Sign out and continue with your school Google account instead. If that is your school address, '
+      + 'email fairgameinitiative@outlook.com and we will add your school.');
+    return;
+  }
 
   let districtWebsite = '';
   if (role === 'teacher') {
@@ -727,15 +862,169 @@ async function doGoogle(context) {
 }
 window.doGoogle = doGoogle;
 
+/* ── Sign-in codes ────────────────────────────────────────────────
+   A clicked link is spent by whoever opens it first, and for addresses
+   behind a mail security gateway that is routinely the scanner rather
+   than the person. A typed code cannot be spent that way, so this is the
+   path we point people at when a link has failed - and the only path a
+   judge or anyone else without a password has.
+
+   One panel serves sign-in and password recovery; they differ only in
+   the OTP type, so the mode is tracked rather than duplicated. */
+let codeMode = 'email';   // 'email' | 'recovery'
+
+function showPanel(name) {
+  document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + name)?.classList.add('active');
+  // The tabs only address sign-in and signup; the code and new-password
+  // steps are mid-flow and a tab click would abandon them silently.
+  const tabs = document.querySelector('.auth-tabs');
+  if (tabs) tabs.style.display = (name === 'login' || name === 'signup') ? '' : 'none';
+}
+
+function showCodeStep(e) {
+  if (e) e.preventDefault();
+  codeMode = 'email';
+  // Carry over whatever they already typed rather than asking twice.
+  const typed = document.getElementById('loginEmail')?.value.trim();
+  if (typed) { const f = document.getElementById('codeEmail'); if (f) f.value = typed; }
+  showPanel('code');
+  document.getElementById('codeEmail')?.focus();
+}
+window.showCodeStep = showCodeStep;
+
+function showPasswordStep(e) {
+  if (e) e.preventDefault();
+  showPanel('login');
+}
+window.showPasswordStep = showPasswordStep;
+
+async function sendSignInCode() {
+  const email = document.getElementById('codeEmail').value.trim();
+  if (!email) { msg('codeMsg','Enter your email address first.','err'); return; }
+  if (!sb) { msg('codeMsg','Auth not configured.','err'); return; }
+
+  const btn = document.getElementById('codeSendBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
+
+  const { error } = codeMode === 'recovery'
+    ? await sb.auth.resetPasswordForEmail(email)
+    /* shouldCreateUser:false so a mistyped address reports itself rather
+       than quietly standing up an account nobody asked for. */
+    : await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
+
+  if (btn) { btn.disabled = false; btn.textContent = 'Email me a code →'; }
+
+  if (error) {
+    // Supabase rate-limits one of these per address per minute, and the
+    // raw message for that does not say so.
+    const m = /rate|seconds|60/i.test(error.message || '')
+      ? 'We have already sent a code to that address in the last minute. Check your inbox, then try again shortly.'
+      : /signups not allowed|not found/i.test(error.message || '')
+        ? 'We could not find an account for that address. Check the spelling, or create an account instead.'
+        : error.message;
+    msg('codeMsg', m, 'err');
+    return;
+  }
+
+  const entry = document.getElementById('codeEntry');
+  if (entry) entry.style.display = 'block';
+  msg('codeMsg', 'Code sent to ' + email + '. It is a 6-digit number - enter it below.', 'ok');
+  document.getElementById('codeToken')?.focus();
+}
+window.sendSignInCode = sendSignInCode;
+
+async function verifySignInCode() {
+  const email = document.getElementById('codeEmail').value.trim();
+  const token = (document.getElementById('codeToken').value || '').replace(/\s/g, '');
+  if (!token) { msg('codeMsg','Enter the code from your email.','err'); return; }
+  if (!sb) return;
+
+  const btn = document.getElementById('codeVerifyBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Please wait…'; }
+
+  /* A recovery code produces a session just like a sign-in one, so the
+     routing listener has to be held off before it is redeemed or the
+     new-password form is skipped again. */
+  if (codeMode === 'recovery') { pendingRecovery = true; suppressAutoRedirect = true; }
+
+  const { data, error } = await sb.auth.verifyOtp({
+    email, token, type: codeMode === 'recovery' ? 'recovery' : 'email'
+  });
+
+  if (btn) { btn.disabled = false; btn.textContent = 'Sign in →'; }
+
+  if (error) {
+    if (codeMode === 'recovery') { pendingRecovery = false; suppressAutoRedirect = false; }
+    msg('codeMsg',
+      /expired|invalid/i.test(error.message || '')
+        ? 'That code is not valid, or it has expired. Request another one below.'
+        : error.message,
+      'err');
+    return;
+  }
+
+  if (codeMode === 'recovery') {
+    showNewPasswordStep(data?.user);
+    return;
+  }
+  // Sign-in codes hand off to the same routing everything else uses.
+  if (data?.user) await go(data.user);
+}
+window.verifySignInCode = verifySignInCode;
+
+/* ── Set a new password ───────────────────────────────────────────
+   The step the reset flow never had. resetPasswordForEmail signed the
+   person in and the routing listener sent them to their portal, so the
+   password they came to change stayed exactly as it was. */
+function showNewPasswordStep(user) {
+  pendingRecovery = true;
+  suppressAutoRedirect = true;
+  const el = document.getElementById('newPwEmail');
+  if (el) el.textContent = user?.email || 'your account';
+  showPanel('newpw');
+  // A recovery token in the fragment is spent; leaving it there means a
+  // refresh looks like a fresh recovery.
+  try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch (_) {}
+  document.getElementById('resetPw')?.focus();
+}
+
+async function submitNewPassword() {
+  const pw      = document.getElementById('resetPw').value;
+  const confirm = document.getElementById('resetPwConfirm').value;
+  if (pw.length < 8)  { msg('resetPwMsg','Password must be at least 8 characters.','err'); return; }
+  if (pw !== confirm) { msg('resetPwMsg','Those two passwords do not match.','err'); return; }
+  if (!sb) return;
+
+  const btn = document.getElementById('resetPwBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Saving…'; }
+  const { error } = await sb.auth.updateUser({ password: pw });
+  if (btn) { btn.disabled = false; btn.textContent = 'Save password and continue →'; }
+
+  if (error) { msg('resetPwMsg', error.message, 'err'); return; }
+
+  msg('resetPwMsg', 'Password saved. Opening your portal…', 'ok');
+  // The gate is lifted only now that the password is actually changed.
+  pendingRecovery = false;
+  suppressAutoRedirect = false;
+  const { data } = await sb.auth.getUser();
+  if (data?.user) await go(data.user);
+}
+window.submitNewPassword = submitNewPassword;
+
 /* ── Forgot password ──────────────────────────────────────────── */
 async function showForgot(e) {
   e.preventDefault();
   const email = document.getElementById('loginEmail').value.trim();
   if (!email) { msg('loginMsg','Enter your email address above first.','err'); return; }
   if (!sb) return;
-  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/login.html' });
-  if (error) msg('loginMsg', error.message, 'err');
-  else msg('loginMsg', 'Password reset email sent - check your inbox.', 'ok');
+  // Recovery runs through the same typed-code panel as sign-in, for the
+  // same reason: a link in a filtered inbox may be spent before it is read.
+  codeMode = 'recovery';
+  const f = document.getElementById('codeEmail');
+  if (f) f.value = email;
+  showPanel('code');
+  await sendSignInCode();
 }
 
 /* ── Sign Out ─────────────────────────────────────────────────── */
@@ -755,3 +1044,22 @@ function togglePw(inputId, btn) {
 
 ['loginPw','loginEmail'].forEach(id => document.getElementById(id)?.addEventListener('keydown', e => { if (e.key === 'Enter') doLogin(); }));
 document.getElementById('signupPw')?.addEventListener('keydown', e => { if (e.key === 'Enter') doSignup(); });
+
+/* Enter should submit the step the person is actually looking at. */
+document.getElementById('codeEmail')?.addEventListener('keydown', e => { if (e.key === 'Enter') sendSignInCode(); });
+document.getElementById('codeToken')?.addEventListener('keydown', e => { if (e.key === 'Enter') verifySignInCode(); });
+['resetPw','resetPwConfirm'].forEach(id =>
+  document.getElementById(id)?.addEventListener('keydown', e => { if (e.key === 'Enter') submitNewPassword(); }));
+
+/* A code is digits; pasting one out of an email often brings spaces with it. */
+document.getElementById('codeToken')?.addEventListener('input', e => {
+  e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
+});
+
+/* The portal's expired-link screen sends people here with ?code=1, and a
+   dead link has already been explained by then - open the code step
+   rather than a password form they cannot fill. Runs last so the module's
+   own declarations are all initialised. */
+if (new URLSearchParams(window.location.search).get('code') === '1' && !pendingRecovery) {
+  showCodeStep();
+}

@@ -327,6 +327,32 @@ nav {
   .portal-banner-inner { justify-content: center; }
 }
 
+/* ── NOTICE BANNER ───────────────────────────────────────────────
+   Programme-status notice. Deliberately in normal flow rather than
+   fixed like .portal-banner above: it sits directly under the nav and
+   pushes the page down instead of covering the top of it, so it cannot
+   hide the thing the reader came for. Amber matches the under-review
+   screens the portal already shows. */
+.notice-banner {
+  background: #fff8e1;
+  border-bottom: 1px solid #f0c661;
+  color: #78350f;
+}
+.notice-banner-inner {
+  max-width: 1160px; margin: 0 auto; padding: 13px 40px;
+  display: flex; align-items: flex-start; gap: 11px;
+  font-size: 0.84rem; line-height: 1.55;
+}
+.notice-banner-icon {
+  flex-shrink: 0; font-size: 0.95rem; line-height: 1.4;
+}
+.notice-banner p { margin: 0; }
+.notice-banner strong { font-weight: 600; }
+
+@media (max-width: 680px) {
+  .notice-banner-inner { padding: 12px 20px; font-size: 0.8rem; }
+}
+
 /* ── HERO ────────────────────────────────────────────────────── */
 .hero {
   background: var(--green-900);

@@ -203,6 +203,17 @@
   </div>
 </nav>
 
+<!-- Mentor program status notice. Delete this block when matching reopens. -->
+<div class="notice-banner">
+  <div class="notice-banner-inner">
+    <span class="notice-banner-icon" aria-hidden="true">&#9432;</span>
+    <p><strong>Our mentor and mentee program is being updated.</strong>
+      We are expanding it to take account of new international participation, so matching is
+      paused for the moment. The program will be up and running again shortly &mdash; thank you
+      for bearing with us.</p>
+  </div>
+</div>
+
 <!-- HERO -->
 <div class="vol-hero">
   <div class="vol-hero-split">
@@ -305,6 +316,20 @@
           <select id="jLevel"><option value="">Select...</option><option>School fair</option><option>District fair</option><option>State fair</option><option>Any level</option></select>
         </div>
         <div class="form-row"><label class="form-label">Availability / notes *</label><textarea id="jNotes" rows="2" placeholder="e.g. Available weekdays only"></textarea></div>
+
+        <!-- Judges used to be sent a one-time sign-in link and given no
+             password at all, so once that link was spent - often by a mail
+             security scanner rather than the judge - there was no second way
+             in. A password set here is the durable one. -->
+        <div class="form-row">
+          <label class="form-label">Create a password *</label>
+          <input type="password" id="jPw" placeholder="At least 8 characters" autocomplete="new-password" />
+          <span class="form-hint">You will use this with your email address to sign in to the judge portal.</span>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Confirm password *</label>
+          <input type="password" id="jPwConfirm" placeholder="Repeat password" autocomplete="new-password" />
+        </div>
         <button class="btn btn-primary" onclick="submitJudge()" style="width:100%;justify-content:center;">Submit Judge Application &rarr;</button>
         <div id="judgeMsg" class="form-msg"></div>
       </div>
