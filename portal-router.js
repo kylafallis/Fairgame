@@ -26,9 +26,12 @@ function routerFail(html) {
 }
 
 let routed = false;
-function routeTo(role) {
+async function routeTo(role, user) {
   if (routed) return;
   routed = true;
+  await window.fgTrack?.('login-success', {
+    via: 'router', role: role || 'none', provider: user?.app_metadata?.provider || 'unknown'
+  });
   window.location.replace(ROUTES[role] || '/portal-ambassador.html');
 }
 
@@ -54,10 +57,26 @@ async function resolveRole(user) {
   return role;
 }
 
+/* A dead link arrives as an error in the fragment, not as an auth event,
+   so without this the spinner ran for the full 15 seconds before saying
+   anything. Say it now, and point at the code that cannot be spent early. */
+const linkErr = readAuthHashError();
+if (linkErr) {
+  routed = true;
+  const expired = /expired|invalid/i.test(linkErr.code + ' ' + linkErr.description);
+  window.fgTrack?.('login-link-failed', { code: linkErr.code, page: 'router' });
+  routerFail(
+    (expired
+      ? 'This sign-in link has expired or was already used. If your school filters email, its scanner may have opened it first.'
+      : 'Sign-in failed: ' + (linkErr.description || linkErr.code)) +
+    '<br><a href="/login.html?code=1">Email me a sign-in code instead →</a>');
+  try { history.replaceState(null, '', window.location.pathname); } catch (_) {}
+}
+
 // Supabase magic link puts the token in the URL hash
 sb.auth.onAuthStateChange(async (event, session) => {
   if (event === 'SIGNED_IN' && session?.user) {
-    routeTo(await resolveRole(session.user));
+    routeTo(await resolveRole(session.user), session.user);
   }
   if (event === 'SIGNED_OUT') {
     window.location.replace('/login.html');
@@ -76,13 +95,14 @@ sb.auth.getSession().then(async ({ data: { session }, error }) => {
       // Signed in, but nothing grants them a portal. Bouncing to the
       // login page would loop; say what happened instead.
       console.warn('No role found in user_roles for', session.user.email);
+      window.fgTrack?.('login-no-role', { provider: session.user.app_metadata?.provider || 'unknown' });
       routerFail(
         'Your account does not have portal access yet.<br>' +
         'If you applied recently we are still reviewing it - you will get an email once approved.<br>' +
         '<a href="/login.html">Back to sign in →</a>');
       return;
     }
-    routeTo(role);
+    routeTo(role, session.user);
   }
   // No session and no error means we are waiting on the magic-link hash,
   // which onAuthStateChange will deliver. If it never arrives the
@@ -91,7 +111,8 @@ sb.auth.getSession().then(async ({ data: { session }, error }) => {
 
 setTimeout(() => {
   if (routed) return;
+  window.fgTrack?.('login-link-failed', { code: 'timeout', page: 'router' });
   routerFail(
     'This sign-in link did not work. It may have expired or already been used.<br>' +
-    '<a href="/login.html">Request a new one →</a>');
+    '<a href="/login.html?code=1">Email me a sign-in code instead →</a>');
 }, 15000);

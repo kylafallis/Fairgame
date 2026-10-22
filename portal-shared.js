@@ -156,7 +156,11 @@ function requireAuth(expectedRole, onReady) {
       // Redirecting would throw that reason away and leave the person
       // staring at a password form they have no password for.
       const linkErr = readAuthHashError();
-      if (linkErr) { _showLinkExpired(linkErr); return; }
+      if (linkErr) {
+        window.fgTrack?.('login-link-failed', { code: linkErr.code, page: window.location.pathname });
+        _showLinkExpired(linkErr);
+        return;
+      }
       window.location.replace('/login.html');
       return;
     }

@@ -128,9 +128,44 @@ function readAuthHash() {
 
 const authHash = readAuthHash();
 
+/* How this sign-in arrived, for the Umami login event. Read now, before
+   supabase-js strips the fragment. Overwritten by the password, code and
+   confirm-link paths when one of those is what signs them in. */
+let loginVia = /access_token=/.test(window.location.hash)
+  ? (authHash.type ? 'link-' + authHash.type : 'google')
+  : 'existing-session';
+
+function trackLogin(outcome, role, user) {
+  return window.fgTrack ? window.fgTrack('login-' + outcome, {
+    via: loginVia, role: role || 'none', provider: user?.app_metadata?.provider || 'unknown'
+  }) : Promise.resolve();
+}
+
 /* A recovery link must land on the new-password form, not a portal. */
 let pendingRecovery = authHash.type === 'recovery';
 if (pendingRecovery) suppressAutoRedirect = true;
+
+/* ── Email link waiting to be confirmed ───────────────────────────
+   The email templates link here with ?token_hash=…&type=… instead of to
+   Supabase's /verify endpoint. /verify spends the token on the first GET,
+   and school mail scanners make that GET before the person ever sees the
+   email - which is where the otp_expired failures came from. Here the
+   token is only redeemed by verifyOtp when the button is pressed, and a
+   scanner loads pages without pressing anything. */
+const LINK_TYPES = ['signup', 'invite', 'magiclink', 'email', 'recovery', 'email_change'];
+const linkQuery = (() => {
+  const q = new URLSearchParams(window.location.search);
+  const token_hash = q.get('token_hash');
+  const type = q.get('type');
+  return token_hash && LINK_TYPES.includes(type) ? { token_hash, type } : null;
+})();
+
+if (linkQuery) {
+  // An older session in this browser must not route the person off before
+  // they have confirmed the link they actually clicked.
+  suppressAutoRedirect = true;
+  if (linkQuery.type === 'recovery') pendingRecovery = true;
+}
 
 /* ── Dead sign-in link ────────────────────────────────────────── */
 function showLinkError(err) {
@@ -146,6 +181,7 @@ function showLinkError(err) {
     : `<strong>We could not complete that sign-in.</strong>
        ${err.description || err.code}`;
   box.style.display = 'block';
+  window.fgTrack?.('login-link-failed', { code: err.code, page: 'login' });
   // Leaving the fragment in place means a refresh re-reports a failure
   // that has already been explained.
   try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch (_) {}
@@ -234,6 +270,7 @@ async function ensurePortalRequest(email, name, role, details) {
 
 /* ── Already signed-in check ──────────────────────────────────── */
 if (sb) sb.auth.getSession().then(async ({ data: { session } }) => {
+  if (linkQuery) return;   // the confirm button decides where they go
   if (session?.user) {
     // A recovery link also produces a session. Routing on it is what
     // sent people into their portal with the old password still live.
@@ -277,7 +314,7 @@ async function go(user) {
          offering it to a waiting judge is how this looked like a failed
          sign-in rather than a queue. */
       const jStatus = await pendingJudgeStatus();
-      if (jStatus) { showPendingScreen(user.email, 'judge'); return; }
+      if (jStatus) { trackLogin('pending', 'judge', user); showPendingScreen(user.email, 'judge'); return; }
 
       const pending = readPendingRole();
       if (pending && pending !== 'judge') {
@@ -302,6 +339,7 @@ async function go(user) {
 
     // Admin always goes straight through
     if (role === 'admin') {
+      await trackLogin('success', role, user);
       window.location.replace(ROUTES.admin);
       return;
     }
@@ -316,10 +354,12 @@ async function go(user) {
       // If RLS blocked the query, don't block the user - let them through
       if (!reqErr) {
         if (!req || req.status === 'pending') {
+          trackLogin('pending', role, user);
           showPendingScreen(user.email, role);
           return;
         }
         if (req.status === 'rejected') {
+          trackLogin('rejected', role, user);
           showRejectedScreen(user.email);
           return;
         }
@@ -327,6 +367,7 @@ async function go(user) {
       // status === 'active' (or RLS error) → fall through to redirect
     }
 
+    await trackLogin('success', role, user);
     window.location.replace(ROUTES[role] || '/portal-student.html');
   } finally {
     routingGuard = false;
@@ -666,6 +707,7 @@ async function doLogin() {
   if (!email || !pw) { msg('loginMsg','Please fill in both fields.','err'); return; }
   if (!sb) { msg('loginMsg','Auth not configured.','err'); return; }
   setLoading('loginBtn', true);
+  loginVia = 'password';
   const { error } = await sb.auth.signInWithPassword({ email, password: pw });
   setLoading('loginBtn', false);
   if (error) msg('loginMsg', error.message, 'err');
@@ -907,11 +949,17 @@ async function sendSignInCode() {
   const btn = document.getElementById('codeSendBtn');
   if (btn) { btn.disabled = true; btn.textContent = 'Sending…'; }
 
+  /* The email carries a link as well as the code. Without a redirect the
+     link lands on the Site URL - the home page - which signs the person in
+     there and never shows the new-password form or routes to a portal. */
   const { error } = codeMode === 'recovery'
-    ? await sb.auth.resetPasswordForEmail(email)
+    ? await sb.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/login.html' })
     /* shouldCreateUser:false so a mistyped address reports itself rather
        than quietly standing up an account nobody asked for. */
-    : await sb.auth.signInWithOtp({ email, options: { shouldCreateUser: false } });
+    : await sb.auth.signInWithOtp({ email, options: {
+        shouldCreateUser: false,
+        emailRedirectTo: window.location.origin + '/portal-router.html'
+      } });
 
   if (btn) { btn.disabled = false; btn.textContent = 'Email me a code →'; }
 
@@ -948,6 +996,7 @@ async function verifySignInCode() {
      new-password form is skipped again. */
   if (codeMode === 'recovery') { pendingRecovery = true; suppressAutoRedirect = true; }
 
+  loginVia = codeMode === 'recovery' ? 'code-recovery' : 'code';
   const { data, error } = await sb.auth.verifyOtp({
     email, token, type: codeMode === 'recovery' ? 'recovery' : 'email'
   });
@@ -972,6 +1021,50 @@ async function verifySignInCode() {
   if (data?.user) await go(data.user);
 }
 window.verifySignInCode = verifySignInCode;
+
+const CONFIRM_TEXT = {
+  signup:       'Press the button below to confirm your email address and open your account.',
+  invite:       'Press the button below to accept your invitation.',
+  recovery:     'Press the button below to choose a new password.',
+  email_change: 'Press the button below to confirm your new email address.'
+};
+
+function showConfirmStep() {
+  const t = document.getElementById('confirmText');
+  if (t && CONFIRM_TEXT[linkQuery.type]) t.textContent = CONFIRM_TEXT[linkQuery.type];
+  showPanel('confirm');
+}
+
+async function confirmEmailLink() {
+  if (!sb || !linkQuery) return;
+  const btn = document.getElementById('confirmBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Please wait…'; }
+
+  loginVia = 'link-' + linkQuery.type;
+  const { data, error } = await sb.auth.verifyOtp(linkQuery);
+
+  // Spent either way; a refresh should not offer to redeem it again.
+  try { history.replaceState(null, '', window.location.pathname); } catch (_) {}
+
+  if (error) {
+    if (btn) btn.style.display = 'none';
+    const expired = /expired|invalid|not found/i.test(error.message || '');
+    window.fgTrack?.('login-link-failed', { code: expired ? 'otp_expired' : 'other', type: linkQuery.type, page: 'login' });
+    document.getElementById('confirmMsg').innerHTML = (expired
+      ? 'This link has expired or was already used. Links only work once, and only for a short while.'
+      : 'We could not complete that: ' + error.message)
+      + '<br><a href="#" onclick="showCodeStep(event)">Email me a 6-digit code instead →</a>';
+    document.getElementById('confirmMsg').className = 'msg err';
+    pendingRecovery = false;
+    suppressAutoRedirect = false;
+    return;
+  }
+
+  if (linkQuery.type === 'recovery') { showNewPasswordStep(data?.user); return; }
+  suppressAutoRedirect = false;
+  if (data?.user) await go(data.user);
+}
+window.confirmEmailLink = confirmEmailLink;
 
 /* ── Set a new password ───────────────────────────────────────────
    The step the reset flow never had. resetPasswordForEmail signed the
@@ -1060,6 +1153,8 @@ document.getElementById('codeToken')?.addEventListener('input', e => {
    dead link has already been explained by then - open the code step
    rather than a password form they cannot fill. Runs last so the module's
    own declarations are all initialised. */
-if (new URLSearchParams(window.location.search).get('code') === '1' && !pendingRecovery) {
+if (linkQuery) {
+  showConfirmStep();
+} else if (new URLSearchParams(window.location.search).get('code') === '1' && !pendingRecovery) {
   showCodeStep();
 }

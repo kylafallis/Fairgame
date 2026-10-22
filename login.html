@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script defer src="https://cloud.umami.is/script.js" data-website-id="fbdc0182-de28-426e-bd4f-9b22c5f8e220"></script>
+    <script src="/umami-redact.js"></script>
+    <script defer src="https://cloud.umami.is/script.js" data-website-id="fbdc0182-de28-426e-bd4f-9b22c5f8e220" data-before-send="fgUmamiRedact"></script>
 <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Sign In - FairGame Initiative</title>
 <link rel="icon" href="/Images/logo.png" type="image/png"/>
@@ -125,6 +126,19 @@
       </div>
       <button class="btn-main" id="resetPwBtn" onclick="submitNewPassword()">Save password and continue →</button>
       <div class="msg" id="resetPwMsg"></div>
+    </div>
+
+    <!-- ══════════════════════════════════════════ -->
+    <!-- CONFIRM EMAIL LINK panel                   -->
+    <!-- Email links carry a token_hash and land    -->
+    <!-- here. Nothing is redeemed until the button -->
+    <!-- is pressed, so a mail scanner that opens   -->
+    <!-- the link cannot use it up.                 -->
+    <!-- ══════════════════════════════════════════ -->
+    <div class="auth-panel" id="panel-confirm">
+      <p class="login-sub" id="confirmText" style="margin-bottom:18px;">Press the button below to finish signing in.</p>
+      <button class="btn-main" id="confirmBtn" onclick="confirmEmailLink()">Continue →</button>
+      <div class="msg" id="confirmMsg"></div>
     </div>
 
     <!-- ══════════════════════════════════════════ -->
