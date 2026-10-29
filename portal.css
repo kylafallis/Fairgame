@@ -856,3 +856,96 @@ select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg widt
   .kpi-row { grid-template-columns: 1fr 1fr; }
   .hide-mobile { display: none !important; }
 }
+/* ── Location picker (geo.js) ───────────────────────────────── */
+.fg-loc-row { margin-bottom: 12px; }
+.fg-loc-row select, .fg-loc-row input { width: 100%; }
+.fg-loc-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.fg-loc-pair .fg-loc-row { margin-bottom: 0; }
+@media (max-width: 480px) { .fg-loc-pair { grid-template-columns: 1fr; } }
+.fg-loc-opt { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--gray-400); }
+.fg-loc-hint { font-size: 0.76rem; color: var(--g600); margin-top: 6px; min-height: 1em; }
+.fg-loc-hint.warn { color: var(--red); }
+
+.chip-inactive { background: var(--gray-100); color: var(--gray-500); }
+
+/* ── Toast ──────────────────────────────────────────────────────
+   Feedback that stays where the admin is looking. The old message
+   strip sat at the top of the section, so after approving row 40 the
+   only way to read the result was to scroll back up. */
+.fg-toast-stack {
+  position: fixed; right: 20px; bottom: 20px; z-index: 400;
+  display: flex; flex-direction: column; gap: 8px; max-width: min(420px, calc(100vw - 32px));
+}
+.fg-toast {
+  background: var(--g900); color: var(--white);
+  padding: 12px 14px 12px 16px; font-size: 0.82rem; line-height: 1.5;
+  box-shadow: 0 6px 24px rgba(0,0,0,.18); border-left: 3px solid var(--g400);
+  display: flex; gap: 12px; align-items: flex-start;
+  animation: fgToastIn .18s ease-out;
+}
+.fg-toast.err { border-left-color: #f87171; }
+.fg-toast a { color: #bbf7d0; }
+.fg-toast button { background: none; border: none; color: rgba(255,255,255,.6); cursor: pointer; font-size: 1rem; line-height: 1; padding: 0; margin-left: auto; }
+@keyframes fgToastIn { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+
+/* ── Admin: judge network toolbar & table ──────────────────── */
+.jn-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
+.jn-tab {
+  border: 1.5px solid var(--gray-200); background: var(--white); color: var(--gray-500);
+  font-family: var(--ff-sans); font-size: 0.76rem; font-weight: 500; padding: 6px 12px; cursor: pointer;
+  border-radius: var(--radius);
+}
+.jn-tab.active { background: var(--g900); border-color: var(--g900); color: var(--white); }
+.jn-tab .jn-n { font-weight: 700; margin-left: 4px; }
+.jn-toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.jn-toolbar input[type="search"] { flex: 1 1 220px; min-width: 0; }
+.jn-toolbar select { flex: 0 1 170px; min-width: 0; }
+.jn-bulk {
+  display: none; align-items: center; gap: 8px; flex-wrap: wrap;
+  background: var(--g50); border: 1px solid var(--g100); padding: 8px 12px; font-size: 0.8rem;
+}
+.jn-bulk.show { display: flex; }
+.data-table td.jn-check, .data-table th.jn-check { width: 32px; padding-right: 0; }
+.data-table tr.jn-done { background: var(--g50); transition: background 1.2s; }
+.jn-more { display: flex; justify-content: center; padding: 14px; }
+.jn-pin-src { font-size: 0.66rem; color: var(--gray-400); }
+
+/* ── Admin: judge map ──────────────────────────────────────── */
+.jm-layout { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; align-items: start; }
+@media (max-width: 1100px) { .jm-layout { grid-template-columns: 1fr; } }
+#adminJudgeMap { height: 620px; width: 100%; background: var(--gray-100); }
+@media (max-width: 640px) { #adminJudgeMap { height: 440px; } }
+.jm-controls { display: flex; gap: 14px; flex-wrap: wrap; align-items: center; font-size: 0.8rem; color: var(--gray-700); }
+.jm-controls label { display: inline-flex; gap: 6px; align-items: center; cursor: pointer; white-space: nowrap; }
+.jm-controls input[type="checkbox"], .jn-check input[type="checkbox"] { width: auto; margin: 0; padding: 0; }
+.jm-legend { display: flex; gap: 12px; flex-wrap: wrap; font-size: 0.74rem; color: var(--gray-500); }
+.jm-dot { display: inline-block; flex-shrink: 0; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: -1px; border: 1.5px solid rgba(0,0,0,.25); }
+.jm-side { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.jm-results { max-height: 300px; overflow-y: auto; }
+.jm-result { padding: 9px 14px; border-bottom: 1px solid var(--gray-100); font-size: 0.8rem; cursor: pointer; }
+.jm-result:hover { background: var(--g50); }
+.jm-result .jm-mi { float: right; color: var(--g700); font-weight: 600; }
+.jm-states { max-height: 420px; overflow-y: auto; }
+.jm-states table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+.jm-states th { position: sticky; top: 0; background: var(--gray-50); text-align: left; font-size: 0.66rem; letter-spacing: .06em; text-transform: uppercase; color: var(--gray-400); padding: 7px 10px; }
+.jm-states td { padding: 6px 10px; border-bottom: 1px solid var(--gray-100); }
+.jm-states tr { cursor: pointer; }
+.jm-states tr:hover td { background: var(--g50); }
+.jm-states tr.jm-zero td:first-child { color: var(--red); }
+.jm-popup { font-family: var(--ff-sans); font-size: 0.8rem; line-height: 1.5; min-width: 200px; }
+.jm-popup strong { font-family: var(--ff-serif); font-size: 0.92rem; color: var(--g900); }
+.jm-popup .jm-popup-actions { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* ── Admin: judge flags & sources ──────────────────────────── */
+.jn-flag {
+  display: inline-block; font-size: 0.6rem; font-weight: 600; letter-spacing: .04em;
+  padding: 1px 6px; margin-left: 4px; vertical-align: 1px;
+  background: #e0f2fe; color: #0369a1; border-radius: 2px; white-space: nowrap;
+}
+.jn-flag-dup  { background: var(--red-light); color: var(--red); }
+.jn-flag-ok   { background: var(--g100); color: var(--g700); }
+.jn-flag-warn { background: var(--amber-light); color: var(--amber); }
+.jn-sources { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 24px; }
+@media (max-width: 900px) { .jn-sources { grid-template-columns: 1fr; } }
+.jn-src-row { display: flex; justify-content: space-between; gap: 10px; font-size: 0.8rem; padding: 4px 0; border-bottom: 1px solid var(--gray-100); }
+.jn-src-row span { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

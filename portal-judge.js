@@ -1,11 +1,23 @@
 let judgeRecord = null;
+let profileLocation = null;
 const EXP_LABELS = ['Biology / Life Sciences','Chemistry / Biochemistry','Physics / Engineering','Environmental Science','Computer Science / Math','Medicine / Health Sciences'];
 const DEMO_REQS = [
   { id:'r1', school:'Bath High School',  fair_date:'2026-03-14', teacher_name:'Ms. Williams', teacher_email:'mwilliams@bath.edu', message:'35 projects across biology and environmental science.', status:'pending' },
   { id:'r2', school:'Lima Senior HS',    fair_date:'2026-03-21', teacher_name:'Mr. Perez',    teacher_email:'jperez@lima.edu',    message:'District-level fair, all STEM fields.', status:'pending' },
 ];
 
+// Declared before requireAuth: in preview mode it calls back synchronously,
+// before anything further down the file has been initialised.
+const EMPTY_JOKES = [
+  "No requests yet - even Schrödinger's cat hasn't observed one. Check back soon.",
+  "Zero requests. Much like dark matter, they exist - just not here yet.",
+  "Nothing yet. Your inbox is currently in its ground state. Excitation imminent.",
+  "No requests yet. The control group has no data. Science is patient.",
+];
+
 requireAuth('judge', async (user) => {
+  const locEl = document.getElementById('pLocation');
+  if (locEl && window.FG_GEO) profileLocation = FG_GEO.mountPicker(locEl, { prefix: 'p' });
   if (sb) {
     const { data } = await sb.from('judges').select('*').eq('email', user.email).maybeSingle().catch(()=>({ data: null }));
     judgeRecord = data;
@@ -25,22 +37,15 @@ function prefillProfile(j) {
   document.getElementById('pName').value    = j.name   || '';
   document.getElementById('pOrg').value     = j.org    || '';
 
-  // City and county stored separately now; also support legacy combined 'city' field
-  if (j.county) {
-    document.getElementById('pCity').value   = j.city?.replace(/,.*$/, '').trim() || '';
-    document.getElementById('pCounty').value = j.county || '';
-  } else {
-    // legacy: city was "Columbus, Franklin County"
-    const parts = (j.city || '').split(',');
-    document.getElementById('pCity').value   = (parts[0] || '').trim();
-    document.getElementById('pCounty').value = (parts[1] || '').trim();
-  }
+  // Older rows hold "Columbus, Franklin County" in city; the picker
+  // keeps the part before the comma and the state from state_code.
+  profileLocation?.set(j);
 
   // Travel range
   const travel = j.travel_range || j.travel_miles;
   if (travel) {
     const sel = document.getElementById('pTravel');
-    const known = ['10','20','30','40','statewide'];
+    const known = ['10','20','30','40','60','100','statewide'];
     if (known.includes(String(travel))) {
       sel.value = String(travel);
     } else {
@@ -51,6 +56,12 @@ function prefillProfile(j) {
   }
 
   if (j.available_level) document.getElementById('pLevel').value = j.available_level;
+  document.getElementById('pLinkedIn').value  = j.linkedin   || '';
+  document.getElementById('pWorkEmail').value = j.work_email || '';
+  document.getElementById('pVirtual').checked = !!j.virtual_ok;
+  ['pg1','pg2','pg3'].forEach(id => { const el = document.getElementById(id); el.checked = (j.preferred_grade_bands || []).includes(el.value); });
+  document.querySelectorAll('#pMonths input').forEach(i => { i.checked = (j.available_months || []).includes(i.value); });
+  showRefLink(j.code);
   (j.expertise || []).forEach(exp => {
     EXP_LABELS.forEach((lbl, i) => { if (exp.includes(lbl.split('/')[0].trim())) document.getElementById('pe'+(i+1)).checked = true; });
   });
@@ -58,6 +69,42 @@ function prefillProfile(j) {
   // Checkbox: checked = visible (active), unchecked = hidden (inactive)
   document.getElementById('pActive').checked = (j.status === 'active');
 }
+
+/* The judge's referral link, and how many people have used it. The count
+   comes from an RPC because a judge cannot read other judges' rows. */
+async function showRefLink(code) {
+  const input = document.getElementById('refLink');
+  if (!input) return;
+  input.value = code ? 'https://fairgameinitiative.org/volunteer.html?ref=' + encodeURIComponent(code) + '#judge' : 'Save your profile to get a link';
+  if (!code || !sb) return;
+  const { data, error } = await sb.rpc('fg_my_referral_count');
+  const el = document.getElementById('refCount');
+  if (!error && el) el.textContent = data ? data + ' judge' + (data === 1 ? '' : 's') + ' joined with your link' : '';
+}
+
+async function copyRefLink(btn) {
+  const input = document.getElementById('refLink');
+  try { await navigator.clipboard.writeText(input.value); }
+  catch (_) { input.select(); document.execCommand('copy'); }
+  btn.textContent = 'Copied';
+  setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+}
+window.copyRefLink = copyRefLink;
+
+/* Same rule as the volunteer form (script.js): a pasted address with or
+   without the scheme, country subdomains allowed. Null if not LinkedIn. */
+function normalizeLinkedIn(raw) {
+  const host = (raw || '').trim().replace(/\/+$/, '').replace(/^https?:\/\//i, '');
+  if (!/^([a-z0-9-]+\.)?linkedin\.com\/\S+$/i.test(host)) return null;
+  return 'https://' + (/^[a-z0-9-]+\.linkedin\.com/i.test(host) ? host : 'www.' + host);
+}
+
+const LEVEL_TO_PREFERRED = {
+  'School fair':   ['school'],
+  'District fair': ['district', 'regional'],
+  'State fair':    ['state'],
+  'Any level':     ['school', 'district', 'regional', 'state'],
+};
 
 function handlePTravelOther(sel) {
   const oth = document.getElementById('pTravelOther');
@@ -79,8 +126,9 @@ window.saveVisibility = saveVisibility;
 
 async function saveProfile() {
   const expertise  = EXP_LABELS.filter((_,i) => document.getElementById('pe'+(i+1)).checked);
-  const city       = document.getElementById('pCity').value.trim();
-  const county     = document.getElementById('pCounty').value.trim();
+  const loc = profileLocation ? await profileLocation.read() : { ok: false, error: 'The location list did not load - refresh the page.' };
+  if (!loc.ok) { showMsg('profileMsg', loc.error, 'err'); return; }
+  const city = loc.value.city || '';
   const travelSel  = document.getElementById('pTravel').value;
   const travelNum  = document.getElementById('pTravelOther')?.value;
   const travel_range = travelSel === 'other' ? (travelNum || 'other') : travelSel;
@@ -88,27 +136,55 @@ async function saveProfile() {
     : travelSel === 'other' ? (parseInt(travelNum) || 50)
     : (parseInt(travelSel) || 10);
   const code = judgeRecord?.code || generateJudgeCode(expertise, city);
+  const linkedRaw = document.getElementById('pLinkedIn').value.trim();
+  const linkedin  = linkedRaw ? normalizeLinkedIn(linkedRaw) : null;
+  if (linkedRaw && !linkedin) { showMsg('profileMsg', 'That does not look like a LinkedIn profile address.', 'err'); return; }
+  const workEmail = document.getElementById('pWorkEmail').value.trim();
+  const grades    = ['pg1','pg2','pg3'].filter(id => document.getElementById(id).checked).map(id => document.getElementById(id).value);
+  const level     = document.getElementById('pLevel').value;
 
   const updates = {
     name:            document.getElementById('pName').value.trim(),
     org:             document.getElementById('pOrg').value.trim(),
-    city:            city + (county ? ', ' + county : ''),
-    county,
+    city:            loc.value.city,
+    state_code:      loc.value.state_code,
+    postal_code:     loc.value.postal_code,
+    latitude:        loc.value.latitude,
+    longitude:       loc.value.longitude,
+    geocode_source:  loc.value.geocode_source,
+    geocoded_at:     loc.value.latitude != null ? new Date().toISOString() : null,
+    country:         loc.value.country,
+    region:          loc.value.region,
     travel_range,
     travel_miles,
-    available_level: document.getElementById('pLevel').value,
+    available_level: level,
+    preferred_levels:      LEVEL_TO_PREFERRED[level] || [],
+    preferred_grade_bands: grades,
+    available_months:      [...document.querySelectorAll('#pMonths input:checked')].map(i => i.value),
+    virtual_ok:            document.getElementById('pVirtual').checked,
+    linkedin,
+    work_email:            workEmail || null,
     expertise,
     status:          document.getElementById('pActive').checked ? 'active' : 'inactive',
     code
   };
 
   if (sb && judgeRecord?.id) {
-    const { error } = await sb.from('judges').update(updates).eq('id', judgeRecord.id);
+    // Columns from migrations 14 and 15 may not exist yet; save the rest.
+    let { error } = await sb.from('judges').update(updates).eq('id', judgeRecord.id);
+    for (let i = 0; error && i < 20; i++) {
+      const m = (error.message || '').match(/'(\w+)' column|column "?(?:\w+\.)?(\w+)"? (?:of relation \S+ )?does not exist/);
+      const col = m && (m[1] || m[2]);
+      if (!col || !(col in updates)) break;
+      delete updates[col];
+      ({ error } = await sb.from('judges').update(updates).eq('id', judgeRecord.id));
+    }
     if (error) { showMsg('profileMsg', error.message, 'err'); return; }
     Object.assign(judgeRecord, updates);
   }
   document.getElementById('profileCode').textContent = code;
   document.getElementById('kCode').textContent       = code;
+  showRefLink(code);
   showMsg('profileMsg', 'Profile saved!', 'ok');
 }
 window.saveProfile = saveProfile;
@@ -127,12 +203,6 @@ async function setPassword() {
 }
 window.setPassword = setPassword;
 
-const EMPTY_JOKES = [
-  "No requests yet - even Schrödinger's cat hasn't observed one. Check back soon.",
-  "Zero requests. Much like dark matter, they exist - just not here yet.",
-  "Nothing yet. Your inbox is currently in its ground state. Excitation imminent.",
-  "No requests yet. The control group has no data. Science is patient.",
-];
 
 async function loadRequests() {
   let reqs = [];
@@ -217,6 +287,6 @@ function renderConfirmed(reqs) {
     <td class="col-sm">${r.fair_date||'TBD'}</td>
     <td class="col-sm">${r.teacher_name}</td>
     <td><span class="chip chip-verified">Confirmed</span></td>
-    <td><a href="/Documents/2026-Judging-Score-Cards-Vertical-layout.pdf" target="_blank" class="btn-xs">Score Cards</a></td>
+    <td><a href="/files/judges/2026-Judging-Score-Cards-Vertical-layout.pdf" target="_blank" class="btn-xs">Score Cards</a></td>
   </tr>`).join('');
 }

@@ -5,10 +5,13 @@
     <script defer src="https://cloud.umami.is/script.js" data-website-id="fbdc0182-de28-426e-bd4f-9b22c5f8e220" data-before-send="fgUmamiRedact"></script>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Admin Dashboard - FairGame</title>
-  <link rel="icon" href="/Images/logo.png" type="image/png"/>
+  <link rel="icon" href="/images/Logo_transparent.png" type="image/png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="/portal.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.min.css"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/MarkerCluster.Default.min.css"/>
 </head>
 <body>
 <button class="pnav-mobile-toggle" onclick="openMobileNav()">☰</button>
@@ -16,7 +19,7 @@
 <div class="portal-shell">
 <nav class="pnav">
   <div class="pnav-logo">
-    <img src="/Images/logo.png" alt="" onerror="this.style.display='none'"/>
+    <img src="/files/brand/fairgame-logo-white.svg" alt="" onerror="this.style.display='none'"/>
     <div class="pnav-logo-text">
       <div class="pnav-logo-name">FairGame Admin</div>
       <div class="pnav-logo-role">Executive Dashboard</div>
@@ -29,7 +32,10 @@
     <div class="pnav-section">Programs</div>
     <a class="pnav-link"       data-section="approvals" data-label="User Approvals" onclick="showSection('approvals',this)">User Approvals <span class="pnav-badge" id="approvalBadge" style="display:none;"></span></a>
     <a class="pnav-link"       data-section="schools"   data-label="Schools"       onclick="showSection('schools',this)">Schools</a>
-    <a class="pnav-link"       data-section="judges"    data-label="Judges"        onclick="showSection('judges',this)">Judge Network</a>
+    <div class="pnav-section">Judges</div>
+    <a class="pnav-link"       data-section="judges"    data-label="Judge Network" onclick="showSection('judges',this)">Judge Network <span class="pnav-badge" id="judgeBadge" style="display:none;"></span></a>
+    <a class="pnav-link"       data-section="judgemap"  data-label="Judge Map"     onclick="showSection('judgemap',this)">Judge Map</a>
+    <div class="pnav-section">Mentoring</div>
     <a class="pnav-link"       data-section="mentors"   data-label="Mentorships"   onclick="showSection('mentors',this)">Mentorships</a>
     <a class="pnav-link"       data-section="convos"    data-label="Conversations"  onclick="showSection('convos',this)">Conversations</a>
     <a class="pnav-link"       data-section="review"    data-label="Message Review" onclick="showSection('review',this)">Message Review <span class="pnav-badge" id="reviewBadge" style="display:none;"></span></a>
@@ -63,7 +69,8 @@
       <div class="kpi-row" id="homeKpis">
         <div class="kpi-card"><div class="kpi-card-n" id="kSchools">–</div><div class="kpi-card-l">Active Schools</div></div>
         <div class="kpi-card"><div class="kpi-card-n" id="kPending">–</div><div class="kpi-card-l">Pending Approvals</div></div>
-        <div class="kpi-card"><div class="kpi-card-n" id="kJudges">–</div><div class="kpi-card-l">Judges Registered</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kJudges">–</div><div class="kpi-card-l">Active Judges</div></div>
+        <div class="kpi-card" style="cursor:pointer;" onclick="showSection('judges')"><div class="kpi-card-n" id="kJudgesPending">–</div><div class="kpi-card-l">Judges to Review</div></div>
         <div class="kpi-card"><div class="kpi-card-n" id="kMentors">–</div><div class="kpi-card-l">Active Mentorships</div></div>
         <div class="kpi-card"><div class="kpi-card-n" id="kDownloads">–</div><div class="kpi-card-l">Resource Downloads</div></div>
         <div class="kpi-card"><div class="kpi-card-n" id="kSubscribers">–</div><div class="kpi-card-l">Email Subscribers</div></div>
@@ -74,7 +81,8 @@
         <div class="card-header"><h3>Quick Actions</h3></div>
         <div class="card-body" style="display:flex;flex-wrap:wrap;gap:10px;">
           <button class="btn-outline" onclick="showSection('approvals',document.querySelector('[data-section=approvals]'))">Review Pending Approvals</button>
-          <a href="/judgemap.html" class="btn-outline">View Judge Map ↗</a>
+          <button class="btn-outline" onclick="showSection('judges')">Review Judge Applications</button>
+          <button class="btn-outline" onclick="showSection('judgemap')">Judge Map</button>
           <a href="/impactreport.html" class="btn-outline">Impact Report ↗</a>
           <a href="/mentorlog.html" class="btn-outline">Mentor Log ↗</a>
         </div>
@@ -143,13 +151,119 @@
 
     <!-- JUDGES -->
     <div class="portal-section" id="sec-judges">
-      <div class="section-heading"><h2>Judge Network</h2><p>All registered judges and their verification status</p></div>
+      <div class="section-heading"><h2>Judge Network</h2><p>Every judge application, newest first. Click a row for the full profile.</p></div>
       <div class="card">
+        <div class="card-header" style="flex-wrap:wrap;gap:10px;">
+          <div class="jn-tabs" id="jnTabs">
+            <button class="jn-tab active" data-status="unverified" onclick="setJudgeTab('unverified')">Needs review<span class="jn-n" id="jnN-unverified">–</span></button>
+            <button class="jn-tab" data-status="active"   onclick="setJudgeTab('active')">Active<span class="jn-n" id="jnN-active">–</span></button>
+            <button class="jn-tab" data-status="inactive" onclick="setJudgeTab('inactive')">Inactive<span class="jn-n" id="jnN-inactive">–</span></button>
+            <button class="jn-tab" data-status="all"      onclick="setJudgeTab('all')">All<span class="jn-n" id="jnN-all">–</span></button>
+          </div>
+          <div style="display:flex;gap:6px;">
+            <button class="btn-xs" onclick="exportJudgesCsv()" title="Download the judges matching these filters">Export CSV</button>
+            <button class="btn-xs" onclick="loadJudges()">Refresh</button>
+          </div>
+        </div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:10px;padding-bottom:12px;">
+          <div class="jn-toolbar">
+            <input type="search" id="jnSearch" placeholder="Search name, email, organization, city, ZIP…" oninput="setJudgeFilter()"/>
+            <select id="jnState" onchange="setJudgeFilter()" aria-label="State"><option value="">All states</option></select>
+            <select id="jnField" onchange="setJudgeFilter()" aria-label="Expertise">
+              <option value="">All fields</option>
+              <option>Biology / Life Sciences</option><option>Chemistry / Biochemistry</option><option>Physics / Engineering</option>
+              <option>Environmental Science</option><option>Computer Science / Math</option><option>Medicine / Health Sciences</option>
+            </select>
+            <select id="jnExtra" onchange="setJudgeFilter()" aria-label="More filters">
+              <option value="">Any</option>
+              <option value="virtual">Can judge virtually</option>
+              <option value="duplicate">Duplicate emails</option>
+              <option value="referred">Joined by referral</option>
+              <option value="bg_cleared">Background check cleared</option>
+              <option value="bg_needed">Background check pending/expired</option>
+            </select>
+            <select id="jnSort" onchange="setJudgeFilter()" aria-label="Sort">
+              <option value="new">Newest first</option><option value="old">Oldest first</option>
+              <option value="name">Name A–Z</option><option value="state">By state</option>
+            </select>
+          </div>
+          <div class="jn-bulk" id="jnBulk">
+            <strong id="jnBulkN"></strong>
+            <button class="btn-xs approve" onclick="bulkJudges('activate')">Activate</button>
+            <button class="btn-xs" onclick="bulkJudges('email')">Email (BCC)</button>
+            <button class="btn-xs danger" onclick="bulkJudges('deactivate')">Deactivate</button>
+            <button class="btn-xs" onclick="clearJudgeSelection()" style="margin-left:auto;">Clear selection</button>
+          </div>
+        </div>
         <div class="card-body-flush" style="overflow-x:auto;">
           <table class="data-table" id="judgesTable">
-            <thead><tr><th>Code</th><th>Name</th><th>Expertise</th><th>Location</th><th>Level</th><th>Status</th><th>Actions</th></tr></thead>
-            <tbody id="judgesTbody"><tr><td colspan="7"><div class="spinner-wrap"><div class="spinner"></div></div></td></tr></tbody>
+            <thead><tr>
+              <th class="jn-check"><input type="checkbox" id="jnAll" aria-label="Select all shown" onchange="toggleAllJudges(this.checked)"/></th>
+              <th>Name</th><th>Expertise</th><th>Location</th><th>Travel</th><th>Applied</th><th>Status</th><th>Actions</th>
+            </tr></thead>
+            <tbody id="judgesTbody"><tr><td colspan="8"><div class="spinner-wrap"><div class="spinner"></div></div></td></tr></tbody>
           </table>
+        </div>
+        <div class="jn-more" id="jnMore"></div>
+      </div>
+      <div class="card mt-16">
+        <div class="card-header"><h3>Where judges come from</h3><span class="text-xs text-muted">All judges, every status</span></div>
+        <div class="card-body jn-sources" id="jnSources"></div>
+      </div>
+    </div>
+
+    <!-- JUDGE MAP -->
+    <div class="portal-section" id="sec-judgemap">
+      <div class="section-heading"><h2>Judge Map</h2><p>Where every judge is, the 100 miles around them, and the states still waiting for one</p></div>
+      <div class="card">
+        <div class="card-body" style="display:flex;flex-direction:column;gap:10px;">
+          <div class="jm-controls">
+            <label><input type="checkbox" id="jmShowActive"   checked onchange="renderJudgeMap()"/> <span class="jm-dot" style="background:#357a38"></span>Active</label>
+            <label><input type="checkbox" id="jmShowPending"  checked onchange="renderJudgeMap()"/> <span class="jm-dot" style="background:#d97706"></span>Needs review</label>
+            <label><input type="checkbox" id="jmShowInactive"         onchange="renderJudgeMap()"/> <span class="jm-dot" style="background:#9ca3af"></span>Inactive</label>
+            <label><input type="checkbox" id="jmRings" onchange="renderJudgeMap()"/> Show 100-mile reach</label>
+            <label><input type="checkbox" id="jmVirtualOnly" onchange="renderJudgeMap()"/> Virtual-capable only</label>
+            <select id="jmField" onchange="renderJudgeMap()" aria-label="Expertise" style="max-width:200px;">
+              <option value="">All fields</option>
+              <option>Biology / Life Sciences</option><option>Chemistry / Biochemistry</option><option>Physics / Engineering</option>
+              <option>Environmental Science</option><option>Computer Science / Math</option><option>Medicine / Health Sciences</option>
+            </select>
+            <button class="btn-xs" onclick="fitJudgeMap()">Fit all</button>
+            <button class="btn-xs" onclick="loadJudgeMap()">Refresh</button>
+            <button class="btn-xs approve" id="jmSaveBtn" style="display:none;" onclick="saveMissingPins()"></button>
+          </div>
+          <div class="jm-legend"><span id="jmSummary"></span><span>Faded pins are placed from the state only. Click the map to find judges near that spot.</span></div>
+        </div>
+      </div>
+      <div class="jm-layout mt-16">
+        <div class="card" style="margin:0;overflow:hidden;"><div id="adminJudgeMap"></div></div>
+        <div class="jm-side">
+          <div class="card" style="margin:0;">
+            <div class="card-header"><h3>Judges near a place</h3></div>
+            <div class="card-body">
+              <div id="jmLocation"></div>
+              <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+                <span class="text-sm">Within</span>
+                <select id="jmRadiusMi" style="width:auto;" onchange="jmLastSearch && searchNearPoint(jmLastSearch.pt, jmLastSearch.label)">
+                  <option>25</option><option>50</option><option selected>100</option><option>150</option><option>250</option>
+                </select>
+                <span class="text-sm">miles</span>
+                <button class="btn-primary" style="font-size:.78rem;padding:7px 14px;margin-left:auto;" onclick="searchNearPlace()">Find judges</button>
+              </div>
+            </div>
+            <div class="card-body-flush jm-results" id="jmResults"></div>
+          </div>
+          <div class="card" style="margin:0;">
+            <div class="card-header" style="flex-wrap:wrap;gap:6px;">
+              <h3>Coverage by state</h3>
+              <select id="jmCoverageSort" onchange="renderCoverage()" style="width:auto;font-size:.74rem;padding:4px 8px;" aria-label="Sort states">
+                <option value="name">A–Z</option><option value="fewest">Fewest judges</option><option value="most">Most judges</option>
+              </select>
+            </div>
+            <div class="text-xs text-muted" style="padding:8px 14px 0;" id="jmCoverageSummary"></div>
+            <div class="text-xs text-muted" style="padding:2px 14px 8px;">States in red have no active judge yet. Click one to zoom in.</div>
+            <div class="card-body-flush jm-states" id="jmStates"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -715,7 +829,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet.markercluster/1.5.3/leaflet.markercluster.min.js"></script>
 <script src="/portal-shared.js"></script>
+<script src="/geo.js"></script>
 <script src="/portal-admin.js"></script>
 </body>
 </html>

@@ -5,7 +5,7 @@
     <script defer src="https://cloud.umami.is/script.js" data-website-id="fbdc0182-de28-426e-bd4f-9b22c5f8e220" data-before-send="fgUmamiRedact"></script>
   <meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
   <title>Judge Portal - FairGame</title>
-  <link rel="icon" href="/Images/logo.png" type="image/png"/>
+  <link rel="icon" href="/images/Logo_transparent.png" type="image/png"/>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="/portal.css"/>
@@ -16,7 +16,7 @@
 <div class="portal-shell">
 <nav class="pnav">
   <div class="pnav-logo">
-    <img src="/Images/logo.png" alt="" onerror="this.style.display='none'"/>
+    <img src="/files/brand/fairgame-logo-white.svg" alt="" onerror="this.style.display='none'"/>
     <div class="pnav-logo-text">
       <div class="pnav-logo-name">FairGame</div>
       <div class="pnav-logo-role">Judge Portal</div>
@@ -76,26 +76,56 @@
         </div>
       </div>
       <div class="card" style="max-width:620px;">
+        <div class="card-header"><h3>Invite Other Judges</h3><span class="text-xs text-muted" id="refCount"></span></div>
+        <div class="card-body">
+          <p class="text-sm text-muted mb-16">Know a scientist, engineer, doctor, or teacher who would make a good judge? Send them your link - everyone who applies through it is credited to you.</p>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="refLink" readonly onclick="this.select()" aria-label="Your referral link" style="flex:1;min-width:0;"/>
+            <button class="btn-primary" style="font-size:.78rem;padding:8px 16px;" onclick="copyRefLink(this)">Copy</button>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="max-width:620px;">
         <div class="card-header"><h3>Edit Profile</h3><button class="btn-primary" onclick="saveProfile()" style="font-size:.78rem;padding:8px 16px;">Save Changes</button></div>
         <div class="card-body">
           <div class="form-grid">
             <div class="form-group"><label class="form-label">Full name</label><input type="text" id="pName" placeholder="Dr. Jane Smith"/></div>
             <div class="form-group"><label class="form-label">Organization</label><input type="text" id="pOrg" placeholder="Ohio State University"/></div>
-            <div class="form-group"><label class="form-label">City</label><input type="text" id="pCity" placeholder="Columbus"/></div>
-            <div class="form-group"><label class="form-label">County</label><input type="text" id="pCounty" placeholder="Franklin County"/></div>
+            <div class="form-group" id="pLocation" style="grid-column:1/-1;"></div>
             <div class="form-group"><label class="form-label">Willing to travel</label>
               <select id="pTravel" onchange="handlePTravelOther(this)">
                 <option value="10">Within 10 miles</option>
                 <option value="20">10–20 miles</option>
                 <option value="30">20–30 miles</option>
                 <option value="40">30–40 miles</option>
-                <option value="statewide">Statewide</option>
+                <option value="60">Up to 60 miles</option>
+                <option value="100">Up to 100 miles</option>
+                <option value="statewide">Anywhere in my state</option>
                 <option value="other">Other</option>
               </select>
               <input type="number" id="pTravelOther" placeholder="Miles" min="1" max="500" style="display:none;margin-top:6px;width:100%;padding:9px;border:1.5px solid var(--gray-200);border-radius:3px;font-size:.85rem;"/>
             </div>
             <div class="form-group"><label class="form-label">Available for</label>
               <select id="pLevel"><option>School fair</option><option>District fair</option><option>State fair</option><option>Any level</option></select>
+            </div>
+            <div class="form-group"><label class="form-label">LinkedIn (optional)</label><input type="url" id="pLinkedIn" placeholder="linkedin.com/in/yourname"/></div>
+            <div class="form-group"><label class="form-label">Work email (optional)</label><input type="email" id="pWorkEmail" placeholder="you@employer.com"/></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Grade levels</label>
+            <div class="check-group">
+              <label class="check-item"><input type="checkbox" id="pg1" value="elementary"> Elementary (K–5)</label>
+              <label class="check-item"><input type="checkbox" id="pg2" value="middle"> Middle school (6–8)</label>
+              <label class="check-item"><input type="checkbox" id="pg3" value="high"> High school (9–12)</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="check-item" style="cursor:pointer;"><input type="checkbox" id="pVirtual"> I can also judge virtually (online fairs and video judging)</label>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Months you're usually free</label>
+            <div class="check-group" id="pMonths" style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px 10px;">
+              <label class="check-item"><input type="checkbox" value="Sep"> Sep</label><label class="check-item"><input type="checkbox" value="Oct"> Oct</label><label class="check-item"><input type="checkbox" value="Nov"> Nov</label><label class="check-item"><input type="checkbox" value="Dec"> Dec</label><label class="check-item"><input type="checkbox" value="Jan"> Jan</label><label class="check-item"><input type="checkbox" value="Feb"> Feb</label><label class="check-item"><input type="checkbox" value="Mar"> Mar</label><label class="check-item"><input type="checkbox" value="Apr"> Apr</label><label class="check-item"><input type="checkbox" value="May"> May</label><label class="check-item"><input type="checkbox" value="Jun"> Jun</label><label class="check-item"><input type="checkbox" value="Jul"> Jul</label><label class="check-item"><input type="checkbox" value="Aug"> Aug</label>
             </div>
           </div>
           <div class="form-group">
@@ -198,6 +228,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/portal-shared.js"></script>
+<script src="/geo.js"></script>
 <script src="/portal-judge.js"></script>
 </body>
 </html>

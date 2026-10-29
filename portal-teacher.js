@@ -105,7 +105,11 @@ async function loadJudgeSection() {
   }
 
   // Filter: judge must be willing to travel to the school's county, OR be statewide
+  // The network is national now: a judge in another state is never
+  // "nearby", whatever their travel range says.
+  const fairState = currentFair?.state_code;
   judges = judges.filter(j => {
+    if (fairState && j.state_code && (j.country || 'US') === 'US' && j.state_code !== fairState) return false;
     if (!j.county && !j.city) return true; // no location data - show anyway
     const jCounty = (j.county || '').toLowerCase();
     const jCity   = (j.city   || '').toLowerCase();

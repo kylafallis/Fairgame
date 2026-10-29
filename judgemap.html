@@ -5,7 +5,7 @@
     <script defer src="https://cloud.umami.is/script.js" data-website-id="fbdc0182-de28-426e-bd4f-9b22c5f8e220" data-before-send="fgUmamiRedact"></script>
   <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Judge Network - FairGame Initiative</title>
-  <meta name="description" content="Find and connect with science fair judges across Ohio." />
+  <meta name="description" content="Find and connect with volunteer science fair judges across the country." />
   <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/style.css" />
@@ -19,7 +19,7 @@
 <nav class="scrolled">
   <div class="nav-inner">
     <a href="/" class="nav-logo">
-      <img src="/Images/logo.png" alt="FairGame" onerror="this.style.display='none'" />
+      <img src="/files/brand/fairgame-logo-white.svg" alt="FairGame" onerror="this.style.display='none'" />
       FairGame
     </a>
     <div class="nav-spacer"></div>
@@ -61,10 +61,10 @@
     <div class="breadcrumb"><a href="/">Home</a><span>/</span>Judge Network</div>
     <span class="overline">Volunteer Map</span>
     <h1>Find a Judge</h1>
-    <p>Science fair judges across Ohio, searchable by expertise and location. Teachers: register your fair below and we'll send match requests automatically.</p>
+    <p>Volunteer science fair judges across the country, searchable by expertise and location. Teachers: register your fair below and we'll send match requests automatically.</p>
     <div style="display:flex;gap:12px;margin-top:20px;flex-wrap:wrap;">
       <a href="/volunteer.html" class="btn btn-white">Register as a Judge →</a>
-      <a href="/fairregister.html" class="btn btn-outline" style="border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.8);">Register Your Fair →</a>
+      <a href="/login.html" class="btn btn-outline" style="border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.8);">Register Your Fair →</a>
     </div>
   </div>
 </div>
@@ -75,7 +75,7 @@
       <div class="map-stat"><div class="map-stat-n" id="statTotal">–</div><div class="map-stat-l">Judges Registered</div></div>
       <div class="map-stat"><div class="map-stat-n" id="statActive">–</div><div class="map-stat-l">Available Now</div></div>
       <div class="map-stat"><div class="map-stat-n" id="statFields">–</div><div class="map-stat-l">STEM Fields</div></div>
-      <div class="map-stat"><div class="map-stat-n" id="statDistricts">–</div><div class="map-stat-l">OAS Districts</div></div>
+      <div class="map-stat"><div class="map-stat-n" id="statDistricts">–</div><div class="map-stat-l">States</div></div>
     </div>
   </div>
 
@@ -116,33 +116,11 @@
       <!-- Map -->
       <div class="map-container">
         <div id="judgeMap"></div>
-        <!-- Register as judge toggle -->
+        <!-- Joining goes through the reviewed application on the volunteer
+             page. The old form here added people straight to the public map
+             as active judges, with no review. -->
         <div class="register-toggle">
-          <button class="btn btn-primary" onclick="toggleRegister()" style="font-size:0.78rem;padding:9px 16px;">+ Add Me to Map</button>
-        </div>
-        <div class="register-panel" id="registerPanel">
-          <h4>Add yourself to the map</h4>
-          <p>Takes 60 seconds. You'll appear as a pin on the map and receive match requests from nearby schools.</p>
-          <div class="reg-row"><label class="reg-label">Full name *</label><input type="text" id="rjName" placeholder="Dr. Jane Smith" /></div>
-          <div class="reg-row"><label class="reg-label">Email *</label><input type="email" id="rjEmail" placeholder="jsmith@osu.edu" /></div>
-          <div class="reg-row"><label class="reg-label">Organization</label><input type="text" id="rjOrg" placeholder="Ohio State University" /></div>
-          <div class="reg-row"><label class="reg-label">City / County *</label><input type="text" id="rjCity" placeholder="Columbus, Franklin County" /></div>
-          <div class="reg-row">
-            <label class="reg-label">STEM expertise (check all that apply)</label>
-            <div class="expertise-grid">
-              <label class="exp-check"><input type="checkbox" id="rje1"> Biology</label>
-              <label class="exp-check"><input type="checkbox" id="rje2"> Chemistry</label>
-              <label class="exp-check"><input type="checkbox" id="rje3"> Physics / Eng.</label>
-              <label class="exp-check"><input type="checkbox" id="rje4"> Environmental</label>
-              <label class="exp-check"><input type="checkbox" id="rje5"> CS / Math</label>
-              <label class="exp-check"><input type="checkbox" id="rje6"> Medicine</label>
-            </div>
-          </div>
-          <div class="reg-row"><label class="reg-label">Available for</label>
-            <select id="rjLevel"><option value="">Select...</option><option>School fair</option><option>District fair</option><option>State fair</option><option>Any level</option></select>
-          </div>
-          <button class="btn btn-primary" onclick="registerJudgeMap()" style="width:100%;justify-content:center;margin-top:6px;">Add to Map →</button>
-          <div id="rjMsg" style="font-size:0.78rem;margin-top:8px;"></div>
+          <a class="btn btn-primary" href="/volunteer.html" style="font-size:0.78rem;padding:9px 16px;">+ Apply to Judge</a>
         </div>
       </div>
     </div>
@@ -156,7 +134,6 @@
     <p>This sends an email to the judge with your fair details and a link to accept or decline.</p>
     <input type="hidden" id="targetJudgeId" />
     <input type="hidden" id="targetJudgeName" />
-    <input type="hidden" id="targetJudgeEmail" />
     <div class="modal-row"><label class="modal-label">Your name *</label><input type="text" id="reqTeacher" placeholder="Ms. Williams" /></div>
     <div class="modal-row"><label class="modal-label">Your email *</label><input type="email" id="reqTeacherEmail" placeholder="mwilliams@school.edu" /></div>
     <div class="modal-row"><label class="modal-label">School name *</label><input type="text" id="reqSchool" placeholder="Bath High School" /></div>
@@ -225,6 +202,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/script.js"></script>
+<script src="/geo.js"></script>
 <script src="/judgemap.js"></script>
 </body>
 </html>

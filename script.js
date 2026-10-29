@@ -748,85 +748,204 @@ function handleJTravelOther(sel) {
 }
 window.handleJTravelOther = handleJTravelOther;
 
+/* The location picker on the judge form. Mounted once on load; read
+   back by submitJudge(). */
+let judgeLocation = null;
+function initJudgeLocation() {
+  const el = document.getElementById('jLocation');
+  if (el && window.FG_GEO) judgeLocation = FG_GEO.mountPicker(el, { prefix: 'j' });
+}
+
+/* ── Referral and source tags ─────────────────────────────────
+   volunteer.html?ref=BI-42-K7QX credits the judge whose link it was;
+   ?src=TX-ACS tags which outreach channel the visit came from. Both are
+   kept for the session, so browsing another page before applying does
+   not lose them. */
+const REF_RE = /^[A-Z]{2}-\d{2,3}-[A-Z0-9]{2,6}$/;
+const SRC_RE = /^[\w.-]{1,40}$/;
+
+function readSignupTags() {
+  const params = new URLSearchParams(window.location.search);
+  const tags = {};
+  try { Object.assign(tags, JSON.parse(sessionStorage.getItem('fgSignupTags') || '{}')); } catch (_) {}
+  const ref = (params.get('ref') || '').trim().toUpperCase();
+  const src = (params.get('src') || params.get('utm_source') || '').trim();
+  if (REF_RE.test(ref)) tags.ref = ref;
+  if (SRC_RE.test(src)) tags.src = src;
+  try { sessionStorage.setItem('fgSignupTags', JSON.stringify(tags)); } catch (_) {}
+  return tags;
+}
+
+function initJudgeReferral() {
+  const note = document.getElementById('jRefNote');
+  if (!note) return;
+  const { ref } = readSignupTags();
+  if (!ref) return;
+  note.textContent = 'You were invited by a FairGame judge - thank you for joining them.';
+  note.style.display = 'block';
+}
+
+function judgeShareUrl(code) {
+  return 'https://fairgameinitiative.org/volunteer.html?ref=' + encodeURIComponent(code) + '#judge';
+}
+
+async function copyJudgeLink(btn) {
+  const input = btn.parentElement.querySelector('input');
+  try { await navigator.clipboard.writeText(input.value); }
+  catch (_) { input.select(); document.execCommand('copy'); }
+  btn.textContent = 'Copied';
+  setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+}
+window.copyJudgeLink = copyJudgeLink;
+
+/* Writes a row, dropping any column the database does not have yet and
+   trying again. The form ships ahead of migrations 14 and 15; an
+   application must never be lost because a column is missing. */
+async function insertJudgeRow(row) {
+  const r = { ...row };
+  for (let i = 0; i < 20; i++) {
+    const { error } = await sb.from('judges').insert([r]);
+    if (!error) return { error: null };
+    const m = (error.message || '').match(/'(\w+)' column|column "?(?:\w+\.)?(\w+)"? (?:of relation \S+ )?does not exist/);
+    const col = m && (m[1] || m[2]);
+    if (!col || !(col in r)) return { error };
+    console.warn('[Judge] column missing, saving without it:', col);
+    delete r[col];
+  }
+  return { error: { message: 'too many missing columns' } };
+}
+
+const LEVEL_TO_PREFERRED = {
+  'School fair':   ['school'],
+  'District fair': ['district', 'regional'],
+  'State fair':    ['state'],
+  'Any level':     ['school', 'district', 'regional', 'state'],
+};
+
 async function submitJudge() {
-  const name      = document.getElementById('jName')?.value.trim();
-  const email     = document.getElementById('jEmail')?.value.trim();
-  const org       = document.getElementById('jOrg')?.value.trim();
-  const city      = document.getElementById('jCity')?.value.trim();
-  const county    = document.getElementById('jCounty')?.value.trim();
-  const travelSel = document.getElementById('jTravel')?.value;
-  const travelNum = document.getElementById('jTravelOther')?.value;
+  const val = id => document.getElementById(id)?.value.trim() || '';
+  const name      = val('jName');
+  const email     = val('jEmail');
+  const org       = val('jOrg');
+  const travelSel = val('jTravel');
+  const travelNum = val('jTravelOther');
   const travel_range = travelSel === 'other' ? (travelNum || 'other') : travelSel;
   const travel_miles = travelSel === 'statewide' ? 9999
     : travelSel === 'other' ? (parseInt(travelNum) || 50)
     : (parseInt(travelSel) || 10);
-  const level     = document.getElementById('jLevel')?.value;
-  const notes     = document.getElementById('jNotes')?.value.trim();
+  const level     = val('jLevel');
+  const notes     = val('jNotes');
+  const heard     = val('jHeard');
+  const linkedRaw = val('jLinkedIn');
+  const workEmail = val('jWorkEmail');
   const pw        = document.getElementById('jPw')?.value || '';
   const pwConfirm = document.getElementById('jPwConfirm')?.value || '';
   const expertise = getExpertise();
+  const grades    = ['jg1','jg2','jg3'].filter(id => document.getElementById(id)?.checked).map(id => document.getElementById(id).value);
+  const months    = [...document.querySelectorAll('#jMonths input:checked')].map(i => i.value);
+  const virtual   = !!document.getElementById('jVirtual')?.checked;
+  const conduct   = !!document.getElementById('jConduct')?.checked;
   const msgEl     = document.getElementById('judgeMsg');
+  const submitBtn = document.getElementById('jSubmit');
   if (!msgEl) return;
 
-  // Every field is required: half-filled judge records cannot be matched
-  // to a fair, and chasing the rest by email never worked.
-  if (!name || !email || !org || !city || !county || !travelSel || !level || !notes) {
-    msgEl.textContent = 'Please fill out every field - all of them are required.';
-    msgEl.className   = 'form-msg error';
-    return;
-  }
-  if (travelSel === 'other' && !travelNum) {
-    msgEl.textContent = 'Please enter how many miles you are willing to travel.';
-    msgEl.className   = 'form-msg error';
-    return;
-  }
-  if (!expertise.length) {
-    msgEl.textContent = 'Please select at least one area of expertise.';
-    msgEl.className   = 'form-msg error';
-    return;
-  }
-  if (pw.length < 8) {
-    msgEl.textContent = 'Please choose a password of at least 8 characters.';
-    msgEl.className   = 'form-msg error';
-    return;
-  }
-  if (pw !== pwConfirm) {
-    msgEl.textContent = 'Those two passwords do not match.';
-    msgEl.className   = 'form-msg error';
-    return;
-  }
+  const fail = text => {
+    msgEl.textContent = text; msgEl.className = 'form-msg error';
+    if (submitBtn) submitBtn.disabled = false;
+  };
 
+  // Half-filled judge records cannot be matched to a fair, and chasing
+  // the rest by email never worked. City, ZIP and everything marked
+  // optional are the exceptions.
+  if (!name || !email || !org || !travelSel || !level) {
+    return fail('Please fill out every field marked with *.');
+  }
+  if (!judgeLocation) return fail('The location list did not load - please refresh the page.');
+  const loc = await judgeLocation.read();
+  if (!loc.ok) return fail(loc.error);
+  if (travelSel === 'other' && !travelNum) {
+    return fail('Please enter how many miles you are willing to travel.');
+  }
+  if (!expertise.length) return fail('Please select at least one area of expertise.');
+  if (!grades.length)    return fail('Please choose at least one grade level you would like to judge.');
+  const linkedin = linkedRaw ? normalizeLinkedIn(linkedRaw) : null;
+  if (linkedRaw && !linkedin) return fail('That does not look like a LinkedIn profile address - fix it or leave it blank.');
+  if (workEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(workEmail)) return fail('Please check the work email, or leave it blank.');
+  if (pw.length < 8)     return fail('Please choose a password of at least 8 characters.');
+  if (pw !== pwConfirm)  return fail('Those two passwords do not match.');
+  if (!conduct)          return fail('Please read and agree to the Judge Code of Conduct.');
+
+  // A second click while the first is still saving was one way the same
+  // person ended up in the table twice.
+  if (submitBtn) submitBtn.disabled = true;
   msgEl.textContent = 'Submitting…';
   msgEl.className   = 'form-msg';
   msgEl.style.display = 'block';
+
+  const alreadyApplied = () => {
+    msgEl.innerHTML = 'You have already applied with <strong>' + email.replace(/</g, '&lt;') + '</strong>, so there is nothing more to do here. '
+      + 'If you have been approved, <a href="/login.html">sign in</a>. To change your application, sign in and edit your profile, '
+      + 'or email <a href="mailto:fairgameinitiative@outlook.com">fairgameinitiative@outlook.com</a>.';
+    msgEl.className = 'form-msg error';
+    if (submitBtn) submitBtn.disabled = false;
+  };
 
   const P = { Biology:'BI', Chemistry:'CH', Physics:'PH', Environmental:'EN', Computer:'CS', Medicine:'ME' };
   const first  = expertise[0] || '';
   const prefix = Object.entries(P).find(([k]) => first.includes(k))?.[1] || 'GN';
   const fips   = String(Math.floor(Math.random() * 90) + 10);
-  const rnd    = Math.random().toString(36).slice(2, 4).toUpperCase();
+  // Four characters, not two: the code is now also a referral link, and
+  // two left too few combinations to stay unique across thousands.
+  const rnd    = Math.random().toString(36).slice(2, 6).toUpperCase().padEnd(4, 'X');
   const code   = `${prefix}-${fips}-${rnd}`;
+  const tags   = readSignupTags();
+  let confirmationSent = false;
 
   if (sb) {
-    const { error: judgeErr } = await sb.from('judges').insert([{
+    const { data: exists, error: dupErr } = await sb.rpc('fg_judge_email_exists', { p_email: email });
+    if (dupErr) console.warn('[Judge] duplicate check unavailable:', dupErr.message);
+    if (exists === true) return alreadyApplied();
+
+    const now = new Date().toISOString();
+    const row = {
       name,
       email,
-      org:             org || '',
-      city:            city + ', ' + county,
-      county,
+      code,
+      org:               org || '',
+      city:              loc.value.city,
+      state_code:        loc.value.state_code,
+      postal_code:       loc.value.postal_code,
+      latitude:          loc.value.latitude,
+      longitude:         loc.value.longitude,
+      geocode_source:    loc.value.geocode_source,
+      geocoded_at:       loc.value.latitude != null ? now : null,
+      country:           loc.value.country,
+      region:            loc.value.region,
       travel_range,
       travel_miles,
       expertise,
-      available_level: level || 'Any level',
-      notes:           notes || '',
-      status:          'unverified',
-      created_at:      new Date().toISOString()
-    }]);
+      available_level:   level || 'Any level',
+      preferred_levels:  LEVEL_TO_PREFERRED[level] || [],
+      preferred_grade_bands: grades,
+      available_months:  months,
+      virtual_ok:        virtual,
+      linkedin,
+      work_email:        workEmail || null,
+      heard_about:       heard || null,
+      signup_source:     tags.src || null,
+      referred_by:       tags.ref || null,
+      conduct_agreed_at: now,
+      notes:             notes || '',
+      status:            'unverified',
+      created_at:        now
+    };
+    const { error: judgeErr } = await insertJudgeRow(row);
 
     if (judgeErr) {
-      msgEl.textContent = 'Error saving your application - please email fairgameinitiative@outlook.com';
-      msgEl.className   = 'form-msg error';
-      return;
+      // The unique index from migration 15 catches what the check above
+      // could not, e.g. two tabs submitted at once.
+      if (judgeErr.code === '23505' || /duplicate key/i.test(judgeErr.message || '')) return alreadyApplied();
+      return fail('Error saving your application - please email fairgameinitiative@outlook.com');
     }
 
     /* Create the account with the password they just chose. This used to
@@ -845,11 +964,21 @@ async function submitJudge() {
       }
     });
 
+    // "We got your application", from supabase/functions/judge-confirmation.
+    // Until that function is deployed this fails quietly and the message
+    // on screen is the only confirmation - so it only mentions the email
+    // when one was actually sent.
+    confirmationSent = await Promise.race([
+      sb.functions.invoke('judge-confirmation', { body: { email } }).then(r => r?.data?.sent === true).catch(() => false),
+      new Promise(r => setTimeout(() => r(false), 8000)),
+    ]);
+
     if (authErr && !/already registered|already exists/i.test(authErr.message || '')) {
       msgEl.innerHTML = 'Your application was saved, but we could not create your portal account: '
         + authErr.message
         + '<br>Please email fairgameinitiative@outlook.com and we will set it up by hand.';
       msgEl.className = 'form-msg error';
+      if (submitBtn) submitBtn.disabled = false;
       return;
     }
   }
@@ -860,26 +989,30 @@ async function submitJudge() {
       form_type:  'Judge Application',
       from_name:  name,
       from_email: email,
-      details:    `Org: ${org || 'N/A'} | City: ${city} | County: ${county} | Travel: ${travel_range} | Level: ${level || 'Any'} | Expertise: ${expertise.join(', ') || 'None selected'} | Notes: ${notes || 'N/A'} | Code: ${code}`
+      details:    `Org: ${org || 'N/A'} | Location: ${FG_GEO.label(loc.value)}${loc.value.postal_code ? ' ' + loc.value.postal_code : ''} | Travel: ${travel_range} | Level: ${level || 'Any'} | Grades: ${grades.join(', ')} | Virtual: ${virtual ? 'yes' : 'no'} | Months: ${months.join(', ') || 'not given'} | Expertise: ${expertise.join(', ') || 'None selected'} | Heard: ${heard || 'N/A'} | Ref: ${tags.ref || '-'} | Src: ${tags.src || '-'} | Notes: ${notes || 'N/A'} | Code: ${code}`
     }, VOL_EJS_KEY).catch(() => {});
   }
 
-  ['jName','jEmail','jOrg','jCity','jCounty','jNotes','jTravelOther','jPw','jPwConfirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
-  ['je1','je2','je3','je4','je5','je6'].forEach(id => { const el = document.getElementById(id); if (el) el.checked = false; });
-  const lvl = document.getElementById('jLevel'); if (lvl) lvl.value = '';
-  const trv = document.getElementById('jTravel'); if (trv) trv.value = '';
+  ['jName','jEmail','jOrg','jNotes','jTravelOther','jPw','jPwConfirm','jLinkedIn','jWorkEmail','jHeard','jLevel','jTravel'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['je1','je2','je3','je4','je5','je6','jg1','jg2','jg3','jVirtual','jConduct'].forEach(id => { const el = document.getElementById(id); if (el) el.checked = false; });
+  document.querySelectorAll('#jMonths input').forEach(i => { i.checked = false; });
   const trvOther = document.getElementById('jTravelOther'); if (trvOther) trvOther.style.display = 'none';
+  judgeLocation.clear();
+  if (submitBtn) submitBtn.disabled = false;
 
   /* No longer "check your email for a link" - the portal opens when an
      admin approves the application, and the judge signs in with the
      password they just set. Promising immediate access was what sent
      people back to the login page again and again. */
-  msgEl.innerHTML = `Application received! Your judge code is <strong>${code}</strong>.<br><br>`
+  msgEl.innerHTML = `<strong>Application received!</strong> Your judge code is <strong>${code}</strong>.${confirmationSent ? ' A confirmation is on its way to your inbox.' : ''}<br><br>`
     + `We review every judge application personally, because judges see student work and school contact details. `
     + `You will get an email once you are approved - typically 1&ndash;3 business days. `
-    + `After that, sign in at <a href="/login.html">the portal</a> with this email address and the password you just chose.`;
+    + `After that, sign in at <a href="/login.html">the portal</a> with this email address and the password you just chose.<br><br>`
+    + `<strong>Know someone who would make a good judge?</strong> Share your link - everyone who applies through it is credited to you:`
+    + `<div class="ref-share"><input type="text" readonly value="${judgeShareUrl(code)}" onclick="this.select()" aria-label="Your referral link"/>`
+    + `<button type="button" class="btn btn-primary" style="padding:8px 14px;font-size:.8rem;" onclick="copyJudgeLink(this)">Copy</button></div>`;
   msgEl.className   = 'form-msg success';
-  logEvent('judge_application', { level, expertise, code });
+  logEvent('judge_application', { level, expertise, code, state: loc.value.state_code, country: loc.value.country, virtual, ref: tags.ref || null, src: tags.src || null });
 }
 
 /* Mentors are matched with minors, so an application has to point at a
@@ -1194,6 +1327,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initDonate();
   initSmoothScroll();
   initLockedDownloads();
+  initJudgeLocation();
+  initJudgeReferral();
 
   // Log page view
   logEvent('page_view', { page: window.location.pathname });
