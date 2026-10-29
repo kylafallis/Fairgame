@@ -27,9 +27,16 @@ const DEMO = {
     { school_name:'Linden-McKinley STEM',teacher_name:'Mr. Jones',    program_type:'Club Launch',       fair_date:null,        student_count:20, county:'Franklin County', status:'planning' },
   ],
   judges: [
-    { code:'EN-163-7X', name:'Dr. Robert Davis', expertise:['Environmental Science'], city:'Lima, Allen County',      available_level:'Any level',  status:'active' },
-    { code:'BI-163-K2', name:'Dr. Laura Chen',   expertise:['Biology'],               city:'Lima, Allen County',      available_level:'School fair', status:'unverified' },
-    { code:'CH-489-Q5', name:'Mark Thompson',    expertise:['Chemistry'],             city:'Columbus, Franklin County',available_level:'District fair',status:'active' },
+    { id:'j1', code:'EN-163-7X', name:'Dr. Robert Davis', email:'rdavis@example.com', org:'Ohio Northern University', expertise:['Environmental Science'], city:'Lima', state_code:'OH', postal_code:'45801', latitude:40.7426, longitude:-84.1052, geocode_source:'fg_zip', travel_miles:40, available_level:'Any level', status:'active', created_at:'2026-02-02T10:00:00Z' },
+    { id:'j2', code:'BI-163-K2', name:'Dr. Laura Chen', email:'lchen@example.com', org:'Allen County Health', expertise:['Biology / Life Sciences'], city:'Lima, Allen County', state_code:'OH', travel_miles:20, available_level:'School fair', status:'unverified', notes:'Weekends only.', created_at:'2026-10-27T14:00:00Z' },
+    { id:'j3', code:'CH-489-Q5', name:'Mark Thompson', email:'mthompson@example.com', org:'Procter & Gamble', expertise:['Chemistry / Biochemistry'], city:'Columbus, Franklin County', state_code:'OH', travel_miles:30, available_level:'District fair', status:'active', created_at:'2026-01-15T09:00:00Z' },
+    { id:'j4', name:'Dr. Aaliyah Brooks', email:'abrooks@example.com', org:'Georgia Tech', expertise:['Physics / Engineering','Computer Science / Math'], city:'Atlanta', state_code:'GA', postal_code:'30332', latitude:33.7756, longitude:-84.3963, geocode_source:'fg_zip', travel_miles:60, available_level:'Any level', status:'unverified', notes:'Happy to judge virtually too.', created_at:'2026-10-28T16:20:00Z' },
+    { id:'j5', name:'Carlos Mendoza', email:'cmendoza@example.com', org:'Intel', expertise:['Computer Science / Math'], city:'Phoenix', state_code:'AZ', latitude:33.4484, longitude:-112.074, geocode_source:'fg_city', travel_miles:100, available_level:'State fair', status:'active', created_at:'2026-09-30T11:00:00Z' },
+    { id:'j6', name:'Dr. Hannah Olsen', email:'holsen@example.com', org:'Mayo Clinic', expertise:['Medicine / Health Sciences','Biology / Life Sciences'], city:'Rochester', state_code:'MN', postal_code:'55905', latitude:44.0225, longitude:-92.4668, geocode_source:'fg_zip', travel_miles:9999, travel_range:'statewide', available_level:'Any level', status:'unverified', created_at:'2026-10-29T08:05:00Z' },
+    { id:'j7', name:'James Whitfield', email:'jwhitfield@example.com', org:'Retired teacher', expertise:['Environmental Science'], city:null, state_code:'MT', latitude:46.6, longitude:-110.0, geocode_source:'fg_state', travel_miles:100, available_level:'School fair', status:'unverified', created_at:'2026-10-26T19:40:00Z' },
+    { id:'j8', name:'Priya Natarajan', email:'pnatarajan@example.com', org:'UC Berkeley', expertise:['Chemistry / Biochemistry'], city:'Berkeley', state_code:'CA', postal_code:'94720', latitude:37.8719, longitude:-122.2585, geocode_source:'fg_zip', travel_miles:40, available_level:'District fair', status:'active', created_at:'2026-08-12T13:00:00Z' },
+    { id:'j9', name:'Samuel Okafor', email:'sokafor@example.com', org:'Texas Instruments', expertise:['Physics / Engineering'], city:'Dallas', state_code:'TX', latitude:32.7767, longitude:-96.797, geocode_source:'fg_city', travel_miles:60, available_level:'Any level', status:'inactive', created_at:'2026-05-03T10:00:00Z' },
+    { id:'j10', name:'Dr. Emily Tran', email:'etran@example.com', org:'University of Toronto', expertise:['Biology / Life Sciences'], country:'CA', city:'Toronto', state_code:'ON', postal_code:'M5S', latitude:43.6629, longitude:-79.3957, geocode_source:'fg_zip', travel_miles:30, available_level:'Any level', status:'unverified', created_at:'2026-10-25T12:00:00Z' },
   ],
   mentors: [
     { student_name:'Rishi Pampati',  mentor_name:'Kyla Fallis',    school:'Walnut Hills HS',      topic:'Biosensors', total_hours:6.5, session_count:4, status:'active' },
@@ -95,6 +102,28 @@ function approvalEmailFor(type, name) {
     };
   }
 
+  if (type === 'judge') {
+    return {
+      subject: 'You are approved as a FairGame judge',
+      body: hi +
+        'Your judge application is approved - thank you for volunteering. Sign in at\n' + PORTAL_URL + '\n' +
+        'with this email address and the password you chose when you applied. If it does not come to mind, use "Email me a sign-in code" on that page instead.\n\n' +
+        'In the Judge Portal you can keep your profile and travel distance up to date, and accept or decline requests from fairs near you.\n\n' +
+        'Before your first fair, the welcome guide and code of conduct are worth ten minutes:\n' +
+        'https://fairgameinitiative.org/files/judges/fairgame-judge-welcome-guide.pdf\n' +
+        'https://fairgameinitiative.org/files/judges/fairgame-judge-code-of-conduct.pdf\n\n' +
+        'Know someone who would make a good judge? Send them to https://fairgameinitiative.org/volunteer.html\n\n' +
+        APPROVAL_SIGNOFF
+    };
+  }
+
+  if (type === 'judge_update') {
+    return {
+      subject: 'A note from FairGame for our judges',
+      body: hi + '\n\n' + APPROVAL_SIGNOFF
+    };
+  }
+
   if (type === 'student_mentor_request') {
     return {
       subject: 'FairGame: your mentor request has been reviewed',
@@ -128,11 +157,10 @@ function openMailto(url) {
   } catch (_) { return false; }
 }
 
+/* Results go to a toast in the corner rather than the strip at the top
+   of the section, which was out of sight after approving row 40. */
 function approvalMsg(html, type) {
-  const el = document.getElementById('approvalsMsg');
-  if (!el) return;
-  el.innerHTML = html;
-  el.className = 'msg-strip show ' + (type || 'ok');
+  fgToast(html, type || 'ok');
 }
 
 /* Escapes user-submitted text before it goes into the admin tables. */
@@ -148,6 +176,7 @@ requireAuth('admin', () => {
   onSectionLoad('approvals', loadApprovals);
   onSectionLoad('schools',   loadSchools);
   onSectionLoad('judges',    loadJudges);
+  onSectionLoad('judgemap',  loadJudgeMap);
   onSectionLoad('mentors',   loadMentors);
   onSectionLoad('review',    loadReviewQueue);
   onSectionLoad('convos',    loadConvos);
@@ -159,7 +188,10 @@ async function loadAllData() {
   if (!sb) {
     document.getElementById('kSchools').textContent    = DEMO.schools.filter(s=>s.status==='active').length;
     document.getElementById('kPending').textContent    = DEMO.approvals.filter(a=>a.status==='pending').length;
-    document.getElementById('kJudges').textContent     = DEMO.judges.length;
+    document.getElementById('kJudges').textContent     = DEMO.judges.filter(j=>j.status==='active').length;
+    document.getElementById('kJudgesPending').textContent = DEMO.judges.filter(j=>j.status==='unverified').length;
+    const jp = DEMO.judges.filter(j=>j.status==='unverified').length, jb = document.getElementById('judgeBadge');
+    if (jb) { jb.textContent = jp; jb.style.display = jp ? 'inline-block' : 'none'; }
     document.getElementById('kMentors').textContent    = DEMO.mentors.length;
     document.getElementById('kDownloads').textContent  = '425';
     document.getElementById('kSubscribers').textContent= '94';
@@ -186,10 +218,22 @@ async function loadAllData() {
     document.getElementById('kSubscribers').textContent= subscribers||0;
     document.getElementById('kPortal').textContent     = portal||0;
     document.getElementById('kJudgeReqs').textContent  = judgeReqs||0;
+    refreshJudgeBadge();
     const p = pending||0;
     const badge = document.getElementById('approvalBadge');
     if (p > 0) { badge.textContent = p; badge.style.display = 'inline-block'; setAlert(`${p} pending approval${p>1?'s':''}.`, 'approvals'); }
   }
+}
+
+async function refreshJudgeBadge() {
+  if (!sb) return;
+  const { count, error } = await sb.from('judges').select('id', { count: 'exact', head: true }).eq('status', 'unverified');
+  const badge = document.getElementById('judgeBadge');
+  if (error || !badge) return;
+  badge.textContent = count || 0;
+  badge.style.display = count ? 'inline-block' : 'none';
+  const k = document.getElementById('kJudgesPending');
+  if (k) k.textContent = count || 0;
 }
 
 function setAlert(text, section) {
@@ -486,8 +530,18 @@ async function approveUser(id) {
     'ok'
   );
 
-  await loadApprovals();
-  await loadAllData();
+  // Update the one record and redraw from memory - no re-fetch, so the
+  // table does not blank out and the page stays where it was.
+  rec.status = 'active';
+  keepScroll(renderApprovals);
+  loadAllData();
+}
+
+/* Runs a re-render without letting the page move. */
+function keepScroll(fn) {
+  const y = window.scrollY;
+  fn();
+  if (Math.abs(window.scrollY - y) > 1) window.scrollTo(0, y);
 }
 async function rejectUser(id) {
   if (!confirm('Reject this request?')) return;
@@ -497,7 +551,10 @@ async function rejectUser(id) {
     if (error) { approvalMsg('Could not reject - ' + esc(error.message), 'err'); return; }
   }
   approvalMsg('Request rejected. No email was sent.', 'ok');
-  await loadApprovals();
+  const rec = allApprovals.find(a => String(a.id) === String(id));
+  if (rec) rec.status = 'rejected';
+  keepScroll(renderApprovals);
+  loadAllData();
 }
 window.approveUser = approveUser; window.rejectUser = rejectUser;
 
@@ -520,37 +577,687 @@ function renderSchools(data) {
       </tr>`).join('');
 }
 
-async function loadJudges() {
-  return fgLoad('judgesTbody',
-    async () => sb ? fgRows(await sb.from('judges').select('*').order('created_at',{ascending:false})) : DEMO.judges,
-    renderJudges,
-    { empty: 'No judges yet - check back later.' });
+/* ══════════════════════════════════════════════════════════════════
+   JUDGE NETWORK
+
+   Built for hundreds of applications arriving at once from outreach in
+   every state, not the dozen the old table was drawn for. Three rules:
+
+   - Nothing an admin clicks moves the page. A status change rewrites
+     that one row where it sits; the list is only re-filtered when the
+     admin changes a filter. The old Verify button re-fetched the whole
+     table behind a spinner, which is what kept snapping back to the top.
+   - The queue opens on "Needs review", because that is the work.
+   - Anything done to one judge can be done to a selection: activate,
+     deactivate, or a BCC email.
+   ══════════════════════════════════════════════════════════════════ */
+
+const JUDGE_FIELDS = ['Biology / Life Sciences','Chemistry / Biochemistry','Physics / Engineering',
+                      'Environmental Science','Computer Science / Math','Medicine / Health Sciences'];
+const JUDGE_STATUS_LABEL = { unverified: 'Needs review', active: 'Active', inactive: 'Inactive' };
+const JUDGE_PAGE = 50;
+const MAILTO_BATCH = 40;   // Outlook and Gmail start truncating long mailto: links past this
+
+let allJudges = [];
+const jn = { status: 'unverified', q: '', state: '', field: '', sort: 'new', shown: JUDGE_PAGE, selected: new Set() };
+
+function jStatusOf(j) { return j.status || 'unverified'; }
+function findJudge(id)  { return allJudges.find(j => String(j.id) === String(id)); }
+
+async function fetchJudges() {
+  if (!sb) return DEMO.judges.map(j => ({ ...j }));
+  return fgRows(await sb.from('judges').select('*').order('created_at', { ascending: false }));
 }
 
-function renderJudges(data) {
-  document.getElementById('judgesTbody').innerHTML = data.map(j => `<tr>
-        <td class="col-mono">${j.code||'–'}</td>
-        <td class="col-name">${j.name}</td>
-        <td class="col-sm">${(j.expertise||[]).join(', ')}</td>
-        <td class="col-sm">${j.city||'–'}</td>
-        <td class="col-sm">${j.available_level||'–'}</td>
-        <td><span class="chip chip-${j.status}">${j.status}</span></td>
-        <td style="white-space:nowrap;">
-          ${j.status==='unverified' ? `<button class="btn-xs approve" onclick="verifyJudge('${j.id}')">Verify</button>` : ''}
-          <button class="btn-xs danger" onclick="deactivateJudge('${j.id}')">Deactivate</button>
-        </td>
-      </tr>`).join('');
+async function loadJudges() {
+  return fgLoad('judgesTbody',
+    async () => {
+      allJudges = await fetchJudges();
+      fillJudgeStateFilter();
+      return allJudges;
+    },
+    renderJudges,
+    { empty: 'No judges yet - share the volunteer page and they will show up here.' });
 }
-async function verifyJudge(id) {
-  if (sb) await sb.from('judges').update({ status:'active' }).eq('id', id);
-  await loadJudges();
+window.loadJudges = loadJudges;
+
+/* -- Filtering ---------------------------------------------------- */
+
+function judgeMatches(j) {
+  if (jn.status !== 'all' && jStatusOf(j) !== jn.status) return false;
+  if (jn.state === '__intl') { if ((j.country || 'US') === 'US') return false; }
+  else if (jn.state && (j.state_code || '') !== jn.state) return false;
+  if (jn.field && !(j.expertise || []).some(e => e.split('/')[0].trim() === jn.field.split('/')[0].trim())) return false;
+  if (jn.q) {
+    const hay = [j.name, j.email, j.org, j.city, j.state_code, j.postal_code, j.region, j.code, j.notes,
+                 (j.expertise || []).join(' ')].join(' ').toLowerCase();
+    if (!jn.q.split(/\s+/).every(w => hay.includes(w))) return false;
+  }
+  return true;
 }
+
+function sortJudges(list) {
+  const t = j => Date.parse(j.created_at || 0) || 0;
+  const by = {
+    new:   (a, b) => t(b) - t(a),
+    old:   (a, b) => t(a) - t(b),
+    name:  (a, b) => (a.name || '').localeCompare(b.name || ''),
+    state: (a, b) => (a.state_code || 'ZZ').localeCompare(b.state_code || 'ZZ') || (a.name || '').localeCompare(b.name || ''),
+  };
+  return list.sort(by[jn.sort] || by.new);
+}
+
+function filteredJudges() { return sortJudges(allJudges.filter(judgeMatches)); }
+
+function setJudgeTab(status) {
+  jn.status = status; jn.shown = JUDGE_PAGE;
+  document.querySelectorAll('#jnTabs .jn-tab').forEach(b => b.classList.toggle('active', b.dataset.status === status));
+  renderJudges();
+}
+function setJudgeFilter() {
+  jn.q     = (document.getElementById('jnSearch')?.value || '').trim().toLowerCase();
+  jn.state = document.getElementById('jnState')?.value || '';
+  jn.field = document.getElementById('jnField')?.value || '';
+  jn.sort  = document.getElementById('jnSort')?.value || 'new';
+  jn.shown = JUDGE_PAGE;
+  renderJudges();
+}
+function showMoreJudges() { jn.shown += JUDGE_PAGE; renderJudges(); }
+Object.assign(window, { setJudgeTab, setJudgeFilter, showMoreJudges });
+
+/* Only the states that actually have judges, with counts, so the
+   dropdown doubles as a quick read of where people are. */
+function fillJudgeStateFilter() {
+  const sel = document.getElementById('jnState');
+  if (!sel) return;
+  const counts = {};
+  let intl = 0;
+  allJudges.forEach(j => {
+    if ((j.country || 'US') !== 'US') { intl++; return; }
+    const st = j.state_code || '';
+    if (st) counts[st] = (counts[st] || 0) + 1;
+  });
+  const keep = sel.value;
+  sel.innerHTML = '<option value="">All states</option>' +
+    Object.keys(counts).sort().map(st => `<option value="${esc(st)}">${esc(st)} (${counts[st]})</option>`).join('') +
+    (intl ? `<option value="__intl">Outside the US (${intl})</option>` : '');
+  sel.value = keep;
+}
+
+function updateJudgeCounts() {
+  const n = { unverified: 0, active: 0, inactive: 0, all: allJudges.length };
+  allJudges.forEach(j => { const s = jStatusOf(j); if (s in n) n[s]++; });
+  Object.entries(n).forEach(([k, v]) => { const el = document.getElementById('jnN-' + k); if (el) el.textContent = v; });
+  const badge = document.getElementById('judgeBadge');
+  if (badge) { badge.textContent = n.unverified; badge.style.display = n.unverified ? 'inline-block' : 'none'; }
+}
+
+/* -- Rendering ---------------------------------------------------- */
+
+function travelLabel(j) {
+  const m = j.travel_miles;
+  if (j.travel_range === 'statewide' || m >= 9999) return 'Anywhere in state';
+  return m ? 'Up to ' + m + ' mi' : (j.travel_range ? esc(j.travel_range) : '–');
+}
+
+function shortFields(j) {
+  return (j.expertise || []).map(e => esc(e.split('/')[0].trim())).join(', ') || '–';
+}
+
+function judgeActionsHTML(j) {
+  const id = esc(j.id), s = jStatusOf(j);
+  if (s === 'active')   return `<button class="btn-xs danger" onclick="deactivateJudge('${id}')">Deactivate</button>`;
+  if (s === 'inactive') return `<button class="btn-xs" onclick="activateJudge('${id}')">Reactivate</button>`;
+  return `<button class="btn-xs approve" onclick="activateJudge('${id}')">Activate</button>
+          <button class="btn-xs danger" onclick="deactivateJudge('${id}')">Decline</button>`;
+}
+
+function judgeRowHTML(j) {
+  const id = esc(j.id), s = jStatusOf(j);
+  const applied = j.created_at ? new Date(j.created_at).toLocaleDateString() : '–';
+  return `<tr id="jrow-${id}" class="row-click" title="Open the full profile" onclick="openJudge('${id}')">
+    <td class="jn-check" onclick="event.stopPropagation();"><input type="checkbox" aria-label="Select ${esc(j.name)}" ${jn.selected.has(String(j.id)) ? 'checked' : ''} onchange="toggleJudgeSelect('${id}', this.checked)"/></td>
+    <td class="col-name">${esc(j.name || 'No name')}<div class="text-xs text-muted">${esc(j.org || '')}</div></td>
+    <td class="col-sm">${shortFields(j)}</td>
+    <td class="col-sm">${esc(FG_GEO.label(j))}${j.postal_code ? ' <span class="text-muted">' + esc(j.postal_code) + '</span>' : ''}</td>
+    <td class="col-sm">${travelLabel(j)}</td>
+    <td class="col-sm">${applied}</td>
+    <td><span class="chip chip-${esc(s)}">${esc(JUDGE_STATUS_LABEL[s] || s)}</span></td>
+    <td style="white-space:nowrap;" onclick="event.stopPropagation();">${judgeActionsHTML(j)}</td>
+  </tr>`;
+}
+
+function renderJudges() {
+  const tbody = document.getElementById('judgesTbody');
+  const more  = document.getElementById('jnMore');
+  if (!tbody) return;
+  updateJudgeCounts();
+  const list = filteredJudges();
+  const all  = document.getElementById('jnAll');
+  if (all) all.checked = false;
+
+  if (!list.length) {
+    const tab = JUDGE_STATUS_LABEL[jn.status];
+    fgEmpty(tbody, jn.q || jn.state || jn.field ? 'No judges match these filters.'
+      : jn.status === 'unverified' ? 'Nobody is waiting for review. Nice work.'
+      : `No ${tab ? tab.toLowerCase() + ' ' : ''}judges yet.`);
+    if (more) more.innerHTML = '';
+    syncJudgeBulkBar();
+    return;
+  }
+  tbody.innerHTML = list.slice(0, jn.shown).map(judgeRowHTML).join('');
+  if (more) {
+    more.innerHTML = list.length > jn.shown
+      ? `<span class="text-xs text-muted" style="align-self:center;margin-right:10px;">Showing ${jn.shown} of ${list.length}</span>
+         <button class="btn-xs" onclick="showMoreJudges()">Show ${Math.min(JUDGE_PAGE, list.length - jn.shown)} more</button>`
+      : `<span class="text-xs text-muted">${list.length} judge${list.length === 1 ? '' : 's'}</span>`;
+  }
+  syncJudgeBulkBar();
+}
+
+/* Rewrites one row in place after its status changes. The row stays put
+   even if it no longer fits the tab, so the rows under it do not jump;
+   it drops out the next time a filter changes. */
+function refreshJudgeRow(id) {
+  const tr = document.getElementById('jrow-' + id);
+  const j  = findJudge(id);
+  if (!tr || !j) return;
+  const tmp = document.createElement('tbody');
+  tmp.innerHTML = judgeRowHTML(j);
+  const row = tmp.firstElementChild;
+  row.classList.add('jn-done');
+  tr.replaceWith(row);
+}
+
+/* -- Selection ---------------------------------------------------- */
+
+function toggleJudgeSelect(id, on) {
+  if (on) jn.selected.add(String(id)); else jn.selected.delete(String(id));
+  syncJudgeBulkBar();
+}
+function toggleAllJudges(on) {
+  filteredJudges().slice(0, jn.shown).forEach(j => on ? jn.selected.add(String(j.id)) : jn.selected.delete(String(j.id)));
+  document.querySelectorAll('#judgesTbody .jn-check input').forEach(cb => { cb.checked = on; });
+  syncJudgeBulkBar();
+}
+function clearJudgeSelection() {
+  jn.selected.clear();
+  document.querySelectorAll('#judgesTbody .jn-check input, #jnAll').forEach(cb => { cb.checked = false; });
+  syncJudgeBulkBar();
+}
+function syncJudgeBulkBar() {
+  const bar = document.getElementById('jnBulk');
+  if (!bar) return;
+  const n = jn.selected.size;
+  bar.classList.toggle('show', n > 0);
+  const label = document.getElementById('jnBulkN');
+  if (label) label.textContent = n + ' selected';
+}
+Object.assign(window, { toggleJudgeSelect, toggleAllJudges, clearJudgeSelection });
+
+/* -- Status changes ----------------------------------------------- */
+
+async function setJudgeStatus(ids, status) {
+  ids = ids.map(String);
+  if (sb) {
+    const { error } = await sb.from('judges').update({ status }).in('id', ids);
+    if (error) { fgToast('Could not update - ' + esc(error.message), 'err'); return false; }
+  }
+  ids.forEach(id => { const j = findJudge(id); if (j) j.status = status; refreshJudgeRow(id); });
+  updateJudgeCounts();
+  if (jmMap) renderJudgeMap();
+  return true;
+}
+
+/* One mailto per batch, the judges in BCC and FairGame in To, so nobody
+   sees anyone else's address. */
+function judgeBccLinks(people, type) {
+  const withEmail = people.filter(p => p.email);
+  const m = approvalEmailFor(type, '');
+  const links = [];
+  for (let i = 0; i < withEmail.length; i += MAILTO_BATCH) {
+    const batch = withEmail.slice(i, i + MAILTO_BATCH);
+    links.push({
+      label: withEmail.length > MAILTO_BATCH ? `${i + 1}–${i + batch.length}` : '',
+      url: 'mailto:fairgameinitiative@outlook.com?bcc=' + encodeURIComponent(batch.map(p => p.email).join(',')) +
+           '&subject=' + encodeURIComponent(m.subject) + '&body=' + encodeURIComponent(m.body),
+    });
+  }
+  return links;
+}
+
+async function activateJudge(id) {
+  const j = findJudge(id);
+  if (!j) return;
+  const prev = jStatusOf(j);
+  if (!await setJudgeStatus([id], 'active')) return;
+  closeModal('portfolioModal');
+  const mailto = j.email ? buildMailto(j.email, 'judge', j.name) : '';
+  if (mailto) openMailto(mailto);
+  fgToast(`Activated <strong>${esc(j.name)}</strong>. ` +
+    (mailto ? `A welcome email is open in your mail app - <a href="${mailto}">open it again</a>. ` : 'No email on file, so no welcome email. ') +
+    `<a href="#" onclick="undoJudge('${esc(id)}','${esc(prev)}');this.closest('.fg-toast').remove();return false;">Undo</a>`);
+}
+
 async function deactivateJudge(id) {
-  if (!confirm('Deactivate this judge?')) return;
-  if (sb) await sb.from('judges').update({ status:'inactive' }).eq('id', id);
-  await loadJudges();
+  const j = findJudge(id);
+  if (!j) return;
+  const declining = jStatusOf(j) === 'unverified';
+  if (!confirm(declining
+      ? `Decline ${j.name}'s application? They will see "paused" if they sign in. You can reactivate them later.`
+      : `Deactivate ${j.name}? Their portal closes and teachers stop seeing them. You can reactivate them later.`)) return;
+  const prev = jStatusOf(j);
+  if (!await setJudgeStatus([id], 'inactive')) return;
+  closeModal('portfolioModal');
+  fgToast(`${declining ? 'Declined' : 'Deactivated'} <strong>${esc(j.name)}</strong>. No email was sent. ` +
+    `<a href="#" onclick="undoJudge('${esc(id)}','${esc(prev)}');this.closest('.fg-toast').remove();return false;">Undo</a>`);
 }
-window.verifyJudge = verifyJudge; window.deactivateJudge = deactivateJudge;
+
+async function undoJudge(id, status) {
+  if (await setJudgeStatus([id], status)) fgToast('Undone.');
+}
+
+async function bulkJudges(action) {
+  const people = [...jn.selected].map(findJudge).filter(Boolean);
+  if (!people.length) return;
+  const n = people.length, s = n === 1 ? '' : 's';
+
+  if (action === 'email') {
+    const links = judgeBccLinks(people, 'judge_update');
+    fgToast(`Email ${n} judge${s}: ` + links.map(l => `<a href="${l.url}">${l.label || 'open draft'}</a>`).join(' · '), 'ok', 0);
+    return;
+  }
+  if (action === 'activate') {
+    if (!confirm(`Activate ${n} judge${s}? Their portals open right away.`)) return;
+    if (!await setJudgeStatus(people.map(p => p.id), 'active')) return;
+    const links = judgeBccLinks(people, 'judge');
+    fgToast(`Activated ${n} judge${s}. Send the welcome email: ` +
+      links.map(l => `<a href="${l.url}">${l.label || 'open draft'}</a>`).join(' · '), 'ok', 0);
+  }
+  if (action === 'deactivate') {
+    if (!confirm(`Deactivate ${n} judge${s}? No email is sent.`)) return;
+    if (!await setJudgeStatus(people.map(p => p.id), 'inactive')) return;
+    fgToast(`Deactivated ${n} judge${s}.`);
+  }
+  clearJudgeSelection();
+}
+Object.assign(window, { activateJudge, deactivateJudge, undoJudge, bulkJudges });
+
+/* -- Export ------------------------------------------------------- */
+
+function exportJudgesCsv() {
+  const list = filteredJudges();
+  if (!list.length) { fgToast('Nothing to export with these filters.'); return; }
+  const cols = [
+    ['Name', j => j.name], ['Email', j => j.email], ['Organization', j => j.org], ['Status', j => jStatusOf(j)],
+    ['Country', j => j.country || 'US'], ['State', j => j.state_code || j.region], ['City', j => j.city],
+    ['ZIP', j => j.postal_code], ['Latitude', j => j.latitude], ['Longitude', j => j.longitude],
+    ['Expertise', j => (j.expertise || []).join('; ')], ['Level', j => j.available_level],
+    ['Travel', j => j.travel_miles >= 9999 ? 'statewide' : j.travel_miles], ['Notes', j => j.notes],
+    ['Code', j => j.code], ['Applied', j => j.created_at ? j.created_at.slice(0, 10) : ''],
+  ];
+  const cell = v => { const t = v == null ? '' : String(v); return /[",\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t; };
+  const csv = [cols.map(c => c[0]).join(','), ...list.map(j => cols.map(c => cell(c[1](j))).join(','))].join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
+  a.download = `fairgame-judges-${jn.status}-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+}
+window.exportJudgesCsv = exportJudgesCsv;
+
+/* -- Profile sheet ------------------------------------------------ */
+
+const PIN_SOURCE = {
+  fg_zip: 'From their ZIP code', fg_city: 'From their city', fg_state: 'State only - approximate',
+  census_zcta: 'From their ZIP code', census_zcta_city: 'From their city', saved: 'Saved',
+  zip: 'From their ZIP code', city: 'From their city', state: 'State only - approximate (not saved yet)',
+};
+
+async function openJudge(id) {
+  const j = findJudge(id);
+  if (!j) return;
+  const s = jStatusOf(j);
+  // The map tab fills jmPoints; until it has been opened, work this
+  // one out here.
+  let pt = jmPoints.get(String(j.id));
+  if (!pt) {
+    pt = await FG_GEO.resolveJudge(j).catch(() => null);
+    if (pt) jmPoints.set(String(j.id), pt);
+  }
+  const applied = j.created_at ? new Date(j.created_at) : null;
+  const waited = applied ? Math.floor((Date.now() - applied) / 86400000) : null;
+
+  document.getElementById('portfolioBody').innerHTML = `
+    <div class="pf-head">
+      <h3 style="margin:0;">${esc(j.name || 'No name given')}</h3>
+      <div class="pf-chips">
+        <span class="chip chip-interest">judge</span>
+        <span class="chip chip-${esc(s)}">${esc(JUDGE_STATUS_LABEL[s] || s)}</span>
+        ${j.code ? `<span class="chip chip-declined">${esc(j.code)}</span>` : ''}
+      </div>
+    </div>
+    <div class="pf-group">
+      <div class="pf-group-title">Contact</div>
+      ${pfPlainRow('Email', j.email ? `<a href="mailto:${esc(j.email)}">${esc(j.email)}</a>` : pfMissing())}
+      ${pfPlainRow('Organization', j.org ? esc(j.org) : pfMissing())}
+      ${pfPlainRow('Applied', applied ? esc(applied.toLocaleDateString() + (waited != null ? ' - ' + (waited <= 0 ? 'today' : waited + ' day' + (waited === 1 ? '' : 's') + ' ago') : '')) : pfMissing())}
+    </div>
+    <div class="pf-group">
+      <div class="pf-group-title">Location</div>
+      ${pfPlainRow('Where', esc(FG_GEO.label(j)))}
+      ${pfPlainRow('Country', esc(FG_GEO.countryName(j.country || 'US')))}
+      ${pfPlainRow('ZIP / postal code', j.postal_code ? esc(j.postal_code) : pfMissing('Not given'))}
+      ${pfPlainRow('Map pin', pt ? esc(PIN_SOURCE[pt.source] || pt.source) : pfMissing('Cannot be placed - no state on file'))}
+      ${pfPlainRow('Will travel', travelLabel(j))}
+    </div>
+    <div class="pf-group">
+      <div class="pf-group-title">Judging</div>
+      ${pfRow('expertise', j.expertise || [])}
+      ${pfPlainRow('Level', j.available_level ? esc(j.available_level) : pfMissing())}
+      ${pfRow('notes', j.notes)}
+    </div>`;
+  document.getElementById('portfolioActions').innerHTML = `
+    <button class="btn-ghost" onclick="closeModal('portfolioModal')">Close</button>
+    ${pt ? `<button class="btn-xs" onclick="closeModal('portfolioModal');focusJudgeOnMap('${esc(j.id)}')">Show on map</button>` : ''}
+    ${s !== 'inactive' ? `<button class="btn-xs danger" onclick="deactivateJudge('${esc(j.id)}')">${s === 'unverified' ? 'Decline' : 'Deactivate'}</button>` : ''}
+    ${s !== 'active' ? `<button class="btn-primary" style="font-size:.8rem;padding:8px 14px;" onclick="activateJudge('${esc(j.id)}')">${s === 'inactive' ? 'Reactivate' : 'Activate'} &rarr;</button>` : ''}`;
+  openModal('portfolioModal');
+}
+window.openJudge = openJudge;
+
+
+/* ══════════════════════════════════════════════════════════════════
+   JUDGE MAP
+
+   Every judge as a pin, clustered so a few thousand stay readable, with
+   an optional 100-mile ring around each one - the practical reach of a
+   volunteer driving to a fair. Two outreach tools sit beside it:
+
+   - Judges near a place: pick a state/city/ZIP or click the map, and
+     see who is within N miles, nearest first.
+   - Coverage by state: all 50 states and DC, with the ones that have no
+     active judge in red. That is the outreach list.
+
+   Pins come from the latitude/longitude saved at sign-up. Older rows
+   that have none are placed from their ZIP, city, or state in the
+   browser; "Save missing pins" writes those back so it only happens once.
+   ══════════════════════════════════════════════════════════════════ */
+
+const JM_COLORS = { active: '#357a38', unverified: '#d97706', inactive: '#9ca3af' };
+const JM_RING_MILES = 100;
+const METERS_PER_MILE = 1609.344;
+const US_51 = ['AL','AK','AZ','AR','CA','CO','CT','DE','DC','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD',
+               'MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD',
+               'TN','TX','UT','VT','VA','WA','WV','WI','WY'];
+
+let jmMap = null, jmCluster = null, jmRings = null, jmSearch = null, jmPicker = null;
+const jmPoints  = new Map();   // judge id -> { lat, lng, source }
+const jmMarkers = new Map();   // judge id -> marker
+let jmLastSearch = null;
+
+async function ensureJudgePoints() {
+  await Promise.all(allJudges.map(async j => {
+    const key = String(j.id);
+    if (jmPoints.has(key)) return;
+    try { const pt = await FG_GEO.resolveJudge(j); if (pt) jmPoints.set(key, pt); }
+    catch (_) { /* a missing state file just leaves this one unmapped */ }
+  }));
+}
+
+function initJudgeMap() {
+  if (jmMap) return true;
+  if (!window.L) {
+    fgEmpty(document.getElementById('adminJudgeMap'), 'The map library did not load - check your connection and refresh.');
+    return false;
+  }
+  jmMap = L.map('adminJudgeMap', { preferCanvas: true, worldCopyJump: true }).setView([39.5, -98.35], 4);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap contributors &copy; CARTO', maxZoom: 18,
+  }).addTo(jmMap);
+  jmRings   = L.layerGroup().addTo(jmMap);
+  jmCluster = (L.markerClusterGroup
+    ? L.markerClusterGroup({ maxClusterRadius: 45, showCoverageOnHover: false, spiderfyOnMaxZoom: true })
+    : L.layerGroup()).addTo(jmMap);
+  jmSearch  = L.layerGroup().addTo(jmMap);
+  jmMap.on('click', e => searchNearPoint({ lat: e.latlng.lat, lng: e.latlng.lng }, 'the point you clicked'));
+
+  const locEl = document.getElementById('jmLocation');
+  if (locEl) jmPicker = FG_GEO.mountPicker(locEl, { prefix: 'jm', labelClass: 'form-label' });
+  return true;
+}
+
+async function loadJudgeMap() {
+  if (!initJudgeMap()) return;
+  // The section was hidden when Leaflet measured it.
+  setTimeout(() => jmMap.invalidateSize(), 0);
+  try {
+    allJudges = await fetchJudges();
+  } catch (e) {
+    fgToast('Could not load judges for the map - ' + esc(e.message), 'err');
+    return;
+  }
+  await ensureJudgePoints();
+  renderJudgeMap();
+  if (!jmMap._fgFitted) { fitJudgeMap(); jmMap._fgFitted = true; }
+}
+
+function jmVisible(j) {
+  const s = jStatusOf(j);
+  if (!document.getElementById(s === 'active' ? 'jmShowActive' : s === 'inactive' ? 'jmShowInactive' : 'jmShowPending')?.checked) return false;
+  const field = document.getElementById('jmField')?.value;
+  if (field && !(j.expertise || []).some(e => e.split('/')[0].trim() === field.split('/')[0].trim())) return false;
+  return true;
+}
+
+function jmPopupHTML(j, pt) {
+  const s = jStatusOf(j);
+  return `<div class="jm-popup">
+    <strong>${esc(j.name)}</strong><br/>
+    <span class="chip chip-${esc(s)}">${esc(JUDGE_STATUS_LABEL[s] || s)}</span>
+    <div>${esc(j.org || '')}</div>
+    <div class="text-muted">${esc(FG_GEO.label(j))} · travels ${travelLabel(j).toLowerCase()}</div>
+    <div>${shortFields(j)}</div>
+    ${/state/.test(pt.source) ? '<div class="jn-pin-src">Pin is approximate - state only</div>' : ''}
+    <div class="jm-popup-actions">
+      <button class="btn-xs" onclick="openJudge('${esc(j.id)}')">Profile</button>
+      ${s !== 'active' ? `<button class="btn-xs approve" onclick="activateJudge('${esc(j.id)}')">Activate</button>` : ''}
+    </div>
+  </div>`;
+}
+
+function renderJudgeMap() {
+  if (!jmMap) return;
+  jmCluster.clearLayers(); jmRings.clearLayers(); jmMarkers.clear();
+  const rings = document.getElementById('jmRings')?.checked;
+  let shown = 0, unmapped = 0, unsaved = 0;
+
+  allJudges.forEach(j => {
+    const pt = jmPoints.get(String(j.id));
+    if (j.latitude == null && pt) unsaved++;
+    if (!jmVisible(j)) return;
+    if (!pt) { unmapped++; return; }
+    const color = JM_COLORS[jStatusOf(j)] || JM_COLORS.unverified;
+    const approx = /state/.test(pt.source);
+    const m = L.circleMarker([pt.lat, pt.lng], {
+      radius: 7, color: '#1c3a1c', weight: 1.5, fillColor: color, fillOpacity: approx ? 0.3 : 0.95,
+    }).bindPopup(() => jmPopupHTML(j, pt));
+    jmCluster.addLayer(m);
+    jmMarkers.set(String(j.id), m);
+    if (rings) {
+      jmRings.addLayer(L.circle([pt.lat, pt.lng], {
+        radius: JM_RING_MILES * METERS_PER_MILE, color, weight: 1, opacity: 0.35, fillOpacity: 0.05, interactive: false,
+      }));
+    }
+    shown++;
+  });
+
+  const sum = document.getElementById('jmSummary');
+  if (sum) sum.textContent = `${shown} on the map` + (unmapped ? ` · ${unmapped} cannot be placed (no state, or outside the US and Canada)` : '');
+  const save = document.getElementById('jmSaveBtn');
+  if (save) {
+    save.style.display = unsaved && sb ? '' : 'none';
+    save.textContent = `Save ${unsaved} missing pin${unsaved === 1 ? '' : 's'}`;
+  }
+  renderCoverage();
+  if (jmLastSearch) searchNearPoint(jmLastSearch.pt, jmLastSearch.label, true);
+}
+window.renderJudgeMap = renderJudgeMap;
+
+function fitJudgeMap() {
+  if (!jmMap) return;
+  const pts = allJudges.filter(jmVisible).map(j => jmPoints.get(String(j.id))).filter(Boolean);
+  if (pts.length) jmMap.fitBounds(L.latLngBounds(pts.map(p => [p.lat, p.lng])).pad(0.15), { maxZoom: 8 });
+  else jmMap.setView([39.5, -98.35], 4);
+}
+window.fitJudgeMap = fitJudgeMap;
+
+/* -- Coverage by state -------------------------------------------- */
+
+async function renderCoverage() {
+  const box = document.getElementById('jmStates');
+  if (!box) return;
+  const rows = {};
+  const bump = (key, s) => { rows[key] = rows[key] || { active: 0, unverified: 0 }; if (s in rows[key]) rows[key][s]++; };
+  allJudges.forEach(j => {
+    const s = jStatusOf(j);
+    if (s === 'inactive') return;
+    const c = j.country || 'US';
+    if (c === 'US' && j.state_code) bump(j.state_code, s);
+    else if (c === 'CA' && j.state_code) bump('CA:' + j.state_code, s);
+    else bump('INTL:' + c, s);
+  });
+  const usNames = Object.fromEntries((await FG_GEO.regions('US').catch(() => [])).map(r => [r.code, r.name]));
+  const caNames = Object.fromEntries((await FG_GEO.regions('CA').catch(() => [])).map(r => [r.code, r.name]));
+  const keys = [...US_51, ...Object.keys(rows).filter(k => !US_51.includes(k)).sort()];
+  const covered = US_51.filter(st => rows[st]?.active).length;
+
+  const sum = document.getElementById('jmCoverageSummary');
+  if (sum) sum.textContent = `${covered} of 51 have an active judge`;
+
+  const sortBy = document.getElementById('jmCoverageSort')?.value || 'name';
+  const total = k => (rows[k]?.active || 0) + (rows[k]?.unverified || 0);
+  if (sortBy === 'fewest') keys.sort((a, b) => total(a) - total(b));
+  if (sortBy === 'most')   keys.sort((a, b) => total(b) - total(a));
+
+  const name = k => k.startsWith('CA:') ? (caNames[k.slice(3)] || k.slice(3)) + ', Canada'
+                  : k.startsWith('INTL:') ? FG_GEO.countryName(k.slice(5)) || 'Unknown country'
+                  : usNames[k] || k;
+  box.innerHTML = `<table>
+    <thead><tr><th>State</th><th>Active</th><th>Review</th></tr></thead>
+    <tbody>${keys.map(k => {
+      const r = rows[k] || { active: 0, unverified: 0 };
+      return `<tr class="${r.active ? '' : 'jm-zero'}" onclick="zoomToState('${esc(k)}')">
+        <td>${esc(name(k))}</td><td>${r.active}</td><td>${r.unverified || ''}</td></tr>`;
+    }).join('')}</tbody></table>`;
+}
+window.renderCoverage = renderCoverage;
+
+async function zoomToState(key) {
+  if (!jmMap) return;
+  const inState = j => key.startsWith('INTL:') ? (j.country || 'US') === key.slice(5)
+                     : key.startsWith('CA:') ? j.country === 'CA' && j.state_code === key.slice(3)
+                     : (j.country || 'US') === 'US' && j.state_code === key;
+  const pts = allJudges.filter(inState).map(j => jmPoints.get(String(j.id))).filter(Boolean);
+  if (pts.length) { jmMap.fitBounds(L.latLngBounds(pts.map(p => [p.lat, p.lng])).pad(0.3), { maxZoom: 9 }); }
+  else {
+    const r = await FG_GEO.region(key.startsWith('CA:') ? 'CA' : 'US', key.replace(/^CA:/, ''));
+    if (r) jmMap.setView([r.lat, r.lng], 6);
+  }
+  document.getElementById('adminJudgeMap')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+window.zoomToState = zoomToState;
+
+/* -- Judges near a place ------------------------------------------ */
+
+async function searchNearPlace() {
+  if (!jmPicker) return;
+  const loc = await jmPicker.read();
+  if (!loc.ok) { fgToast(esc(loc.error), 'err'); return; }
+  const v = loc.value;
+  if (v.latitude == null) { fgToast('Pick a US state or Canadian province to search near.', 'err'); return; }
+  searchNearPoint({ lat: v.latitude, lng: v.longitude }, FG_GEO.label(v) + (v.postal_code ? ' ' + v.postal_code : ''));
+}
+window.searchNearPlace = searchNearPlace;
+
+function searchNearPoint(pt, label, quiet) {
+  if (!jmMap) return;
+  const miles = parseInt(document.getElementById('jmRadiusMi')?.value || JM_RING_MILES, 10);
+  jmLastSearch = { pt, label };
+  jmSearch.clearLayers();
+  const ring = L.circle([pt.lat, pt.lng], { radius: miles * METERS_PER_MILE, color: '#1d4ed8', weight: 2, dashArray: '6 6', fillOpacity: 0.04, interactive: false });
+  jmSearch.addLayer(ring);
+  jmSearch.addLayer(L.circleMarker([pt.lat, pt.lng], { radius: 6, color: '#1d4ed8', weight: 2, fillColor: '#fff', fillOpacity: 1 }));
+  if (!quiet) jmMap.fitBounds(ring.getBounds(), { padding: [20, 20] });
+
+  const near = allJudges.filter(jmVisible).map(j => {
+    const p = jmPoints.get(String(j.id));
+    return p ? { j, p, d: FG_GEO.milesBetween(pt, p) } : null;
+  }).filter(x => x && x.d <= miles).sort((a, b) => a.d - b.d);
+
+  const active = near.filter(x => jStatusOf(x.j) === 'active').length;
+  const box = document.getElementById('jmResults');
+  if (!box) return;
+  box.innerHTML = `<div class="jm-result" style="cursor:default;background:var(--gray-50);">
+      <strong>${near.length}</strong> judge${near.length === 1 ? '' : 's'} within ${miles} mi of ${esc(label)}${near.length ? ` · ${active} active` : ''}
+      <a href="#" style="float:right;" onclick="clearNearSearch();return false;">Clear</a>
+    </div>` +
+    (near.length ? near.map(({ j, p, d }) => {
+      const reach = j.travel_miles >= 9999 || (j.travel_miles && j.travel_miles >= d);
+      return `<div class="jm-result" onclick="focusJudgeOnMap('${esc(j.id)}')">
+        <span class="jm-mi">${Math.round(d)} mi</span>
+        <span class="jm-dot" style="background:${JM_COLORS[jStatusOf(j)] || JM_COLORS.unverified}"></span>${esc(j.name)}
+        <div class="text-xs text-muted">${esc(FG_GEO.label(j))} · ${shortFields(j)}${/state/.test(p.source) ? ' · approx. pin' : ''}</div>
+        <div class="text-xs" style="color:${reach ? 'var(--g600)' : 'var(--gray-400)'};">${reach ? 'Willing to travel this far' : 'Travels ' + travelLabel(j).toLowerCase()}</div>
+      </div>`;
+    }).join('') : '<div class="jm-result" style="cursor:default;">No judges in range yet - this is a gap to recruit for.</div>');
+}
+
+function clearNearSearch() {
+  jmLastSearch = null;
+  jmSearch?.clearLayers();
+  const box = document.getElementById('jmResults');
+  if (box) box.innerHTML = '';
+}
+window.clearNearSearch = clearNearSearch;
+
+async function focusJudgeOnMap(id) {
+  const link = document.querySelector('.pnav-link[data-section="judgemap"]');
+  if (!document.getElementById('sec-judgemap')?.classList.contains('active')) {
+    showSection('judgemap', link);
+    await loadJudgeMap();
+  }
+  const m = jmMarkers.get(String(id));
+  if (!m) { fgToast('That judge is hidden by the map filters, or has no location.'); return; }
+  const open = () => { jmMap.setView(m.getLatLng(), Math.max(jmMap.getZoom(), 9)); m.openPopup(); };
+  if (jmCluster.zoomToShowLayer) jmCluster.zoomToShowLayer(m, open); else open();
+  document.getElementById('adminJudgeMap')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+window.focusJudgeOnMap = focusJudgeOnMap;
+
+/* Writes the browser-worked-out pins for older judges back to the table,
+   so the server-side matcher and every later visit can use them. */
+async function saveMissingPins() {
+  if (!sb) return;
+  const todo = allJudges.filter(j => j.latitude == null && jmPoints.has(String(j.id)));
+  if (!todo.length) return;
+  if (!confirm(`Save map locations for ${todo.length} judge${todo.length === 1 ? '' : 's'}? Pins placed from the state alone stay marked as approximate.`)) return;
+  const btn = document.getElementById('jmSaveBtn');
+  if (btn) btn.disabled = true;
+  let done = 0, failed = 0;
+  for (const j of todo) {
+    const pt = jmPoints.get(String(j.id));
+    const upd = { latitude: pt.lat, longitude: pt.lng, geocode_source: 'fg_' + pt.source, geocoded_at: new Date().toISOString() };
+    const { error } = await sb.from('judges').update(upd).eq('id', j.id);
+    if (error) failed++;
+    else { Object.assign(j, upd); jmPoints.set(String(j.id), { ...pt, source: upd.geocode_source }); done++; }
+    if (btn) btn.textContent = `Saving… ${done + failed}/${todo.length}`;
+  }
+  if (btn) btn.disabled = false;
+  renderJudgeMap();
+  fgToast(`Saved ${done} pin${done === 1 ? '' : 's'}.` + (failed ? ` ${failed} could not be saved.` : ''), failed ? 'err' : 'ok');
+}
+window.saveMissingPins = saveMissingPins;
 
 async function loadMentors() {
   return fgLoad('mentorsTbody',

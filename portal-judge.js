@@ -1,4 +1,5 @@
 let judgeRecord = null;
+let profileLocation = null;
 const EXP_LABELS = ['Biology / Life Sciences','Chemistry / Biochemistry','Physics / Engineering','Environmental Science','Computer Science / Math','Medicine / Health Sciences'];
 const DEMO_REQS = [
   { id:'r1', school:'Bath High School',  fair_date:'2026-03-14', teacher_name:'Ms. Williams', teacher_email:'mwilliams@bath.edu', message:'35 projects across biology and environmental science.', status:'pending' },
@@ -6,6 +7,8 @@ const DEMO_REQS = [
 ];
 
 requireAuth('judge', async (user) => {
+  const locEl = document.getElementById('pLocation');
+  if (locEl && window.FG_GEO) profileLocation = FG_GEO.mountPicker(locEl, { prefix: 'p' });
   if (sb) {
     const { data } = await sb.from('judges').select('*').eq('email', user.email).maybeSingle().catch(()=>({ data: null }));
     judgeRecord = data;
@@ -25,22 +28,15 @@ function prefillProfile(j) {
   document.getElementById('pName').value    = j.name   || '';
   document.getElementById('pOrg').value     = j.org    || '';
 
-  // City and county stored separately now; also support legacy combined 'city' field
-  if (j.county) {
-    document.getElementById('pCity').value   = j.city?.replace(/,.*$/, '').trim() || '';
-    document.getElementById('pCounty').value = j.county || '';
-  } else {
-    // legacy: city was "Columbus, Franklin County"
-    const parts = (j.city || '').split(',');
-    document.getElementById('pCity').value   = (parts[0] || '').trim();
-    document.getElementById('pCounty').value = (parts[1] || '').trim();
-  }
+  // Older rows hold "Columbus, Franklin County" in city; the picker
+  // keeps the part before the comma and the state from state_code.
+  profileLocation?.set(j);
 
   // Travel range
   const travel = j.travel_range || j.travel_miles;
   if (travel) {
     const sel = document.getElementById('pTravel');
-    const known = ['10','20','30','40','statewide'];
+    const known = ['10','20','30','40','60','100','statewide'];
     if (known.includes(String(travel))) {
       sel.value = String(travel);
     } else {
@@ -79,8 +75,9 @@ window.saveVisibility = saveVisibility;
 
 async function saveProfile() {
   const expertise  = EXP_LABELS.filter((_,i) => document.getElementById('pe'+(i+1)).checked);
-  const city       = document.getElementById('pCity').value.trim();
-  const county     = document.getElementById('pCounty').value.trim();
+  const loc = profileLocation ? await profileLocation.read() : { ok: false, error: 'The location list did not load - refresh the page.' };
+  if (!loc.ok) { showMsg('profileMsg', loc.error, 'err'); return; }
+  const city = loc.value.city || '';
   const travelSel  = document.getElementById('pTravel').value;
   const travelNum  = document.getElementById('pTravelOther')?.value;
   const travel_range = travelSel === 'other' ? (travelNum || 'other') : travelSel;
@@ -92,8 +89,15 @@ async function saveProfile() {
   const updates = {
     name:            document.getElementById('pName').value.trim(),
     org:             document.getElementById('pOrg').value.trim(),
-    city:            city + (county ? ', ' + county : ''),
-    county,
+    city:            loc.value.city,
+    state_code:      loc.value.state_code,
+    postal_code:     loc.value.postal_code,
+    latitude:        loc.value.latitude,
+    longitude:       loc.value.longitude,
+    geocode_source:  loc.value.geocode_source,
+    geocoded_at:     loc.value.latitude != null ? new Date().toISOString() : null,
+    country:         loc.value.country,
+    region:          loc.value.region,
     travel_range,
     travel_miles,
     available_level: document.getElementById('pLevel').value,
@@ -103,7 +107,12 @@ async function saveProfile() {
   };
 
   if (sb && judgeRecord?.id) {
-    const { error } = await sb.from('judges').update(updates).eq('id', judgeRecord.id);
+    let { error } = await sb.from('judges').update(updates).eq('id', judgeRecord.id);
+    // country and region need migration 14; save the rest without them.
+    if (error && /country|region/i.test(error.message || '')) {
+      delete updates.country; delete updates.region;
+      ({ error } = await sb.from('judges').update(updates).eq('id', judgeRecord.id));
+    }
     if (error) { showMsg('profileMsg', error.message, 'err'); return; }
     Object.assign(judgeRecord, updates);
   }

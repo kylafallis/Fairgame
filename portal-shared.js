@@ -327,18 +327,21 @@ function _fgWrap(el, inner) {
 }
 
 function fgSpinner(el) {
+  if (typeof el === 'string') el = document.getElementById(el);
   if (!el) return;
   el.innerHTML = _fgWrap(el, '<div class="spinner-wrap"><div class="spinner"></div></div>');
 }
 window.fgSpinner = fgSpinner;
 
 function fgEmpty(el, text) {
+  if (typeof el === 'string') el = document.getElementById(el);
   if (!el) return;
   el.innerHTML = _fgWrap(el, `<div class="empty-state"><p>${text || FG_EMPTY_TEXT}</p></div>`);
 }
 window.fgEmpty = fgEmpty;
 
 function fgError(el, retryFn) {
+  if (typeof el === 'string') el = document.getElementById(el);
   if (!el) return;
   const id = 'fgr' + Math.random().toString(36).slice(2, 8);
   el.innerHTML = _fgWrap(el, `<div class="empty-state"><p>We couldn’t load this just now. <button id="${id}" class="btn-xs" type="button">Try again</button></p></div>`);
@@ -364,15 +367,24 @@ async function fgLoad(elId, fetchFn, renderFn, opts = {}) {
   const el = typeof elId === 'string' ? document.getElementById(elId) : elId;
   if (!el) return;
   const retry = () => fgLoad(elId, fetchFn, renderFn, opts);
-  fgSpinner(el);
+  // Only the first load paints a spinner. A refresh - after a button
+  // press, or on coming back to the tab from the mail app - keeps the
+  // current rows on screen until the new ones arrive. Swapping a long
+  // table for a 48px spinner collapsed the page and threw the reader
+  // back to the top every time they approved someone.
+  const refreshing = el.dataset.fgLoaded === '1';
+  const scrollY = window.scrollY;
+  if (!refreshing) fgSpinner(el);
   try {
     const rows = await Promise.race([
       Promise.resolve(fetchFn()),
       _fgTimeout(opts.timeout || FG_LOAD_TIMEOUT_MS),
     ]);
     const isEmpty = rows == null || (Array.isArray(rows) && rows.length === 0);
-    if (isEmpty) { fgEmpty(el, opts.empty); return; }
-    renderFn(rows);
+    if (isEmpty) fgEmpty(el, opts.empty);
+    else         renderFn(rows);
+    el.dataset.fgLoaded = '1';
+    if (refreshing && Math.abs(window.scrollY - scrollY) > 1) window.scrollTo(0, scrollY);
   } catch (err) {
     console.warn('[Portal] fgLoad failed for', elId, err?.message || err);
     fgError(el, retry);
@@ -463,6 +475,30 @@ function showMsg(elId, text, type = 'ok') {
   if (type === 'ok') setTimeout(() => { el.textContent = ''; el.className = 'msg-strip'; }, 4000);
 }
 window.showMsg = showMsg;
+
+/* ── Toast ───────────────────────────────────────────────────
+   A message pinned to the corner of the screen, for results of an
+   action taken halfway down a long list. html is trusted markup -
+   escape anything user-submitted before passing it in. */
+function fgToast(html, type = 'ok', ms = 6000) {
+  let stack = document.querySelector('.fg-toast-stack');
+  if (!stack) {
+    stack = document.createElement('div');
+    stack.className = 'fg-toast-stack';
+    stack.setAttribute('role', 'status');
+    stack.setAttribute('aria-live', 'polite');
+    document.body.appendChild(stack);
+  }
+  const t = document.createElement('div');
+  t.className = 'fg-toast' + (type === 'err' ? ' err' : '');
+  t.innerHTML = `<div>${html}</div><button type="button" aria-label="Dismiss">&times;</button>`;
+  t.querySelector('button').addEventListener('click', () => t.remove());
+  stack.appendChild(t);
+  // Errors stay until dismissed; they usually need acting on.
+  if (type !== 'err' && ms) setTimeout(() => t.remove(), ms);
+  return t;
+}
+window.fgToast = fgToast;
 
 /* ── File helpers ────────────────────────────────────────────── */
 async function getSignedUrl(bucket, path, expiresIn = 3600) {

@@ -748,12 +748,18 @@ function handleJTravelOther(sel) {
 }
 window.handleJTravelOther = handleJTravelOther;
 
+/* The location picker on the judge form. Mounted once on load; read
+   back by submitJudge(). */
+let judgeLocation = null;
+function initJudgeLocation() {
+  const el = document.getElementById('jLocation');
+  if (el && window.FG_GEO) judgeLocation = FG_GEO.mountPicker(el, { prefix: 'j' });
+}
+
 async function submitJudge() {
   const name      = document.getElementById('jName')?.value.trim();
   const email     = document.getElementById('jEmail')?.value.trim();
   const org       = document.getElementById('jOrg')?.value.trim();
-  const city      = document.getElementById('jCity')?.value.trim();
-  const county    = document.getElementById('jCounty')?.value.trim();
   const travelSel = document.getElementById('jTravel')?.value;
   const travelNum = document.getElementById('jTravelOther')?.value;
   const travel_range = travelSel === 'other' ? (travelNum || 'other') : travelSel;
@@ -768,32 +774,28 @@ async function submitJudge() {
   const msgEl     = document.getElementById('judgeMsg');
   if (!msgEl) return;
 
-  // Every field is required: half-filled judge records cannot be matched
-  // to a fair, and chasing the rest by email never worked.
-  if (!name || !email || !org || !city || !county || !travelSel || !level || !notes) {
-    msgEl.textContent = 'Please fill out every field - all of them are required.';
-    msgEl.className   = 'form-msg error';
-    return;
+  const fail = text => { msgEl.textContent = text; msgEl.className = 'form-msg error'; };
+
+  // Half-filled judge records cannot be matched to a fair, and chasing
+  // the rest by email never worked. City and ZIP are the exceptions:
+  // a state is enough to put someone on the map.
+  if (!name || !email || !org || !travelSel || !level || !notes) {
+    return fail('Please fill out every field marked with *.');
   }
+  if (!judgeLocation) return fail('The location list did not load - please refresh the page.');
+  const loc = await judgeLocation.read();
+  if (!loc.ok) return fail(loc.error);
   if (travelSel === 'other' && !travelNum) {
-    msgEl.textContent = 'Please enter how many miles you are willing to travel.';
-    msgEl.className   = 'form-msg error';
-    return;
+    return fail('Please enter how many miles you are willing to travel.');
   }
   if (!expertise.length) {
-    msgEl.textContent = 'Please select at least one area of expertise.';
-    msgEl.className   = 'form-msg error';
-    return;
+    return fail('Please select at least one area of expertise.');
   }
   if (pw.length < 8) {
-    msgEl.textContent = 'Please choose a password of at least 8 characters.';
-    msgEl.className   = 'form-msg error';
-    return;
+    return fail('Please choose a password of at least 8 characters.');
   }
   if (pw !== pwConfirm) {
-    msgEl.textContent = 'Those two passwords do not match.';
-    msgEl.className   = 'form-msg error';
-    return;
+    return fail('Those two passwords do not match.');
   }
 
   msgEl.textContent = 'Submitting…';
@@ -808,12 +810,19 @@ async function submitJudge() {
   const code   = `${prefix}-${fips}-${rnd}`;
 
   if (sb) {
-    const { error: judgeErr } = await sb.from('judges').insert([{
+    const row = {
       name,
       email,
       org:             org || '',
-      city:            city + ', ' + county,
-      county,
+      city:            loc.value.city,
+      state_code:      loc.value.state_code,
+      postal_code:     loc.value.postal_code,
+      latitude:        loc.value.latitude,
+      longitude:       loc.value.longitude,
+      geocode_source:  loc.value.geocode_source,
+      geocoded_at:     loc.value.latitude != null ? new Date().toISOString() : null,
+      country:         loc.value.country,
+      region:          loc.value.region,
       travel_range,
       travel_miles,
       expertise,
@@ -821,7 +830,14 @@ async function submitJudge() {
       notes:           notes || '',
       status:          'unverified',
       created_at:      new Date().toISOString()
-    }]);
+    };
+    let { error: judgeErr } = await sb.from('judges').insert([row]);
+    // country and region arrive with migration 14. Until it has run, keep
+    // the application rather than lose it during an outreach push.
+    if (judgeErr && /country|region/i.test(judgeErr.message || '')) {
+      const { country, region, ...rest } = row;
+      ({ error: judgeErr } = await sb.from('judges').insert([rest]));
+    }
 
     if (judgeErr) {
       msgEl.textContent = 'Error saving your application - please email fairgameinitiative@outlook.com';
@@ -860,15 +876,16 @@ async function submitJudge() {
       form_type:  'Judge Application',
       from_name:  name,
       from_email: email,
-      details:    `Org: ${org || 'N/A'} | City: ${city} | County: ${county} | Travel: ${travel_range} | Level: ${level || 'Any'} | Expertise: ${expertise.join(', ') || 'None selected'} | Notes: ${notes || 'N/A'} | Code: ${code}`
+      details:    `Org: ${org || 'N/A'} | Location: ${FG_GEO.label(loc.value)}${loc.value.postal_code ? ' ' + loc.value.postal_code : ''} | Travel: ${travel_range} | Level: ${level || 'Any'} | Expertise: ${expertise.join(', ') || 'None selected'} | Notes: ${notes || 'N/A'} | Code: ${code}`
     }, VOL_EJS_KEY).catch(() => {});
   }
 
-  ['jName','jEmail','jOrg','jCity','jCounty','jNotes','jTravelOther','jPw','jPwConfirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+  ['jName','jEmail','jOrg','jNotes','jTravelOther','jPw','jPwConfirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
   ['je1','je2','je3','je4','je5','je6'].forEach(id => { const el = document.getElementById(id); if (el) el.checked = false; });
   const lvl = document.getElementById('jLevel'); if (lvl) lvl.value = '';
   const trv = document.getElementById('jTravel'); if (trv) trv.value = '';
   const trvOther = document.getElementById('jTravelOther'); if (trvOther) trvOther.style.display = 'none';
+  judgeLocation.clear();
 
   /* No longer "check your email for a link" - the portal opens when an
      admin approves the application, and the judge signs in with the
@@ -879,7 +896,7 @@ async function submitJudge() {
     + `You will get an email once you are approved - typically 1&ndash;3 business days. `
     + `After that, sign in at <a href="/login.html">the portal</a> with this email address and the password you just chose.`;
   msgEl.className   = 'form-msg success';
-  logEvent('judge_application', { level, expertise, code });
+  logEvent('judge_application', { level, expertise, code, state: loc.value.state_code, country: loc.value.country });
 }
 
 /* Mentors are matched with minors, so an application has to point at a
@@ -1194,6 +1211,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initDonate();
   initSmoothScroll();
   initLockedDownloads();
+  initJudgeLocation();
 
   // Log page view
   logEvent('page_view', { page: window.location.pathname });

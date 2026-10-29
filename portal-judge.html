@@ -81,15 +81,16 @@
           <div class="form-grid">
             <div class="form-group"><label class="form-label">Full name</label><input type="text" id="pName" placeholder="Dr. Jane Smith"/></div>
             <div class="form-group"><label class="form-label">Organization</label><input type="text" id="pOrg" placeholder="Ohio State University"/></div>
-            <div class="form-group"><label class="form-label">City</label><input type="text" id="pCity" placeholder="Columbus"/></div>
-            <div class="form-group"><label class="form-label">County</label><input type="text" id="pCounty" placeholder="Franklin County"/></div>
+            <div class="form-group" id="pLocation" style="grid-column:1/-1;"></div>
             <div class="form-group"><label class="form-label">Willing to travel</label>
               <select id="pTravel" onchange="handlePTravelOther(this)">
                 <option value="10">Within 10 miles</option>
                 <option value="20">10–20 miles</option>
                 <option value="30">20–30 miles</option>
                 <option value="40">30–40 miles</option>
-                <option value="statewide">Statewide</option>
+                <option value="60">Up to 60 miles</option>
+                <option value="100">Up to 100 miles</option>
+                <option value="statewide">Anywhere in my state</option>
                 <option value="other">Other</option>
               </select>
               <input type="number" id="pTravelOther" placeholder="Miles" min="1" max="500" style="display:none;margin-top:6px;width:100%;padding:9px;border:1.5px solid var(--gray-200);border-radius:3px;font-size:.85rem;"/>
@@ -198,6 +199,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/portal-shared.js"></script>
+<script src="/geo.js"></script>
 <script src="/portal-judge.js"></script>
 </body>
 </html>

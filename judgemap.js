@@ -1,42 +1,14 @@
 /* ── JUDGE MAP PAGE LOGIC ────────────────────────────────── */
 let map, allJudges = [], markers = {}, activeFilter = 'all', activeLevelFilter = 'all';
 
-// Ohio center
-const OHIO_CENTER = [40.4173, -82.9071];
-const OHIO_ZOOM   = 7;
-
-/* Ohio county → approx lat/lng lookup (subset - expand as needed) */
-const COUNTY_COORDS = {
-  'franklin':    [39.97,  -82.99], 'cuyahoga': [41.48,  -81.68], 'hamilton': [39.10,  -84.51],
-  'summit':      [41.10,  -81.52], 'montgomery':[39.76, -84.19], 'lucas':    [41.66,  -83.56],
-  'stark':       [40.80,  -81.35], 'lorain':   [41.28,  -82.22], 'butler':   [39.44,  -84.56],
-  'lake':        [41.70,  -81.24], 'mahoning': [41.01,  -80.77], 'warren':   [39.43,  -84.17],
-  'medina':      [41.14,  -81.86], 'clermont': [39.06,  -84.15], 'licking':  [40.09,  -82.47],
-  'allen':       [40.77,  -84.10], 'richland': [40.78,  -82.53], 'wayne':    [40.83,  -81.89],
-  'delaware':    [40.28,  -83.07], 'portage':  [41.17,  -81.21], 'geauga':   [41.50,  -81.16],
-  'greene':      [39.69,  -83.88], 'fairfield':[39.74,  -82.62], 'ashtabula':[41.73,  -80.79],
-  'trumbull':    [41.31,  -80.77], 'muskingum':[39.97,  -82.01], 'pickaway': [39.64,  -83.06],
-  'ross':        [39.35,  -83.00], 'tuscarawas':[40.44, -81.48], 'athens':   [39.33,  -82.10],
-  'scioto':      [38.84,  -82.97], 'wood':     [41.37,  -83.62],
-  // City fallbacks
-  'columbus':    [39.96,  -82.99], 'cleveland':[41.49,  -81.69], 'cincinnati':[39.10, -84.51],
-  'toledo':      [41.66,  -83.55], 'akron':    [41.08,  -81.52], 'dayton':   [39.76,  -84.19],
-  'lima':        [40.74,  -84.10], 'youngstown':[41.10, -80.65], 'canton':   [40.80,  -81.37],
-  'lorain city': [41.45,  -82.18], 'elyria':   [41.37,  -82.10], 'springfield':[39.92,-83.81],
-};
-
-function coordsFromLocation(city) {
-  if (!city) return [...OHIO_CENTER];
-  const lower = city.toLowerCase();
-  for (const [key, coords] of Object.entries(COUNTY_COORDS)) {
-    if (lower.includes(key)) return [...coords];
-  }
-  // Add small random jitter to avoid exact overlap for unknown cities
-  return [OHIO_CENTER[0] + (Math.random() - 0.5) * 3, OHIO_CENTER[1] + (Math.random() - 0.5) * 4];
-}
+// Continental US. Judges are placed from the latitude/longitude saved at
+// sign-up, or from their ZIP / city / state for older rows (geo.js).
+const US_CENTER = [39.5, -98.35];
+const US_ZOOM   = 4;
+const judgePoints = new Map();
 
 function initMap() {
-  map = L.map('judgeMap').setView(OHIO_CENTER, OHIO_ZOOM);
+  map = L.map('judgeMap').setView(US_CENTER, US_ZOOM);
   L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
     attribution: '© OpenStreetMap contributors © CARTO',
     maxZoom: 18
@@ -77,8 +49,11 @@ function renderJudges(judges) {
   }
 
   list.innerHTML = '';
+  const bounds = [];
   filtered.forEach(judge => {
-    const coords = coordsFromLocation(judge.city);
+    const pt = judgePoints.get(String(judge.id));
+    const coords = pt ? [pt.lat, pt.lng] : null;
+    if (coords) bounds.push(coords);
     // Sidebar item
     const item = document.createElement('div');
     item.className = 'judge-item';
@@ -87,7 +62,7 @@ function renderJudges(judges) {
       <div class="judge-item-name">${judge.name}</div>
       <div class="judge-item-org">${judge.org || 'Independent'}</div>
       <div class="judge-item-tags">${(judge.expertise || []).map(e => `<span class="judge-tag">${e.split('/')[0].trim()}</span>`).join('')}</div>
-      <div class="judge-item-level">${judge.available_level || 'Any level'} · ${judge.city || 'Ohio'}</div>`;
+      <div class="judge-item-level">${judge.available_level || 'Any level'} · ${FG_GEO.label(judge)}</div>`;
     item.addEventListener('click', () => {
       document.querySelectorAll('.judge-item').forEach(i => i.classList.remove('highlighted'));
       item.classList.add('highlighted');
@@ -97,6 +72,7 @@ function renderJudges(judges) {
       }
     });
     list.appendChild(item);
+    if (!coords) return;
 
     // Map marker
     const marker = L.marker(coords, { icon: makeMarkerIcon() }).addTo(map);
@@ -104,7 +80,7 @@ function renderJudges(judges) {
     marker.bindPopup(`
       <div class="judge-popup">
         <div class="judge-popup-name">${judge.name}</div>
-        <div class="judge-popup-org">${judge.org || 'Independent'} · ${judge.city || 'Ohio'}</div>
+        <div class="judge-popup-org">${judge.org || 'Independent'} · ${FG_GEO.label(judge)}</div>
         <div class="judge-popup-tags">${(judge.expertise || []).map(e => `<span class="judge-popup-tag">${e.split('/')[0].trim()}</span>`).join('')}</div>
         <div style="font-size:0.75rem;color:#6b756b;margin-bottom:8px;">Available for: ${judge.available_level || 'Any level'}</div>
         <button class="judge-popup-btn" onclick="openMatchModal('${judge.id}','${escHtml(judge.name)}','${escHtml(judge.email || '')}')">Send Match Request →</button>
@@ -116,8 +92,10 @@ function renderJudges(judges) {
     });
   });
 
+  if (bounds.length && !map._fgFitted) { map.fitBounds(bounds, { padding: [30, 30], maxZoom: 8 }); map._fgFitted = true; }
+
   // Update stats
-  const districts = new Set(filtered.map(j => j.city?.split(',')[0]?.trim()).filter(Boolean)).size;
+  const districts = new Set(filtered.map(j => (j.country || 'US') + ':' + (j.state_code || j.region || '')).filter(k => !k.endsWith(':'))).size;
   const fields    = new Set(filtered.flatMap(j => j.expertise || [])).size;
   document.getElementById('statTotal').textContent    = judges.length;
   document.getElementById('statActive').textContent   = filtered.length;
@@ -146,13 +124,14 @@ async function loadJudges() {
   if (!sb) {
     // Demo data when Supabase isn't connected
     allJudges = [
-      { id:'demo1', name:'Dr. Sarah Mitchell', org:'Ohio State University', city:'Columbus, Franklin County', expertise:['Biology / Life Sciences','Environmental Science'], available_level:'Any level', email:'' },
-      { id:'demo2', name:'Prof. James Chen',   org:'Case Western Reserve',  city:'Cleveland, Cuyahoga County', expertise:['Physics / Engineering','Computer Science / Math'], available_level:'District fair', email:'' },
-      { id:'demo3', name:'Dr. Maria Santos',   org:'University of Cincinnati', city:'Cincinnati, Hamilton County', expertise:['Chemistry / Biochemistry','Medicine / Health Sciences'], available_level:'School fair', email:'' },
-      { id:'demo4', name:'Mark Thompson',      org:'Procter & Gamble',       city:'Cincinnati, Hamilton County', expertise:['Chemistry / Biochemistry'], available_level:'School fair', email:'' },
-      { id:'demo5', name:'Dr. Linda Park',     org:'Cleveland Clinic',       city:'Cleveland, Cuyahoga County', expertise:['Medicine / Health Sciences','Biology / Life Sciences'], available_level:'Any level', email:'' },
-      { id:'demo6', name:'Prof. Robert Davis',  org:'Toledo University',     city:'Toledo, Lucas County', expertise:['Environmental Science','Physics / Engineering'], available_level:'District fair', email:'' },
+      { id:'demo1', name:'Dr. Sarah Mitchell', org:'Ohio State University', city:'Columbus', state_code:'OH', expertise:['Biology / Life Sciences','Environmental Science'], available_level:'Any level', email:'' },
+      { id:'demo2', name:'Prof. James Chen',   org:'Case Western Reserve',  city:'Cleveland', state_code:'OH', expertise:['Physics / Engineering','Computer Science / Math'], available_level:'District fair', email:'' },
+      { id:'demo3', name:'Dr. Maria Santos',   org:'University of Cincinnati', city:'Atlanta', state_code:'GA', expertise:['Chemistry / Biochemistry','Medicine / Health Sciences'], available_level:'School fair', email:'' },
+      { id:'demo4', name:'Mark Thompson',      org:'Procter & Gamble',       city:'Cincinnati', state_code:'OH', expertise:['Chemistry / Biochemistry'], available_level:'School fair', email:'' },
+      { id:'demo5', name:'Dr. Linda Park',     org:'Cleveland Clinic',       city:'Phoenix', state_code:'AZ', expertise:['Medicine / Health Sciences','Biology / Life Sciences'], available_level:'Any level', email:'' },
+      { id:'demo6', name:'Prof. Robert Davis',  org:'Toledo University',     city:'Denver', state_code:'CO', expertise:['Environmental Science','Physics / Engineering'], available_level:'District fair', email:'' },
     ];
+    await placeJudges();
     renderJudges(allJudges);
     return;
   }
@@ -170,40 +149,18 @@ async function loadJudges() {
       '<button type="button" class="btn-xs" onclick="loadJudges()">Try again</button></div>';
     return;
   }
+  await placeJudges();
   renderJudges(allJudges);
 }
 window.loadJudges = loadJudges;
 
-function toggleRegister() {
-  document.getElementById('registerPanel').classList.toggle('open');
+async function placeJudges() {
+  await Promise.all(allJudges.map(async j => {
+    if (judgePoints.has(String(j.id))) return;
+    const pt = await FG_GEO.resolveJudge(j).catch(() => null);
+    if (pt) judgePoints.set(String(j.id), pt);
+  }));
 }
-window.toggleRegister = toggleRegister;
-
-async function registerJudgeMap() {
-  const name  = document.getElementById('rjName').value.trim();
-  const email = document.getElementById('rjEmail').value.trim();
-  const org   = document.getElementById('rjOrg').value.trim();
-  const city  = document.getElementById('rjCity').value.trim();
-  const level = document.getElementById('rjLevel').value;
-  const expertise = ['rje1','rje2','rje3','rje4','rje5','rje6'].map((id, i) => {
-    const labels = ['Biology / Life Sciences','Chemistry / Biochemistry','Physics / Engineering','Environmental Science','Computer Science / Math','Medicine / Health Sciences'];
-    return document.getElementById(id).checked ? labels[i] : null;
-  }).filter(Boolean);
-  const msg = document.getElementById('rjMsg');
-
-  if (!name || !email || !city) { msg.textContent = 'Please fill in name, email, and city.'; msg.style.color = '#c0392b'; return; }
-  msg.textContent = 'Adding you to the map...'; msg.style.color = 'var(--gray-500)';
-
-  if (sb) {
-    const { error } = await sb.from('judges').insert([{ name, email, org, city, expertise, available_level: level, status: 'active' }]);
-    if (error) { msg.textContent = 'Error - please try again or email us.'; msg.style.color = '#c0392b'; return; }
-  }
-
-  msg.textContent = 'You\'re on the map! Refresh to see your pin.'; msg.style.color = 'var(--green-600)';
-  logEvent('judge_registered', { city, expertise });
-  await loadJudges();
-}
-window.registerJudgeMap = registerJudgeMap;
 
 /* ── MATCH REQUEST ─────────────────────────────────────── */
 function openMatchModal(judgeId, judgeName, judgeEmail) {

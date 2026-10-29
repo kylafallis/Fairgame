@@ -122,6 +122,13 @@
       font-size: 0.88rem; color: var(--gray-500); line-height: 1.6; margin: 0 0 24px;
     }
     .form-row { margin-bottom: 18px; }
+    .fg-loc-row { margin-bottom: 14px; }
+    .fg-loc-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .fg-loc-pair .fg-loc-row { margin-bottom: 0; }
+    @media (max-width: 480px) { .fg-loc-pair { grid-template-columns: 1fr; } }
+    .fg-loc-opt { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--gray-500); }
+    .fg-loc-hint { font-size: 0.78rem; color: var(--green-600, #357a38); margin-top: 6px; min-height: 1em; }
+    .fg-loc-hint.warn { color: #c0392b; }
     .form-label {
       display: block; font-size: 0.8rem; font-weight: 600;
       color: var(--gray-700); margin-bottom: 6px;
@@ -284,12 +291,13 @@
       <div class="form-box">
         <h3>Judge Application</h3>
         <p>Fill out this form to join our judge network. We'll reach out when a fair near you needs judges in your expertise area.</p>
-        <p style="margin-top:-14px;"><strong>Every field is required.</strong></p>
+        <p style="margin-top:-14px;"><strong>Fields marked * are required.</strong> We take judges from every state - pick yours below and we will place you on our map.</p>
         <div class="form-row"><label class="form-label">Full name *</label><input type="text" id="jName" placeholder="Dr. Jane Smith" /></div>
         <div class="form-row"><label class="form-label">Email address *</label><input type="email" id="jEmail" placeholder="jsmith@company.com" /></div>
         <div class="form-row"><label class="form-label">Organization / Employer *</label><input type="text" id="jOrg" placeholder="University or Company" /></div>
-        <div class="form-row"><label class="form-label">City *</label><input type="text" id="jCity" placeholder="Columbus" /></div>
-        <div class="form-row"><label class="form-label">County *</label><input type="text" id="jCounty" placeholder="Franklin County" /></div>
+        <!-- Country, state, then optional city and ZIP, picked rather than
+             typed, so every judge lands on the map. Built by geo.js. -->
+        <div class="form-row" id="jLocation"></div>
         <div class="form-row">
           <label class="form-label">How far are you willing to travel to a fair? *</label>
           <select id="jTravel" onchange="handleJTravelOther(this)">
@@ -298,7 +306,9 @@
             <option value="20">10–20 miles</option>
             <option value="30">20–30 miles</option>
             <option value="40">30–40 miles</option>
-            <option value="statewide">Statewide (anywhere)</option>
+            <option value="60">Up to 60 miles</option>
+            <option value="100">Up to 100 miles</option>
+            <option value="statewide">Anywhere in my state</option>
             <option value="other">Other - I'll specify</option>
           </select>
           <input type="number" id="jTravelOther" placeholder="Miles (e.g. 50)" min="1" max="500" style="display:none;margin-top:8px;width:100%;padding:9px 12px;border:1.5px solid var(--gray-300);border-radius:3px;font-size:.9rem;"/>
@@ -429,6 +439,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+<script src="/geo.js"></script>
 <script src="/script.js"></script>
 </body>
 </html>
