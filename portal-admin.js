@@ -1420,10 +1420,10 @@ function renderMentors(data) {
       </tr>`).join('');
 }
 
-const STAT_KEYS   = ['schools_supported','students_reached','resources_count','teachers_network'];
-const STAT_LABELS = ['Schools Supported','Students Reached','Free Resources','Teacher Network'];
+const STAT_KEYS   = ['students_reached','resources_count','teachers_network','schools_supported'];
+const STAT_LABELS = ['Students Reached','Free Resources','Teacher Network','Schools Supported'];
 async function loadStats() {
-  let vals = { schools_supported:4, students_reached:500, resources_count:47, teachers_network:100 };
+  let vals = { students_reached:1000, resources_count:116, teachers_network:100, schools_supported:4 };
   if (sb) {
     try { fgRows(await sb.from('stats').select('*')).forEach(r => vals[r.key] = r.value); }
     catch (e) { console.warn('[Admin] stats read failed, using defaults:', e.message); }

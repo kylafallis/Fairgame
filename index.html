@@ -84,21 +84,25 @@
           <a href="#about" class="btn btn-outline" style="border-color:rgba(255,255,255,0.3);color:rgba(255,255,255,0.8);">How It Works</a>
         </div>
         <div class="hero-stats anim d4">
+          <!-- Biggest first. These are the fallbacks: on load, script.js
+               replaces each with the value saved under its data-key in the
+               Supabase stats table (admin > Site Settings), so change them
+               there too or the old figure keeps showing. -->
           <div class="hero-stat">
-            <div class="hero-stat-n"><span class="cu" data-t="4" data-key="schools_supported">4</span></div>
-            <div class="hero-stat-l">Schools Supported</div>
-          </div>
-          <div class="hero-stat">
-            <div class="hero-stat-n"><span class="cu" data-t="500" data-key="students_reached">500</span><span class="g">+</span></div>
+            <div class="hero-stat-n"><span class="cu" data-t="1000" data-key="students_reached">1,000</span><span class="g">+</span></div>
             <div class="hero-stat-l">Students Reached</div>
           </div>
           <div class="hero-stat">
-            <div class="hero-stat-n"><span class="cu" data-t="47" data-key="resources_count">47</span></div>
+            <div class="hero-stat-n"><span class="cu" data-t="116" data-key="resources_count">116</span></div>
             <div class="hero-stat-l">Free Resources</div>
           </div>
           <div class="hero-stat">
             <div class="hero-stat-n"><span class="cu" data-t="100" data-key="teachers_network">100</span><span class="g">+</span></div>
             <div class="hero-stat-l">Teacher Network</div>
+          </div>
+          <div class="hero-stat">
+            <div class="hero-stat-n"><span class="cu" data-t="4" data-key="schools_supported">4</span></div>
+            <div class="hero-stat-l">Schools Supported</div>
           </div>
         </div>
       </div>

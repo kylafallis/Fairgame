@@ -169,7 +169,7 @@ function countUp(el, target, durationMs = 1200) {
   function tick(now) {
     const progress = Math.min((now - start) / durationMs, 1);
     const eased    = 1 - Math.pow(1 - progress, 3); // ease-out cubic
-    el.textContent = Math.round(eased * target);
+    el.textContent = Math.round(eased * target).toLocaleString('en-US');  // 1,000 not 1000
     if (progress < 1) requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);

@@ -327,7 +327,11 @@
       display: grid; grid-template-columns: repeat(4, 1fr);
     }
     @media (max-width: 640px) {
-      .hero-stats { grid-template-columns: repeat(2, 1fr); gap: 0; }
+      .hero-stats { grid-template-columns: repeat(2, 1fr); gap: 22px 0; }
+      /* Two per row: each row starts flush left and the right column
+         carries no divider. Without this the third stat sat indented. */
+      .hero-stats .hero-stat:nth-child(odd)  { padding-left: 0; }
+      .hero-stats .hero-stat:nth-child(even) { border-right: none; }
     }
     .hero-stat {
       padding: 0 24px 0 0;
