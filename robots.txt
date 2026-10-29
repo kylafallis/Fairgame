@@ -1,0 +1,10 @@
+User-agent: *
+Allow: /
+# Sign-in, portals and admin tools are not useful in search results.
+Disallow: /login.html
+Disallow: /portal-
+Disallow: /mentorlog.html
+Disallow: /impactreport.html
+Disallow: /consent.html
+
+Sitemap: https://fairgameinitiative.org/sitemap.xml

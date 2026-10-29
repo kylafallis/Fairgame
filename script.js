@@ -143,6 +143,9 @@ function initNav() {
    the viewport. JS adds .vis which triggers the CSS transition.
    ───────────────────────────────────────────────────────────── */
 function initScrollReveal() {
+  // Tells the guard in each page's <head> that sections will be revealed,
+  // so it does not un-hide them as a fallback.
+  window.fgRevealReady = true;
   const items = document.querySelectorAll('.reveal');
   if (!items.length) return;
 
@@ -203,16 +206,23 @@ function initCountUp() {
     if (window.supabase) {
       const _sb = window.supabase.createClient(_sbUrl, _sbKey);
       const timeout = setTimeout(attachObserver, 1500); // fallback if fetch is slow
-      _sb.from('stats').select('key,value').then(({ data }) => {
+      // A stat marked data-live="judges" counts active judges directly, so
+      // it grows on its own as applications are approved.
+      const wantsJudges = [...triggers].some(el => el.dataset.live === 'judges');
+      Promise.all([
+        _sb.from('stats').select('key,value'),
+        wantsJudges ? _sb.from('judges_public').select('id', { count: 'exact', head: true }) : Promise.resolve({}),
+      ]).then(([{ data }, judges]) => {
         clearTimeout(timeout);
-        if (data?.length) {
-          const map = {};
-          data.forEach(r => { map[r.key] = r.value; });
-          triggers.forEach(el => {
-            const key = el.dataset.key;
-            if (key && map[key] !== undefined) el.dataset.t = String(map[key]);
-          });
-        }
+        const map = {};
+        (data || []).forEach(r => { map[r.key] = r.value; });
+        if (!judges?.error && judges?.count > 0) map.active_judges = judges.count;
+        triggers.forEach(el => {
+          const key = el.dataset.key;
+          if (key && map[key] !== undefined) el.dataset.t = String(map[key]);
+          // Hidden until there is a real number to show.
+          if (el.dataset.live && Number(map[key]) > 0) el.closest('.hero-stat')?.removeAttribute('hidden');
+        });
         attachObserver();
       }).catch(() => attachObserver());
     } else { attachObserver(); }

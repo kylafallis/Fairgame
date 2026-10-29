@@ -119,6 +119,10 @@ p { color: var(--gray-500); line-height: 1.75; }
 }
 .btn-primary { background: var(--green-600); color: var(--white); }
 .btn-primary:hover { background: var(--green-700); }
+/* Was only defined in index.css, so on every other page these buttons
+   had no background and dark text on the dark green bands. */
+.btn-white { background: var(--white); color: var(--green-700); }
+.btn-white:hover { background: var(--green-50); }
 
 .btn-outline {
   background: transparent;
@@ -398,7 +402,7 @@ nav {
   color: var(--white); line-height: 1; margin-bottom: 4px;
 }
 .hero-stat-n .g { color: var(--green-400); }
-.hero-stat-l { font-size: 0.73rem; color: rgba(255,255,255,0.42); letter-spacing: 0.04em; }
+.hero-stat-l { font-size: 0.73rem; color: rgba(255,255,255,0.72); letter-spacing: 0.04em; }
 
 /* Hero card */
 .hero-card {
@@ -727,7 +731,7 @@ footer { background: var(--green-900); border-top: 3px solid var(--green-600); p
 .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 40px; }
 .f-brand-name { font-family: var(--ff-serif); font-size: 1.2rem; font-weight: 700; color: var(--white); margin-bottom: 10px; }
 .f-brand-desc { font-size: 0.85rem; color: rgba(255,255,255,0.42); line-height: 1.7; max-width: 260px; margin-bottom: 18px; }
-.f-social { display: flex; gap: 8px; }
+.f-social { display: flex; gap: 8px; margin-top: 16px; }
 .f-social a { width: 32px; height: 32px; border: 1px solid rgba(255,255,255,0.12); display: flex; align-items: center; justify-content: center; font-size: 0.72rem; color: rgba(255,255,255,0.4); transition: all 0.15s; }
 .f-social a:hover { border-color: var(--green-400); color: var(--green-400); }
 .f-col h5 { font-size: 0.67rem; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(255,255,255,0.28); margin-bottom: 14px; }
@@ -744,8 +748,8 @@ footer { background: var(--green-900); border-top: 3px solid var(--green-600); p
 .anim { animation: fadeUp 0.55s ease both; }
 .d1 { animation-delay: 0.08s; } .d2 { animation-delay: 0.18s; }
 .d3 { animation-delay: 0.28s; } .d4 { animation-delay: 0.38s; }
-.reveal { opacity:0; transform:translateY(14px); transition: opacity 0.55s ease, transform 0.55s ease; }
-.reveal.vis { opacity:1; transform:translateY(0); }
+.fg-reveal .reveal { opacity:0; transform:translateY(14px); transition: opacity 0.55s ease, transform 0.55s ease; }
+.fg-reveal .reveal.vis { opacity:1; transform:translateY(0); }
 
 /* ── RESPONSIVE ──────────────────────────────────────────────── */
 @media (max-width: 960px) {
