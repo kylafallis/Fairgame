@@ -27,15 +27,16 @@ const DEMO = {
     { school_name:'Linden-McKinley STEM',teacher_name:'Mr. Jones',    program_type:'Club Launch',       fair_date:null,        student_count:20, county:'Franklin County', status:'planning' },
   ],
   judges: [
-    { id:'j1', code:'EN-163-7X', name:'Dr. Robert Davis', email:'rdavis@example.com', org:'Ohio Northern University', expertise:['Environmental Science'], city:'Lima', state_code:'OH', postal_code:'45801', latitude:40.7426, longitude:-84.1052, geocode_source:'fg_zip', travel_miles:40, available_level:'Any level', status:'active', created_at:'2026-02-02T10:00:00Z' },
+    { id:'j1', virtual_ok:true, preferred_grade_bands:['middle','high'], available_months:['Feb','Mar'], heard_about:'My university', conduct_agreed_at:'2026-02-02T10:00:00Z', background_check_status:'cleared', background_check_date:'2026-02-10', code:'EN-163-7X', name:'Dr. Robert Davis', email:'rdavis@example.com', org:'Ohio Northern University', expertise:['Environmental Science'], city:'Lima', state_code:'OH', postal_code:'45801', latitude:40.7426, longitude:-84.1052, geocode_source:'fg_zip', travel_miles:40, available_level:'Any level', status:'active', created_at:'2026-02-02T10:00:00Z' },
     { id:'j2', code:'BI-163-K2', name:'Dr. Laura Chen', email:'lchen@example.com', org:'Allen County Health', expertise:['Biology / Life Sciences'], city:'Lima, Allen County', state_code:'OH', travel_miles:20, available_level:'School fair', status:'unverified', notes:'Weekends only.', created_at:'2026-10-27T14:00:00Z' },
     { id:'j3', code:'CH-489-Q5', name:'Mark Thompson', email:'mthompson@example.com', org:'Procter & Gamble', expertise:['Chemistry / Biochemistry'], city:'Columbus, Franklin County', state_code:'OH', travel_miles:30, available_level:'District fair', status:'active', created_at:'2026-01-15T09:00:00Z' },
-    { id:'j4', name:'Dr. Aaliyah Brooks', email:'abrooks@example.com', org:'Georgia Tech', expertise:['Physics / Engineering','Computer Science / Math'], city:'Atlanta', state_code:'GA', postal_code:'30332', latitude:33.7756, longitude:-84.3963, geocode_source:'fg_zip', travel_miles:60, available_level:'Any level', status:'unverified', notes:'Happy to judge virtually too.', created_at:'2026-10-28T16:20:00Z' },
+    { id:'j4', referred_by:'EN-163-7X', signup_source:'GA-ACS', heard_about:'A friend or colleague', preferred_grade_bands:['high'], virtual_ok:true, linkedin:'https://www.linkedin.com/in/aaliyahbrooks', conduct_agreed_at:'2026-10-28T16:20:00Z', confirmation_sent_at:'2026-10-28T16:21:00Z', name:'Dr. Aaliyah Brooks', email:'abrooks@example.com', org:'Georgia Tech', expertise:['Physics / Engineering','Computer Science / Math'], city:'Atlanta', state_code:'GA', postal_code:'30332', latitude:33.7756, longitude:-84.3963, geocode_source:'fg_zip', travel_miles:60, available_level:'Any level', status:'unverified', notes:'Happy to judge virtually too.', created_at:'2026-10-28T16:20:00Z' },
     { id:'j5', name:'Carlos Mendoza', email:'cmendoza@example.com', org:'Intel', expertise:['Computer Science / Math'], city:'Phoenix', state_code:'AZ', latitude:33.4484, longitude:-112.074, geocode_source:'fg_city', travel_miles:100, available_level:'State fair', status:'active', created_at:'2026-09-30T11:00:00Z' },
-    { id:'j6', name:'Dr. Hannah Olsen', email:'holsen@example.com', org:'Mayo Clinic', expertise:['Medicine / Health Sciences','Biology / Life Sciences'], city:'Rochester', state_code:'MN', postal_code:'55905', latitude:44.0225, longitude:-92.4668, geocode_source:'fg_zip', travel_miles:9999, travel_range:'statewide', available_level:'Any level', status:'unverified', created_at:'2026-10-29T08:05:00Z' },
-    { id:'j7', name:'James Whitfield', email:'jwhitfield@example.com', org:'Retired teacher', expertise:['Environmental Science'], city:null, state_code:'MT', latitude:46.6, longitude:-110.0, geocode_source:'fg_state', travel_miles:100, available_level:'School fair', status:'unverified', created_at:'2026-10-26T19:40:00Z' },
+    { id:'j6', signup_source:'MN-MAYO', heard_about:'My employer or professional society', preferred_grade_bands:['elementary','middle','high'], available_months:['Jan','Feb','Mar','Apr'], work_email:'olsen.hannah@mayo.edu', conduct_agreed_at:'2026-10-29T08:05:00Z', name:'Dr. Hannah Olsen', email:'holsen@example.com', org:'Mayo Clinic', expertise:['Medicine / Health Sciences','Biology / Life Sciences'], city:'Rochester', state_code:'MN', postal_code:'55905', latitude:44.0225, longitude:-92.4668, geocode_source:'fg_zip', travel_miles:9999, travel_range:'statewide', available_level:'Any level', status:'unverified', created_at:'2026-10-29T08:05:00Z' },
+    { id:'j7', referred_by:'EN-163-7X', signup_source:'MT-RTA', heard_about:'A teacher or school', virtual_ok:true, name:'James Whitfield', email:'jwhitfield@example.com', org:'Retired teacher', expertise:['Environmental Science'], city:null, state_code:'MT', latitude:46.6, longitude:-110.0, geocode_source:'fg_state', travel_miles:100, available_level:'School fair', status:'unverified', created_at:'2026-10-26T19:40:00Z' },
     { id:'j8', name:'Priya Natarajan', email:'pnatarajan@example.com', org:'UC Berkeley', expertise:['Chemistry / Biochemistry'], city:'Berkeley', state_code:'CA', postal_code:'94720', latitude:37.8719, longitude:-122.2585, geocode_source:'fg_zip', travel_miles:40, available_level:'District fair', status:'active', created_at:'2026-08-12T13:00:00Z' },
     { id:'j9', name:'Samuel Okafor', email:'sokafor@example.com', org:'Texas Instruments', expertise:['Physics / Engineering'], city:'Dallas', state_code:'TX', latitude:32.7767, longitude:-96.797, geocode_source:'fg_city', travel_miles:60, available_level:'Any level', status:'inactive', created_at:'2026-05-03T10:00:00Z' },
+    { id:'j11', name:'Dr. Hannah Olsen', email:'HOlsen@example.com ', org:'Mayo Clinic', expertise:['Medicine / Health Sciences'], city:'Rochester', state_code:'MN', travel_miles:40, available_level:'Any level', status:'unverified', created_at:'2026-10-29T08:01:00Z' },
     { id:'j10', name:'Dr. Emily Tran', email:'etran@example.com', org:'University of Toronto', expertise:['Biology / Life Sciences'], country:'CA', city:'Toronto', state_code:'ON', postal_code:'M5S', latitude:43.6629, longitude:-79.3957, geocode_source:'fg_zip', travel_miles:30, available_level:'Any level', status:'unverified', created_at:'2026-10-25T12:00:00Z' },
   ],
   mentors: [
@@ -63,7 +64,7 @@ function firstName(name) {
   return parts[0];
 }
 
-function approvalEmailFor(type, name) {
+function approvalEmailFor(type, name, extra = {}) {
   const hi = 'Hi ' + firstName(name) + ',\n\n';
 
   if (type === 'teacher') {
@@ -112,7 +113,9 @@ function approvalEmailFor(type, name) {
         'Before your first fair, the welcome guide and code of conduct are worth ten minutes:\n' +
         'https://fairgameinitiative.org/files/judges/fairgame-judge-welcome-guide.pdf\n' +
         'https://fairgameinitiative.org/files/judges/fairgame-judge-code-of-conduct.pdf\n\n' +
-        'Know someone who would make a good judge? Send them to https://fairgameinitiative.org/volunteer.html\n\n' +
+        'Know someone who would make a good judge? Send them your own link - everyone who applies through it is credited to you:\n' +
+        (extra.code ? 'https://fairgameinitiative.org/volunteer.html?ref=' + encodeURIComponent(extra.code) + '#judge'
+                    : 'https://fairgameinitiative.org/volunteer.html (your personal link is on your portal profile page)') + '\n\n' +
         APPROVAL_SIGNOFF
     };
   }
@@ -141,8 +144,8 @@ function approvalEmailFor(type, name) {
   };
 }
 
-function buildMailto(email, type, name) {
-  const m = approvalEmailFor(type, name);
+function buildMailto(email, type, name, extra) {
+  const m = approvalEmailFor(type, name, extra);
   return 'mailto:' + encodeURIComponent(email) +
          '?subject=' + encodeURIComponent(m.subject) +
          '&body='    + encodeURIComponent(m.body);
@@ -599,7 +602,8 @@ const JUDGE_PAGE = 50;
 const MAILTO_BATCH = 40;   // Outlook and Gmail start truncating long mailto: links past this
 
 let allJudges = [];
-const jn = { status: 'unverified', q: '', state: '', field: '', sort: 'new', shown: JUDGE_PAGE, selected: new Set() };
+const jn = { status: 'unverified', q: '', state: '', field: '', extra: '', sort: 'new', shown: JUDGE_PAGE, selected: new Set() };
+let judgeEmailCounts = new Map();   // lower(email) -> rows with that address
 
 function jStatusOf(j) { return j.status || 'unverified'; }
 function findJudge(id)  { return allJudges.find(j => String(j.id) === String(id)); }
@@ -628,8 +632,14 @@ function judgeMatches(j) {
   if (jn.state === '__intl') { if ((j.country || 'US') === 'US') return false; }
   else if (jn.state && (j.state_code || '') !== jn.state) return false;
   if (jn.field && !(j.expertise || []).some(e => e.split('/')[0].trim() === jn.field.split('/')[0].trim())) return false;
+  if (jn.extra === 'virtual'    && !j.virtual_ok) return false;
+  if (jn.extra === 'duplicate'  && !isDuplicateJudge(j)) return false;
+  if (jn.extra === 'referred'   && !j.referred_by) return false;
+  if (jn.extra === 'bg_cleared' && j.background_check_status !== 'cleared') return false;
+  if (jn.extra === 'bg_needed'  && !['requested','expired'].includes(j.background_check_status)) return false;
   if (jn.q) {
-    const hay = [j.name, j.email, j.org, j.city, j.state_code, j.postal_code, j.region, j.code, j.notes,
+    const hay = [j.name, j.email, j.work_email, j.org, j.city, j.state_code, j.postal_code, j.region, j.code, j.notes,
+                 j.signup_source, j.heard_about, j.referred_by,
                  (j.expertise || []).join(' ')].join(' ').toLowerCase();
     if (!jn.q.split(/\s+/).every(w => hay.includes(w))) return false;
   }
@@ -649,6 +659,13 @@ function sortJudges(list) {
 
 function filteredJudges() { return sortJudges(allJudges.filter(judgeMatches)); }
 
+function emailKey(j) { return (j.email || '').trim().toLowerCase(); }
+function isDuplicateJudge(j) { return emailKey(j) && (judgeEmailCounts.get(emailKey(j)) || 0) > 1; }
+function countJudgeEmails() {
+  judgeEmailCounts = new Map();
+  allJudges.forEach(j => { const k = emailKey(j); if (k) judgeEmailCounts.set(k, (judgeEmailCounts.get(k) || 0) + 1); });
+}
+
 function setJudgeTab(status) {
   jn.status = status; jn.shown = JUDGE_PAGE;
   document.querySelectorAll('#jnTabs .jn-tab').forEach(b => b.classList.toggle('active', b.dataset.status === status));
@@ -658,6 +675,7 @@ function setJudgeFilter() {
   jn.q     = (document.getElementById('jnSearch')?.value || '').trim().toLowerCase();
   jn.state = document.getElementById('jnState')?.value || '';
   jn.field = document.getElementById('jnField')?.value || '';
+  jn.extra = document.getElementById('jnExtra')?.value || '';
   jn.sort  = document.getElementById('jnSort')?.value || 'new';
   jn.shown = JUDGE_PAGE;
   renderJudges();
@@ -704,6 +722,19 @@ function shortFields(j) {
   return (j.expertise || []).map(e => esc(e.split('/')[0].trim())).join(', ') || '–';
 }
 
+const BG_LABEL = { not_required: 'Not required', requested: 'Requested', cleared: 'Cleared', expired: 'Expired' };
+
+/* Small flags beside the name: what an admin needs to notice at a glance. */
+function judgeBadgesHTML(j) {
+  const b = [];
+  if (isDuplicateJudge(j)) b.push('<span class="jn-flag jn-flag-dup" title="Another application uses this email">Duplicate</span>');
+  if (j.virtual_ok)        b.push('<span class="jn-flag" title="Can judge virtually">Virtual</span>');
+  if (j.background_check_status === 'cleared') b.push('<span class="jn-flag jn-flag-ok" title="Background check cleared">BG ✓</span>');
+  if (['requested','expired'].includes(j.background_check_status)) b.push(`<span class="jn-flag jn-flag-warn" title="Background check ${esc(j.background_check_status)}">BG ${esc(j.background_check_status)}</span>`);
+  if (j.referred_by)       b.push('<span class="jn-flag" title="Joined through another judge\'s link">Referred</span>');
+  return b.length ? ' ' + b.join(' ') : '';
+}
+
 function judgeActionsHTML(j) {
   const id = esc(j.id), s = jStatusOf(j);
   if (s === 'active')   return `<button class="btn-xs danger" onclick="deactivateJudge('${id}')">Deactivate</button>`;
@@ -717,7 +748,7 @@ function judgeRowHTML(j) {
   const applied = j.created_at ? new Date(j.created_at).toLocaleDateString() : '–';
   return `<tr id="jrow-${id}" class="row-click" title="Open the full profile" onclick="openJudge('${id}')">
     <td class="jn-check" onclick="event.stopPropagation();"><input type="checkbox" aria-label="Select ${esc(j.name)}" ${jn.selected.has(String(j.id)) ? 'checked' : ''} onchange="toggleJudgeSelect('${id}', this.checked)"/></td>
-    <td class="col-name">${esc(j.name || 'No name')}<div class="text-xs text-muted">${esc(j.org || '')}</div></td>
+    <td class="col-name">${esc(j.name || 'No name')}${judgeBadgesHTML(j)}<div class="text-xs text-muted">${esc(j.org || '')}</div></td>
     <td class="col-sm">${shortFields(j)}</td>
     <td class="col-sm">${esc(FG_GEO.label(j))}${j.postal_code ? ' <span class="text-muted">' + esc(j.postal_code) + '</span>' : ''}</td>
     <td class="col-sm">${travelLabel(j)}</td>
@@ -731,14 +762,16 @@ function renderJudges() {
   const tbody = document.getElementById('judgesTbody');
   const more  = document.getElementById('jnMore');
   if (!tbody) return;
+  countJudgeEmails();
   updateJudgeCounts();
+  renderJudgeSources();
   const list = filteredJudges();
   const all  = document.getElementById('jnAll');
   if (all) all.checked = false;
 
   if (!list.length) {
     const tab = JUDGE_STATUS_LABEL[jn.status];
-    fgEmpty(tbody, jn.q || jn.state || jn.field ? 'No judges match these filters.'
+    fgEmpty(tbody, jn.q || jn.state || jn.field || jn.extra ? 'No judges match these filters.'
       : jn.status === 'unverified' ? 'Nobody is waiting for review. Nice work.'
       : `No ${tab ? tab.toLowerCase() + ' ' : ''}judges yet.`);
     if (more) more.innerHTML = '';
@@ -832,7 +865,7 @@ async function activateJudge(id) {
   const prev = jStatusOf(j);
   if (!await setJudgeStatus([id], 'active')) return;
   closeModal('portfolioModal');
-  const mailto = j.email ? buildMailto(j.email, 'judge', j.name) : '';
+  const mailto = j.email ? buildMailto(j.email, 'judge', j.name, { code: j.code }) : '';
   if (mailto) openMailto(mailto);
   fgToast(`Activated <strong>${esc(j.name)}</strong>. ` +
     (mailto ? `A welcome email is open in your mail app - <a href="${mailto}">open it again</a>. ` : 'No email on file, so no welcome email. ') +
@@ -894,6 +927,12 @@ function exportJudgesCsv() {
     ['ZIP', j => j.postal_code], ['Latitude', j => j.latitude], ['Longitude', j => j.longitude],
     ['Expertise', j => (j.expertise || []).join('; ')], ['Level', j => j.available_level],
     ['Travel', j => j.travel_miles >= 9999 ? 'statewide' : j.travel_miles], ['Notes', j => j.notes],
+    ['Grade levels', j => (j.preferred_grade_bands || []).join('; ')], ['Virtual', j => j.virtual_ok ? 'yes' : ''],
+    ['Months', j => (j.available_months || []).join('; ')], ['LinkedIn', j => j.linkedin], ['Work email', j => j.work_email],
+    ['Heard about', j => j.heard_about], ['Source', j => j.signup_source], ['Referred by', j => j.referred_by],
+    ['Referrals', j => referralsOf(j).length], ['Code of conduct', j => j.conduct_agreed_at ? j.conduct_agreed_at.slice(0, 10) : ''],
+    ['Background check', j => j.background_check_status], ['Background check date', j => j.background_check_date],
+    ['Duplicate email', j => isDuplicateJudge(j) ? 'yes' : ''],
     ['Code', j => j.code], ['Applied', j => j.created_at ? j.created_at.slice(0, 10) : ''],
   ];
   const cell = v => { const t = v == null ? '' : String(v); return /[",\n]/.test(t) ? '"' + t.replace(/"/g, '""') + '"' : t; };
@@ -954,8 +993,35 @@ async function openJudge(id) {
     <div class="pf-group">
       <div class="pf-group-title">Judging</div>
       ${pfRow('expertise', j.expertise || [])}
-      ${pfPlainRow('Level', j.available_level ? esc(j.available_level) : pfMissing())}
+      ${pfPlainRow('Grade levels', (j.preferred_grade_bands || []).length ? (j.preferred_grade_bands).map(g => esc(GRADE_LABEL[g] || g)).join(' &middot; ') : pfMissing('Not given'))}
+      ${pfPlainRow('Fair level', j.available_level ? esc(j.available_level) : pfMissing())}
+      ${pfPlainRow('Virtual judging', j.virtual_ok ? 'Yes' : 'No')}
+      ${pfPlainRow('Months free', (j.available_months || []).length ? esc(j.available_months.join(', ')) : pfMissing('Not given'))}
       ${pfRow('notes', j.notes)}
+    </div>
+    <div class="pf-group">
+      <div class="pf-group-title">Checks</div>
+      ${isDuplicateJudge(j) ? pfPlainRow('Duplicate', `<span class="pf-missing">${judgeEmailCounts.get(emailKey(j))} applications use this email</span> - <a href="#" onclick="closeModal('portfolioModal');showDuplicatesOf('${esc(emailKey(j))}');return false;">show them</a>`) : ''}
+      ${pfPlainRow('LinkedIn', j.linkedin ? `<a href="${esc(j.linkedin)}" target="_blank" rel="noopener noreferrer">${esc(j.linkedin)}</a>` : pfMissing('Not given'))}
+      ${pfPlainRow('Work email', j.work_email ? `<a href="mailto:${esc(j.work_email)}">${esc(j.work_email)}</a>` : pfMissing('Not given'))}
+      ${pfPlainRow('Code of conduct', j.conduct_agreed_at ? 'Agreed ' + esc(new Date(j.conduct_agreed_at).toLocaleDateString()) : pfMissing('Not on file - applied before it was asked'))}
+      ${pfPlainRow('Confirmation email', j.confirmation_sent_at ? 'Sent ' + esc(new Date(j.confirmation_sent_at).toLocaleString()) : '<span class="text-muted">Not sent</span>')}
+      <div class="pf-row"><div class="pf-key">Background check</div><div class="pf-val" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <select id="pfBgStatus" style="width:auto;padding:5px 8px;font-size:.8rem;">
+          <option value="">Not recorded</option>
+          ${Object.entries(BG_LABEL).map(([k, v]) => `<option value="${k}" ${j.background_check_status === k ? 'selected' : ''}>${v}</option>`).join('')}
+        </select>
+        <input type="date" id="pfBgDate" value="${esc(j.background_check_date || '')}" style="width:auto;padding:4px 8px;font-size:.8rem;"/>
+        <button class="btn-xs" onclick="saveBackgroundCheck('${esc(j.id)}')">Save</button>
+      </div></div>
+    </div>
+    <div class="pf-group">
+      <div class="pf-group-title">How they found us</div>
+      ${pfPlainRow('Heard about us', j.heard_about ? esc(j.heard_about) : pfMissing('Not given'))}
+      ${pfPlainRow('Link tag', j.signup_source ? esc(j.signup_source) : '<span class="text-muted">None</span>')}
+      ${pfPlainRow('Referred by', referrerHTML(j))}
+      ${pfPlainRow('Their referrals', referralsHTML(j))}
+      ${j.code ? pfPlainRow('Referral link', `<a href="https://fairgameinitiative.org/volunteer.html?ref=${encodeURIComponent(j.code)}#judge" target="_blank" rel="noopener">volunteer.html?ref=${esc(j.code)}</a>`) : ''}
     </div>`;
   document.getElementById('portfolioActions').innerHTML = `
     <button class="btn-ghost" onclick="closeModal('portfolioModal')">Close</button>
@@ -965,6 +1031,76 @@ async function openJudge(id) {
   openModal('portfolioModal');
 }
 window.openJudge = openJudge;
+
+const GRADE_LABEL = { elementary: 'Elementary (K–5)', middle: 'Middle (6–8)', high: 'High (9–12)' };
+
+function referralsOf(j) {
+  return j.code ? allJudges.filter(r => r.referred_by && r.referred_by === j.code) : [];
+}
+function judgeLink(j) {
+  return `<a href="#" onclick="openJudge('${esc(j.id)}');return false;">${esc(j.name || j.email || 'Unnamed')}</a>`;
+}
+function referrerHTML(j) {
+  if (!j.referred_by) return '<span class="text-muted">Nobody</span>';
+  const r = allJudges.find(x => x.code === j.referred_by);
+  return r ? judgeLink(r) + ` <span class="text-muted">(${esc(j.referred_by)})</span>` : esc(j.referred_by) + ' <span class="text-muted">- no judge has this code</span>';
+}
+function referralsHTML(j) {
+  const rs = referralsOf(j);
+  return rs.length ? rs.map(judgeLink).join(', ') : '<span class="text-muted">None yet</span>';
+}
+
+async function saveBackgroundCheck(id) {
+  const j = findJudge(id);
+  if (!j) return;
+  const upd = {
+    background_check_status: document.getElementById('pfBgStatus')?.value || null,
+    background_check_date:   document.getElementById('pfBgDate')?.value || null,
+  };
+  if (sb) {
+    const { error } = await sb.from('judges').update(upd).eq('id', id);
+    if (error) { fgToast('Could not save the background check - ' + esc(error.message), 'err'); return; }
+  }
+  Object.assign(j, upd);
+  refreshJudgeRow(id);
+  fgToast('Background check saved for <strong>' + esc(j.name) + '</strong>.');
+}
+window.saveBackgroundCheck = saveBackgroundCheck;
+
+/* Duplicates are found by email, so the quickest way to compare them is
+   to search for that email across every status. */
+function showDuplicatesOf(email) {
+  const search = document.getElementById('jnSearch');
+  if (search) search.value = email;
+  const extra = document.getElementById('jnExtra');
+  if (extra) extra.value = '';
+  setJudgeTab('all');
+  setJudgeFilter();
+}
+window.showDuplicatesOf = showDuplicatesOf;
+
+/* -- Where judges come from ---------------------------------------
+   The outreach scoreboard: which ?src= tags, which "heard about us"
+   answers, and which judges' referral links are bringing people in. */
+function renderJudgeSources() {
+  const box = document.getElementById('jnSources');
+  if (!box) return;
+  const tally = (fn) => {
+    const m = new Map();
+    allJudges.forEach(j => { const k = fn(j); if (k) m.set(k, (m.get(k) || 0) + 1); });
+    return [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8);
+  };
+  const byCode = new Map(allJudges.filter(j => j.code).map(j => [j.code, j]));
+  const col = (title, rows, label = k => esc(k), empty) => `<div class="jn-src-col">
+      <div class="pf-group-title">${title}</div>
+      ${rows.length ? rows.map(([k, n]) => `<div class="jn-src-row"><span>${label(k)}</span><strong>${n}</strong></div>`).join('')
+                    : `<div class="text-xs text-muted">${empty}</div>`}
+    </div>`;
+  box.innerHTML =
+    col('Link tags (?src=)', tally(j => j.signup_source), undefined, 'None yet. Add ?src=TX-ACS (or similar) to each outreach link.') +
+    col('Heard about us', tally(j => j.heard_about), undefined, 'No answers yet.') +
+    col('Top referrers', tally(j => j.referred_by), k => byCode.get(k) ? judgeLink(byCode.get(k)) : esc(k), 'No referrals yet.');
+}
 
 
 /* ══════════════════════════════════════════════════════════════════
@@ -1045,6 +1181,7 @@ async function loadJudgeMap() {
 function jmVisible(j) {
   const s = jStatusOf(j);
   if (!document.getElementById(s === 'active' ? 'jmShowActive' : s === 'inactive' ? 'jmShowInactive' : 'jmShowPending')?.checked) return false;
+  if (document.getElementById('jmVirtualOnly')?.checked && !j.virtual_ok) return false;
   const field = document.getElementById('jmField')?.value;
   if (field && !(j.expertise || []).some(e => e.split('/')[0].trim() === field.split('/')[0].trim())) return false;
   return true;
@@ -1056,7 +1193,7 @@ function jmPopupHTML(j, pt) {
     <strong>${esc(j.name)}</strong><br/>
     <span class="chip chip-${esc(s)}">${esc(JUDGE_STATUS_LABEL[s] || s)}</span>
     <div>${esc(j.org || '')}</div>
-    <div class="text-muted">${esc(FG_GEO.label(j))} · travels ${travelLabel(j).toLowerCase()}</div>
+    <div class="text-muted">${esc(FG_GEO.label(j))} · travels ${travelLabel(j).toLowerCase()}${j.virtual_ok ? ' · virtual OK' : ''}</div>
     <div>${shortFields(j)}</div>
     ${/state/.test(pt.source) ? '<div class="jn-pin-src">Pin is approximate - state only</div>' : ''}
     <div class="jm-popup-actions">
@@ -1196,6 +1333,10 @@ function searchNearPoint(pt, label, quiet) {
   }).filter(x => x && x.d <= miles).sort((a, b) => a.d - b.d);
 
   const active = near.filter(x => jStatusOf(x.j) === 'active').length;
+  // Rural gaps are where virtual judges matter: count the ones outside
+  // the ring who could still take this fair online.
+  const nearIds = new Set(near.map(x => String(x.j.id)));
+  const virtualElsewhere = allJudges.filter(j => j.virtual_ok && jStatusOf(j) === 'active' && !nearIds.has(String(j.id))).length;
   const box = document.getElementById('jmResults');
   if (!box) return;
   box.innerHTML = `<div class="jm-result" style="cursor:default;background:var(--gray-50);">
@@ -1210,7 +1351,9 @@ function searchNearPoint(pt, label, quiet) {
         <div class="text-xs text-muted">${esc(FG_GEO.label(j))} · ${shortFields(j)}${/state/.test(p.source) ? ' · approx. pin' : ''}</div>
         <div class="text-xs" style="color:${reach ? 'var(--g600)' : 'var(--gray-400)'};">${reach ? 'Willing to travel this far' : 'Travels ' + travelLabel(j).toLowerCase()}</div>
       </div>`;
-    }).join('') : '<div class="jm-result" style="cursor:default;">No judges in range yet - this is a gap to recruit for.</div>');
+    }).join('') : '<div class="jm-result" style="cursor:default;">No judges in range yet - this is a gap to recruit for.</div>') +
+    (virtualElsewhere ? `<div class="jm-result" style="cursor:pointer;color:var(--g700);" onclick="document.getElementById('jmVirtualOnly').checked=true;renderJudgeMap();fitJudgeMap();">
+      + ${virtualElsewhere} active judge${virtualElsewhere === 1 ? '' : 's'} outside this range can judge virtually - show them</div>` : '');
 }
 
 function clearNearSearch() {

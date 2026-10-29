@@ -174,6 +174,14 @@
               <option>Biology / Life Sciences</option><option>Chemistry / Biochemistry</option><option>Physics / Engineering</option>
               <option>Environmental Science</option><option>Computer Science / Math</option><option>Medicine / Health Sciences</option>
             </select>
+            <select id="jnExtra" onchange="setJudgeFilter()" aria-label="More filters">
+              <option value="">Any</option>
+              <option value="virtual">Can judge virtually</option>
+              <option value="duplicate">Duplicate emails</option>
+              <option value="referred">Joined by referral</option>
+              <option value="bg_cleared">Background check cleared</option>
+              <option value="bg_needed">Background check pending/expired</option>
+            </select>
             <select id="jnSort" onchange="setJudgeFilter()" aria-label="Sort">
               <option value="new">Newest first</option><option value="old">Oldest first</option>
               <option value="name">Name A–Z</option><option value="state">By state</option>
@@ -198,6 +206,10 @@
         </div>
         <div class="jn-more" id="jnMore"></div>
       </div>
+      <div class="card mt-16">
+        <div class="card-header"><h3>Where judges come from</h3><span class="text-xs text-muted">All judges, every status</span></div>
+        <div class="card-body jn-sources" id="jnSources"></div>
+      </div>
     </div>
 
     <!-- JUDGE MAP -->
@@ -210,6 +222,7 @@
             <label><input type="checkbox" id="jmShowPending"  checked onchange="renderJudgeMap()"/> <span class="jm-dot" style="background:#d97706"></span>Needs review</label>
             <label><input type="checkbox" id="jmShowInactive"         onchange="renderJudgeMap()"/> <span class="jm-dot" style="background:#9ca3af"></span>Inactive</label>
             <label><input type="checkbox" id="jmRings" onchange="renderJudgeMap()"/> Show 100-mile reach</label>
+            <label><input type="checkbox" id="jmVirtualOnly" onchange="renderJudgeMap()"/> Virtual-capable only</label>
             <select id="jmField" onchange="renderJudgeMap()" aria-label="Expertise" style="max-width:200px;">
               <option value="">All fields</option>
               <option>Biology / Life Sciences</option><option>Chemistry / Biochemistry</option><option>Physics / Engineering</option>

@@ -76,6 +76,16 @@
         </div>
       </div>
       <div class="card" style="max-width:620px;">
+        <div class="card-header"><h3>Invite Other Judges</h3><span class="text-xs text-muted" id="refCount"></span></div>
+        <div class="card-body">
+          <p class="text-sm text-muted mb-16">Know a scientist, engineer, doctor, or teacher who would make a good judge? Send them your link - everyone who applies through it is credited to you.</p>
+          <div style="display:flex;gap:8px;">
+            <input type="text" id="refLink" readonly onclick="this.select()" aria-label="Your referral link" style="flex:1;min-width:0;"/>
+            <button class="btn-primary" style="font-size:.78rem;padding:8px 16px;" onclick="copyRefLink(this)">Copy</button>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="max-width:620px;">
         <div class="card-header"><h3>Edit Profile</h3><button class="btn-primary" onclick="saveProfile()" style="font-size:.78rem;padding:8px 16px;">Save Changes</button></div>
         <div class="card-body">
           <div class="form-grid">
@@ -97,6 +107,25 @@
             </div>
             <div class="form-group"><label class="form-label">Available for</label>
               <select id="pLevel"><option>School fair</option><option>District fair</option><option>State fair</option><option>Any level</option></select>
+            </div>
+            <div class="form-group"><label class="form-label">LinkedIn (optional)</label><input type="url" id="pLinkedIn" placeholder="linkedin.com/in/yourname"/></div>
+            <div class="form-group"><label class="form-label">Work email (optional)</label><input type="email" id="pWorkEmail" placeholder="you@employer.com"/></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Grade levels</label>
+            <div class="check-group">
+              <label class="check-item"><input type="checkbox" id="pg1" value="elementary"> Elementary (K–5)</label>
+              <label class="check-item"><input type="checkbox" id="pg2" value="middle"> Middle school (6–8)</label>
+              <label class="check-item"><input type="checkbox" id="pg3" value="high"> High school (9–12)</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="check-item" style="cursor:pointer;"><input type="checkbox" id="pVirtual"> I can also judge virtually (online fairs and video judging)</label>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Months you're usually free</label>
+            <div class="check-group" id="pMonths" style="display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:4px 10px;">
+              <label class="check-item"><input type="checkbox" value="Sep"> Sep</label><label class="check-item"><input type="checkbox" value="Oct"> Oct</label><label class="check-item"><input type="checkbox" value="Nov"> Nov</label><label class="check-item"><input type="checkbox" value="Dec"> Dec</label><label class="check-item"><input type="checkbox" value="Jan"> Jan</label><label class="check-item"><input type="checkbox" value="Feb"> Feb</label><label class="check-item"><input type="checkbox" value="Mar"> Mar</label><label class="check-item"><input type="checkbox" value="Apr"> Apr</label><label class="check-item"><input type="checkbox" value="May"> May</label><label class="check-item"><input type="checkbox" value="Jun"> Jun</label><label class="check-item"><input type="checkbox" value="Jul"> Jul</label><label class="check-item"><input type="checkbox" value="Aug"> Aug</label>
             </div>
           </div>
           <div class="form-group">

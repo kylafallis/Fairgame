@@ -123,6 +123,21 @@
     }
     .form-row { margin-bottom: 18px; }
     .fg-loc-row { margin-bottom: 14px; }
+    .form-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    @media (max-width: 480px) { .form-pair { grid-template-columns: 1fr; } }
+    .form-opt { font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--gray-500); }
+    .month-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+    @media (max-width: 480px) { .month-grid { grid-template-columns: repeat(4, 1fr); } }
+    .month-grid label {
+      display: flex; align-items: center; justify-content: center; gap: 5px;
+      border: 1px solid var(--gray-200); border-radius: 7px; padding: 7px 4px;
+      font-size: 0.82rem; color: var(--gray-700); cursor: pointer; user-select: none;
+    }
+    .month-grid label:has(input:checked) { background: var(--green-50); border-color: var(--green-600, #357a38); color: var(--green-800); }
+    .month-grid input { width: 13px; height: 13px; margin: 0; }
+    .ref-note { background: var(--green-50); color: var(--green-800); border-radius: 7px; padding: 10px 14px; font-size: 0.84rem; margin: 0 0 18px; }
+    .ref-share { display: flex; gap: 8px; margin-top: 10px; }
+    .ref-share input { flex: 1; min-width: 0; font-size: 0.8rem !important; padding: 8px 10px !important; }
     .fg-loc-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .fg-loc-pair .fg-loc-row { margin-bottom: 0; }
     @media (max-width: 480px) { .fg-loc-pair { grid-template-columns: 1fr; } }
@@ -288,13 +303,19 @@
 
     <div class="form-grid reveal">
 
-      <div class="form-box">
+      <div class="form-box" id="judge">
         <h3>Judge Application</h3>
+        <div class="ref-note" id="jRefNote" style="display:none;"></div>
         <p>Fill out this form to join our judge network. We'll reach out when a fair near you needs judges in your expertise area.</p>
         <p style="margin-top:-14px;"><strong>Fields marked * are required.</strong> We take judges from every state - pick yours below and we will place you on our map.</p>
         <div class="form-row"><label class="form-label">Full name *</label><input type="text" id="jName" placeholder="Dr. Jane Smith" /></div>
         <div class="form-row"><label class="form-label">Email address *</label><input type="email" id="jEmail" placeholder="jsmith@company.com" /></div>
         <div class="form-row"><label class="form-label">Organization / Employer *</label><input type="text" id="jOrg" placeholder="University or Company" /></div>
+        <div class="form-pair">
+          <div class="form-row"><label class="form-label">LinkedIn <span class="form-opt">(optional)</span></label><input type="url" id="jLinkedIn" placeholder="linkedin.com/in/yourname" /></div>
+          <div class="form-row"><label class="form-label">Work email <span class="form-opt">(optional)</span></label><input type="email" id="jWorkEmail" placeholder="you@employer.com" /></div>
+        </div>
+        <span class="form-hint" style="margin:-10px 0 18px;display:block;">Either one helps us approve you faster.</span>
         <!-- Country, state, then optional city and ZIP, picked rather than
              typed, so every judge lands on the map. Built by geo.js. -->
         <div class="form-row" id="jLocation"></div>
@@ -323,10 +344,43 @@
           <div class="checkbox-row"><input type="checkbox" id="je6"><label for="je6">Medicine / Health Sciences</label></div>
         </div>
         <div class="form-row">
-          <label class="form-label">Preferred level *</label>
+          <label class="form-label">Grade levels you'd like to judge *</label>
+          <div class="checkbox-row"><input type="checkbox" id="jg1" value="elementary"><label for="jg1">Elementary (K–5)</label></div>
+          <div class="checkbox-row"><input type="checkbox" id="jg2" value="middle"><label for="jg2">Middle school (6–8)</label></div>
+          <div class="checkbox-row"><input type="checkbox" id="jg3" value="high"><label for="jg3">High school (9–12)</label></div>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Preferred fair level *</label>
           <select id="jLevel"><option value="">Select...</option><option>School fair</option><option>District fair</option><option>State fair</option><option>Any level</option></select>
         </div>
-        <div class="form-row"><label class="form-label">Availability / notes *</label><textarea id="jNotes" rows="2" placeholder="e.g. Available weekdays only"></textarea></div>
+        <div class="form-row">
+          <div class="checkbox-row"><input type="checkbox" id="jVirtual"><label for="jVirtual"><strong>I can also judge virtually</strong> - online fairs and video judging, from anywhere</label></div>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Months you're usually free <span class="form-opt">(optional - most fairs run January to April)</span></label>
+          <div class="month-grid" id="jMonths">
+            <label><input type="checkbox" value="Sep">Sep</label><label><input type="checkbox" value="Oct">Oct</label><label><input type="checkbox" value="Nov">Nov</label>
+            <label><input type="checkbox" value="Dec">Dec</label><label><input type="checkbox" value="Jan">Jan</label><label><input type="checkbox" value="Feb">Feb</label>
+            <label><input type="checkbox" value="Mar">Mar</label><label><input type="checkbox" value="Apr">Apr</label><label><input type="checkbox" value="May">May</label>
+            <label><input type="checkbox" value="Jun">Jun</label><label><input type="checkbox" value="Jul">Jul</label><label><input type="checkbox" value="Aug">Aug</label>
+          </div>
+        </div>
+        <div class="form-row"><label class="form-label">Anything else we should know? <span class="form-opt">(optional)</span></label><textarea id="jNotes" rows="2" placeholder="e.g. Weekends only, or happy to bring a colleague"></textarea></div>
+        <div class="form-row">
+          <label class="form-label">How did you hear about FairGame? <span class="form-opt">(optional)</span></label>
+          <select id="jHeard">
+            <option value="">Select...</option>
+            <option>Email from FairGame</option>
+            <option>A friend or colleague</option>
+            <option>My employer or professional society</option>
+            <option>My university</option>
+            <option>A teacher or school</option>
+            <option>LinkedIn</option>
+            <option>Other social media</option>
+            <option>Web search</option>
+            <option>Other</option>
+          </select>
+        </div>
 
         <!-- Judges used to be sent a one-time sign-in link and given no
              password at all, so once that link was spent - often by a mail
@@ -341,7 +395,10 @@
           <label class="form-label">Confirm password *</label>
           <input type="password" id="jPwConfirm" placeholder="Repeat password" autocomplete="new-password" />
         </div>
-        <button class="btn btn-primary" onclick="submitJudge()" style="width:100%;justify-content:center;">Submit Judge Application &rarr;</button>
+        <div class="form-row">
+          <div class="checkbox-row"><input type="checkbox" id="jConduct"><label for="jConduct">I have read and agree to the <a href="/files/judges/fairgame-judge-code-of-conduct.pdf" target="_blank" rel="noopener">FairGame Judge Code of Conduct</a>. *</label></div>
+        </div>
+        <button class="btn btn-primary" id="jSubmit" onclick="submitJudge()" style="width:100%;justify-content:center;">Submit Judge Application &rarr;</button>
         <div id="judgeMsg" class="form-msg"></div>
       </div>
 
