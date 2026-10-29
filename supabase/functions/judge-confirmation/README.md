@@ -25,3 +25,12 @@ to change the From line.
 
 Until it is deployed the signup form still works - the call just fails
 quietly and the on-screen confirmation is all the applicant gets.
+
+# judge-request-notify
+
+Emails a judge when a teacher sends a match request from the public judge
+map, with the teacher as Reply-To. Needs migration 16. Deploy the same way:
+
+```bash
+supabase functions deploy judge-request-notify --no-verify-jwt
+```

@@ -63,7 +63,7 @@ async function buildReport() {
       ] = await Promise.all([
         sb.from('stats').select('value').eq('key','schools_supported').single().then(r => ({ count: r.data?.value || 12 })),
         sb.from('resource_downloads').select('id', { count:'exact', head:true }),
-        sb.from('judges').select('id', { count:'exact', head:true }).eq('status','active'),
+        sb.from('judges_public').select('id', { count:'exact', head:true }),
         sb.from('mentorships').select('id', { count:'exact', head:true }).eq('status','active'),
         sb.from('portal_requests').select('id', { count:'exact', head:true }),
         sb.from('email_subscribers').select('id', { count:'exact', head:true }),

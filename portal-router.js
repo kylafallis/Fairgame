@@ -28,11 +28,27 @@ function routerFail(html) {
 let routed = false;
 async function routeTo(role, user) {
   if (routed) return;
+  // A role with no portal of its own used to fall through to the
+  // ambassador portal, which bounced it back to the login page.
+  if (!role) {
+    routed = true;
+    routerFail('Your account does not have portal access yet.<br>' +
+      'If you applied recently we are still reviewing it - you will get an email once approved.<br>' +
+      '<a href="/login.html">Back to sign in →</a>');
+    return;
+  }
+  if (!ROUTES[role]) {
+    routed = true;
+    routerFail('Your sign-in worked, but this account has no portal page' +
+      (role === 'inactive' ? ' because it has been paused' : '') + '.<br>' +
+      'Email <a href="mailto:fairgameinitiative@outlook.com">fairgameinitiative@outlook.com</a> and we will sort it out.');
+    return;
+  }
   routed = true;
   await window.fgTrack?.('login-success', {
     via: 'router', role: role || 'none', provider: user?.app_metadata?.provider || 'unknown'
   });
-  window.location.replace(ROUTES[role] || '/portal-ambassador.html');
+  window.location.replace(ROUTES[role]);
 }
 
 async function resolveRole(user) {

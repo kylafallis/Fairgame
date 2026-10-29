@@ -101,6 +101,27 @@ async function pendingJudgeStatus() {
   return data || null;
 }
 
+/* Has the signed-in person's own request of this type been decided?
+   Kept in step with myRequestStatus() in portal-shared.js, which this
+   page does not load. The direct read it replaces matched the address
+   exactly - auth stores it lower-cased, the request keeps what was
+   typed - and row-level security returns an empty result rather than an
+   error, so approved teachers kept seeing "under review". */
+async function myRequestStatus(type, email) {
+  const { data, error } = await sb.rpc('fg_my_request_status', { p_type: type });
+  if (!error) return { status: data || null, known: true };
+  const pattern = String(email || '').replace(/[\\%_]/g, c => '\\' + c);
+  const { data: rows, error: readErr } = await sb.from('portal_requests')
+    .select('status').ilike('email', pattern).eq('type', type)
+    .order('created_at', { ascending: false }).limit(5);
+  if (readErr) return { status: null, known: false };
+  const statuses = (rows || []).map(r => r.status);
+  return {
+    status: statuses.includes('active') ? 'active' : statuses.includes('rejected') ? 'rejected' : statuses[0] || null,
+    known: true,
+  };
+}
+
 // Set to true during signup to prevent the onAuthStateChange listener from auto-redirecting
 let suppressAutoRedirect = false;
 
@@ -243,8 +264,11 @@ function normalizeWebsite(raw) {
    rather than telling the user their account is under review. */
 async function ensurePortalRequest(email, name, role, details) {
   if (!sb || !APPROVAL_ROLES.includes(role)) return { ok: true };
+  // Lower case, the way auth stores it, so the status lookup and the
+  // duplicate check below both find this row again.
+  email = String(email || '').trim().toLowerCase();
   const { data: existing, error: selErr } = await sb.from('portal_requests')
-    .select('id,status').eq('email', email).eq('type', role).limit(1);
+    .select('id,status').ilike('email', email.replace(/[\\%_]/g, c => '\\' + c)).eq('type', role).limit(1);
   if (!selErr && existing && existing.length) return { ok: true, existing: existing[0] };
   const d = details || {};
   const { error: insErr } = await sb.from('portal_requests').insert([{
@@ -314,7 +338,15 @@ async function go(user) {
          offering it to a waiting judge is how this looked like a failed
          sign-in rather than a queue. */
       const jStatus = await pendingJudgeStatus();
-      if (jStatus) { trackLogin('pending', 'judge', user); showPendingScreen(user.email, 'judge'); return; }
+      if (jStatus) { trackLogin('pending', 'judge', user); showPendingScreen(user.email, 'judge', jStatus); return; }
+
+      /* The mentor counterpart. A mentor waiting on approval was offered
+         the student/teacher chooser here, and choosing anything wrote a
+         role that later stopped the mentor role from ever being granted. */
+      const mStatus = await myRequestStatus('mentor', user.email);
+      if (['pending', 'interest'].includes(mStatus.status)) {
+        trackLogin('pending', 'mentor', user); showPendingScreen(user.email, 'mentor'); return;
+      }
 
       const pending = readPendingRole();
       if (pending && pending !== 'judge') {
@@ -337,6 +369,21 @@ async function go(user) {
       }
     }
 
+    /* inactive, parent and fair_manager have no portal. Sending them to
+       the student portal bounced them back here, and this page sent them
+       on again - a reload loop with no message. */
+    if (!ROUTES[role]) {
+      trackLogin('no-portal', role, user);
+      showNoPortalScreen(user.email, role);
+      return;
+    }
+
+    // A deactivated judge keeps the judge role; the judges row decides.
+    if (role === 'judge') {
+      const jStatus = await pendingJudgeStatus();
+      if (jStatus && jStatus !== 'active') { trackLogin('pending', 'judge', user); showPendingScreen(user.email, 'judge', jStatus); return; }
+    }
+
     // Admin always goes straight through
     if (role === 'admin') {
       await trackLogin('success', role, user);
@@ -346,29 +393,25 @@ async function go(user) {
 
     // Teacher / Ambassador: check approval status in portal_requests
     if (APPROVAL_ROLES.includes(role) && sb) {
-      const { data: rows, error: reqErr } = await sb.from('portal_requests')
-        .select('status').eq('email', user.email).eq('type', role)
-        .in('status', ['pending', 'active', 'rejected'])
-        .order('created_at', { ascending: false }).limit(1);
-      const req = rows?.[0] || null;
-      // If RLS blocked the query, don't block the user - let them through
-      if (!reqErr) {
-        if (!req || req.status === 'pending') {
-          trackLogin('pending', role, user);
-          showPendingScreen(user.email, role);
-          return;
-        }
+      const req = await myRequestStatus(role, user.email);
+      // known:false means the status could not be read at all; let them
+      // through rather than lock out someone who may well be approved.
+      if (req.known) {
         if (req.status === 'rejected') {
           trackLogin('rejected', role, user);
           showRejectedScreen(user.email);
           return;
         }
+        if (req.status !== 'active') {
+          trackLogin('pending', role, user);
+          showPendingScreen(user.email, role);
+          return;
+        }
       }
-      // status === 'active' (or RLS error) → fall through to redirect
     }
 
     await trackLogin('success', role, user);
-    window.location.replace(ROUTES[role] || '/portal-student.html');
+    window.location.replace(ROUTES[role]);
   } finally {
     routingGuard = false;
   }
@@ -611,17 +654,38 @@ function showRequestFailedScreen(email, role) {
   `;
 }
 
-function showPendingScreen(email, role) {
+function showPendingScreen(email, role, status) {
   const card = document.querySelector('.login-card');
+  const paused = status === 'inactive';
   card.innerHTML = `
-    <h2>Account Under Review</h2>
+    <h2>${paused ? 'Account Paused' : 'Account Under Review'}</h2>
     <p class="login-sub" style="margin-bottom:18px;">Signed in as <strong>${email}</strong></p>
     <div style="background:#fff8e1;border:1.5px solid #f59e0b;border-radius:4px;padding:14px 16px;font-size:.84rem;color:#78350f;line-height:1.6;margin-bottom:18px;">
-      <strong style="display:block;margin-bottom:4px;">Your ${role} account is pending approval.</strong>
-      We review all ${role} accounts personally to ensure a safe environment for students. You'll receive an email at <strong>${email}</strong> once your account is approved - typically within 1–3 business days.
+      ${paused
+        ? `Your ${role} account is currently paused, so the portal is closed. Email <a href="mailto:fairgameinitiative@outlook.com?subject=Account%20paused" style="color:#78350f;">fairgameinitiative@outlook.com</a> to have it reopened.`
+        : `<strong style="display:block;margin-bottom:4px;">Your ${role} account is pending approval.</strong>
+      We review all ${role} accounts personally to ensure a safe environment for students. You'll receive an email at <strong>${email}</strong> once your account is approved - typically within 1–3 business days.`}
     </div>
+    <p style="font-size:.78rem;color:var(--gray-500);line-height:1.6;margin:0 0 16px;">Your sign-in worked - nothing is wrong with your password or link, and you do not need to sign up again.</p>
     <button onclick="doSignOut()" style="width:100%;padding:10px;background:none;border:1.5px solid var(--gray-200);border-radius:3px;font-size:.82rem;color:var(--gray-500);cursor:pointer;">
       Sign out and switch accounts
+    </button>
+  `;
+}
+
+function showNoPortalScreen(email, role) {
+  const card = document.querySelector('.login-card');
+  card.innerHTML = `
+    <h2>${role === 'inactive' ? 'Account Paused' : 'No Portal Yet'}</h2>
+    <p class="login-sub" style="margin-bottom:18px;">Signed in as <strong>${email}</strong></p>
+    <div style="background:#fff8e1;border:1.5px solid #f59e0b;border-radius:4px;padding:14px 16px;font-size:.84rem;color:#78350f;line-height:1.6;margin-bottom:18px;">
+      ${role === 'inactive'
+        ? 'This account has been paused, so the portal is closed.'
+        : 'Your sign-in worked, but this kind of account does not have a portal page yet.'}
+      Email <a href="mailto:fairgameinitiative@outlook.com?subject=Portal%20access" style="color:#78350f;">fairgameinitiative@outlook.com</a> and we will sort it out.
+    </div>
+    <button onclick="doSignOut()" style="width:100%;padding:10px;background:none;border:1.5px solid var(--gray-200);border-radius:3px;font-size:.82rem;color:var(--gray-500);cursor:pointer;">
+      Sign out
     </button>
   `;
 }

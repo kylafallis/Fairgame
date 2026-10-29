@@ -135,6 +135,11 @@ window.readAuthHashError = readAuthHashError;
 /* ── Auth guard ──────────────────────────────────────────────── */
 function requireAuth(expectedRole, onReady) {
   const isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
+  // Preview mode must not keep a live client. Every loader checks `if (sb)`
+  // before choosing real data over sample data, so leaving it set made
+  // ?demo=true a way past the sign-in check that still queried the real
+  // tables as an anonymous visitor.
+  if (isDemo) sb = null;
   if (!sb || isDemo) {
     currentUser = { id: 'demo', email: 'demo@fairgame.dev', user_metadata: { role: expectedRole, name: 'Preview Mode' } };
     currentRole = expectedRole;
@@ -167,10 +172,15 @@ function requireAuth(expectedRole, onReady) {
     // Refresh token so a fresh session is on hand before we look up the role
     const { data: refreshed } = await sb.auth.refreshSession();
     const user = refreshed?.session?.user || session.user;
+    // An admin grant recorded against this address is claimed before the
+    // existing role is read, the same order login.html and the router
+    // use. Without it, an admin arriving here first was routed by the
+    // teacher or student role the signup form had given them.
+    let role = await claimAdminRole();
     // Role comes from user_roles, never from user_metadata. A brand new
     // self-serve signup has no row there yet, so try to claim one from
     // whatever they picked on the signup form before giving up.
-    let role = await getRole(user.id);
+    if (!role) role = await getRole(user.id);
     if (!role) {
       const claimed = user.user_metadata?.role;
       if (claimed && SELF_PROVISION_ROLES.includes(claimed)) role = await claimRole(claimed);
@@ -188,21 +198,32 @@ function requireAuth(expectedRole, onReady) {
       // this look like a broken link for weeks.
       const jStatus = await judgeStatus();
       if (jStatus && jStatus !== 'active') { _showJudgePending(user.email, jStatus); return; }
+      // Same for a mentor application nobody has approved yet. Sent to
+      // the login page, they were offered the student/teacher chooser -
+      // and picking one gave them a role that then blocked the mentor
+      // role for good once they were approved.
+      const mStatus = await myRequestStatus('mentor', user.email);
+      if (['pending', 'interest'].includes(mStatus.status)) { _showPortalPending(user.email, 'mentor'); return; }
       window.location.replace('/login.html');
       return;
     }
+    // A role with no portal of its own (inactive, parent, fair_manager).
+    // Redirecting to /login.html sent it straight back here through the
+    // login page's own routing - an endless reload.
+    if (!ROLE_ROUTES[role]) { _showNoPortal(user.email, role); return; }
+    // Deactivating a judge in the admin closes their portal. The role
+    // stays in user_roles, so the judges row is what decides.
+    if (role === 'judge') {
+      const jStatus = await judgeStatus();
+      if (jStatus && jStatus !== 'active') { _showJudgePending(user.email, jStatus); return; }
+    }
     if (role === 'admin' || role === expectedRole) {
       // Teacher and Ambassador accounts require admin approval before portal access
-      if ((role === 'teacher' || role === 'ambassador') && role !== 'admin') {
-        const { data: rows, error: reqErr } = await sb.from('portal_requests')
-          .select('status').eq('email', user.email).eq('type', role)
-          .in('status', ['pending', 'active', 'rejected'])
-          .order('created_at', { ascending: false }).limit(1);
-        const req = rows?.[0] || null;
-        // If RLS blocked the query entirely, don't punish the user - let them through
-        if (!reqErr) {
-          if (!req || req.status === 'pending') { _showPortalPending(user.email, role); return; }
-          if (req.status === 'rejected')        { _showPortalRejected(user.email);      return; }
+      if (role === 'teacher' || role === 'ambassador') {
+        const req = await myRequestStatus(role, user.email);
+        if (req.known) {
+          if (req.status === 'rejected') { _showPortalRejected(user.email); return; }
+          if (req.status !== 'active')   { _showPortalPending(user.email, role); return; }
         }
       }
       currentUser = user; currentRole = role;
@@ -213,6 +234,48 @@ function requireAuth(expectedRole, onReady) {
       window.location.replace(ROLE_ROUTES[role] || '/login.html');
     }
   });
+}
+
+/* Whether the signed-in person's own request of one type has been
+   decided. migration 16's fg_my_request_status answers it whatever the
+   table's policies are and whatever case the address was typed in;
+   before that has run, the row is read directly, case-insensitively.
+   known:false means neither worked, and the caller lets them through
+   rather than locking out someone who may well be approved. */
+async function myRequestStatus(type, email) {
+  if (!sb) return { status: null, known: false };
+  const { data, error } = await sb.rpc('fg_my_request_status', { p_type: type });
+  if (!error) return { status: data || null, known: true };
+  const pattern = String(email || '').replace(/[\\%_]/g, c => '\\' + c);
+  const { data: rows, error: readErr } = await sb.from('portal_requests')
+    .select('status').ilike('email', pattern).eq('type', type)
+    .order('created_at', { ascending: false }).limit(5);
+  if (readErr) return { status: null, known: false };
+  const statuses = (rows || []).map(r => r.status);
+  return {
+    status: statuses.includes('active') ? 'active' : statuses.includes('rejected') ? 'rejected' : statuses[0] || null,
+    known: true,
+  };
+}
+window.myRequestStatus = myRequestStatus;
+
+function _showNoPortal(email, role) {
+  document.body.style.opacity = '1';
+  const inactive = role === 'inactive';
+  document.body.innerHTML = `
+    <div style="font-family:'DM Sans',system-ui,sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#f1faf2;padding:24px;">
+      <div style="max-width:440px;width:100%;background:#fff;padding:36px 40px;border-top:3px solid #357a38;box-shadow:0 4px 20px rgba(0,0,0,.1);">
+        <div style="font-size:1.3rem;font-family:'Playfair Display',serif;font-weight:600;color:#1a1e1a;margin-bottom:8px;">${inactive ? 'Account Paused' : 'No Portal for This Account Yet'}</div>
+        <p style="font-size:.84rem;color:#6b756b;margin-bottom:20px;">Signed in as <strong>${email}</strong></p>
+        <div style="background:#fff8e1;border:1.5px solid #f59e0b;border-radius:4px;padding:14px 16px;font-size:.84rem;color:#78350f;line-height:1.6;margin-bottom:20px;">
+          ${inactive
+            ? 'This account has been paused, so the portal is closed.'
+            : 'Your sign-in worked, but this kind of account does not have a portal page yet.'}
+          Email <a href="mailto:fairgameinitiative@outlook.com?subject=Portal%20access" style="color:#78350f;">fairgameinitiative@outlook.com</a> and we will sort it out.
+        </div>
+        <button onclick="portalLogout()" style="width:100%;padding:10px;background:none;border:1.5px solid #c8cec8;border-radius:3px;font-size:.82rem;color:#6b756b;cursor:pointer;">Sign out</button>
+      </div>
+    </div>`;
 }
 
 function _showPortalPending(email, role) {

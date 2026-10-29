@@ -83,7 +83,7 @@ function renderJudges(judges) {
         <div class="judge-popup-org">${judge.org || 'Independent'} · ${FG_GEO.label(judge)}</div>
         <div class="judge-popup-tags">${(judge.expertise || []).map(e => `<span class="judge-popup-tag">${e.split('/')[0].trim()}</span>`).join('')}</div>
         <div style="font-size:0.75rem;color:#6b756b;margin-bottom:8px;">Available for: ${judge.available_level || 'Any level'}</div>
-        <button class="judge-popup-btn" onclick="openMatchModal('${judge.id}','${escHtml(judge.name)}','${escHtml(judge.email || '')}')">Send Match Request →</button>
+        <button class="judge-popup-btn" onclick="openMatchModal('${judge.id}','${escHtml(judge.name)}')">Send Match Request →</button>
       </div>`);
     marker.on('click', () => {
       document.querySelectorAll('.judge-item').forEach(i => i.classList.remove('highlighted'));
@@ -136,7 +136,12 @@ async function loadJudges() {
     return;
   }
   try {
-    const { data, error } = await sb.from('judges').select('*').eq('status','active').order('created_at', { ascending: false });
+    // Public columns only. judges_public (migration 16) is the safe source;
+    // until it exists, ask the table for the same columns rather than '*',
+    // which handed every visitor each judge's email and private notes.
+    const COLS = 'id,name,org,city,state_code,country,region,expertise,available_level,travel_miles,travel_range,virtual_ok,latitude,longitude,geocode_source,created_at';
+    let { data, error } = await sb.from('judges_public').select(COLS).order('created_at', { ascending: false });
+    if (error) ({ data, error } = await sb.from('judges').select(COLS).eq('status','active').order('created_at', { ascending: false }));
     if (error) throw new Error(error.message);
     allJudges = data || [];
   } catch (err) {
@@ -163,10 +168,9 @@ async function placeJudges() {
 }
 
 /* ── MATCH REQUEST ─────────────────────────────────────── */
-function openMatchModal(judgeId, judgeName, judgeEmail) {
+function openMatchModal(judgeId, judgeName) {
   document.getElementById('targetJudgeId').value    = judgeId;
   document.getElementById('targetJudgeName').value  = judgeName;
-  document.getElementById('targetJudgeEmail').value = judgeEmail;
   document.getElementById('matchModal').classList.add('open');
   // Set min date to today
   document.getElementById('reqDate').min = new Date().toISOString().split('T')[0];
@@ -178,7 +182,6 @@ window.closeModal     = closeModal;
 async function sendMatchRequest() {
   const judgeId    = document.getElementById('targetJudgeId').value;
   const judgeName  = document.getElementById('targetJudgeName').value;
-  const judgeEmail = document.getElementById('targetJudgeEmail').value;
   const teacher    = document.getElementById('reqTeacher').value.trim();
   const teacherEmail = document.getElementById('reqTeacherEmail').value.trim();
   const school     = document.getElementById('reqSchool').value.trim();
@@ -193,30 +196,25 @@ async function sendMatchRequest() {
   msgEl.textContent = 'Sending request...'; msgEl.style.color = 'var(--gray-500)';
 
   if (sb) {
-    // Log the match request in Supabase
+    // The id is made here so the notify function can be handed it without
+    // reading the row back, which an anonymous visitor cannot do.
+    const id = crypto.randomUUID();
     const { error } = await sb.from('judge_requests').insert([{
-      judge_id: judgeId, judge_email: judgeEmail, judge_name: judgeName,
+      id, judge_id: judgeId, judge_name: judgeName,
       teacher_name: teacher, teacher_email: teacherEmail,
       school, fair_date: date, message,
       status: 'pending'
     }]);
     if (error) { msgEl.textContent = 'Error saving request. Please email us directly.'; msgEl.style.color = '#c0392b'; return; }
+
+    /* Judges' addresses are no longer handed to the public page, so the
+       judge is emailed by supabase/functions/judge-request-notify, with
+       the teacher as Reply-To. Until that is deployed the request still
+       waits in the judge's portal. */
+    sb.functions.invoke('judge-request-notify', { body: { id } }).catch(() => {});
   }
 
-  // Trigger email via mailto as fallback (replace with Supabase Edge Function when ready)
-  const subject = encodeURIComponent(`Science Fair Judge Request - ${school}`);
-  const body    = encodeURIComponent(
-    `Hi ${judgeName},\n\nMy name is ${teacher} and I'm coordinating the science fair at ${school}.\n\n` +
-    `Fair date: ${date}\n\n${message ? message + '\n\n' : ''}` +
-    `We'd love to have you join us as a judge. Please reply to this email or contact me at ${teacherEmail} to confirm.\n\n` +
-    `Thank you!\n${teacher}`
-  );
-
-  if (judgeEmail) {
-    window.open(`mailto:${judgeEmail}?subject=${subject}&body=${body}`);
-  }
-
-  msgEl.textContent = `Request sent to ${judgeName}!`; msgEl.style.color = 'var(--green-600)';
+  msgEl.textContent = `Request sent to ${judgeName}! They will reply to you at ${teacherEmail}.`; msgEl.style.color = 'var(--green-600)';
   logEvent('judge_request_sent', { judge_id: judgeId, school });
 
   setTimeout(() => { closeModal(); document.getElementById('reqMsg').textContent = ''; }, 2000);

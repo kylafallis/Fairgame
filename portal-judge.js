@@ -287,6 +287,6 @@ function renderConfirmed(reqs) {
     <td class="col-sm">${r.fair_date||'TBD'}</td>
     <td class="col-sm">${r.teacher_name}</td>
     <td><span class="chip chip-verified">Confirmed</span></td>
-    <td><a href="/Documents/2026-Judging-Score-Cards-Vertical-layout.pdf" target="_blank" class="btn-xs">Score Cards</a></td>
+    <td><a href="/files/judges/2026-Judging-Score-Cards-Vertical-layout.pdf" target="_blank" class="btn-xs">Score Cards</a></td>
   </tr>`).join('');
 }
