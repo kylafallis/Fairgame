@@ -77,6 +77,22 @@ async function resolveRole(user) {
   return role;
 }
 
+/* Whether this visit came from an email sign-in link. Supabase puts the
+   token in the fragment (#access_token=…) or, for the newer flow, a code
+   in the query (?code=…). Without either there is nothing to wait for. */
+const ARRIVED_WITH_LINK = /access_token|refresh_token|token_hash|[#&?]type=|[?&]code=/.test(
+  window.location.hash + window.location.search);
+
+/* No sign-in and no link to finish: this is someone the home page thought
+   was signed in (an expired saved sign-in looks signed in there), or who
+   came here directly. Send them to the login page, where they pick their
+   account type, instead of a 15-second wait for a link that is not coming. */
+function toLogin() {
+  if (routed) return;
+  routed = true;
+  window.location.replace('/login.html');
+}
+
 /* A dead link arrives as an error in the fragment, not as an auth event,
    so without this the spinner ran for the full 15 seconds before saying
    anything. Say it now, and point at the code that cannot be spent early. */
@@ -106,6 +122,9 @@ sb.auth.onAuthStateChange(async (event, session) => {
 // Handle cases where the hash is already resolved
 sb.auth.getSession().then(async ({ data: { session }, error }) => {
   if (error) {
+    // A saved sign-in that could not be refreshed is just a signed-out
+    // visitor; only a link that failed needs explaining.
+    if (!ARRIVED_WITH_LINK) { toLogin(); return; }
     routerFail('Sign-in failed: ' + error.message + '<br><a href="/login.html">Try again →</a>');
     return;
   }
@@ -124,9 +143,12 @@ sb.auth.getSession().then(async ({ data: { session }, error }) => {
     }
     routeTo(role, session.user);
   }
-  // No session and no error means we are waiting on the magic-link hash,
-  // which onAuthStateChange will deliver. If it never arrives the
-  // timeout below stops the spinner rather than leaving it forever.
+  // No session and no error: if a link brought them here, wait for
+  // onAuthStateChange to deliver it (the timeout below stops the spinner
+  // if it never does). Otherwise there is nothing to wait for.
+  else if (!ARRIVED_WITH_LINK && !linkErr) {
+    toLogin();
+  }
 });
 
 setTimeout(() => {
