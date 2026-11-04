@@ -32,6 +32,7 @@
     <div class="pnav-section">Programs</div>
     <a class="pnav-link"       data-section="approvals" data-label="User Approvals" onclick="showSection('approvals',this)">User Approvals <span class="pnav-badge" id="approvalBadge" style="display:none;"></span></a>
     <a class="pnav-link"       data-section="schools"   data-label="Schools"       onclick="showSection('schools',this)">Schools</a>
+    <a class="pnav-link"       data-section="states"    data-label="States &amp; Directors" onclick="showSection('states',this)">States &amp; Directors</a>
     <div class="pnav-section">Judges</div>
     <a class="pnav-link"       data-section="judges"    data-label="Judge Network" onclick="showSection('judges',this)">Judge Network <span class="pnav-badge" id="judgeBadge" style="display:none;"></span></a>
     <a class="pnav-link"       data-section="judgemap"  data-label="Judge Map"     onclick="showSection('judgemap',this)">Judge Map</a>
@@ -804,6 +805,55 @@
         </div>
         </div>
       </details>
+    </div>
+
+    <!-- STATES & DIRECTORS (migration 18) -->
+    <div class="portal-section" id="sec-states">
+      <div class="section-heading"><h2>States &amp; Directors</h2><p>Check a state the way its director will see it, then invite them. Each invitation is a one-time link for one email address, valid for 14 days.</p></div>
+
+      <div class="card">
+        <div class="card-header"><h3>Preview a state</h3></div>
+        <div class="card-body" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+          <select id="stPreviewState" aria-label="State" style="width:auto;min-width:200px;flex:1 1 200px;"></select>
+          <button class="btn-primary" type="button" onclick="previewState()">Open state view →</button>
+          <span class="text-xs text-muted" style="flex-basis:100%;">Opens the state page exactly as that state's director would see it: fairs, judges, regions, and the list of things to check. Nobody is invited.</span>
+        </div>
+      </div>
+
+      <div class="card mt-16">
+        <div class="card-header"><h3>Invite a state director</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label" for="stName">Name</label><input id="stName" maxlength="120" placeholder="Their full name"/></div>
+            <div class="form-group"><label class="form-label" for="stEmail">Email <span class="req">*</span></label><input id="stEmail" type="email" maxlength="200" placeholder="The address they will sign in with"/></div>
+          </div>
+          <div class="form-group"><label class="form-label" for="stState">State <span class="req">*</span></label><select id="stState"></select></div>
+          <label class="text-sm" style="display:flex;gap:8px;align-items:center;margin-bottom:12px;"><input type="checkbox" id="stSend" checked style="width:auto;"/> Email them the link</label>
+          <button class="btn-primary" type="button" id="stBtn" onclick="inviteStateDirector()">Create invitation</button>
+          <div class="msg-strip" id="stMsg" style="margin-top:12px;"></div>
+          <div id="stLink"></div>
+        </div>
+      </div>
+
+      <div class="card mt-16">
+        <div class="card-header"><h3>States</h3><button class="btn-xs" type="button" onclick="loadStates()">Refresh</button></div>
+        <div class="card-body-flush" style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>State</th><th>Judges</th><th>Fairs</th><th>Regions</th><th>Director</th><th>Coordinators</th><th>Open invites</th><th></th></tr></thead>
+            <tbody id="statesTbody"><tr><td colspan="8"><div class="spinner-wrap"><div class="spinner"></div></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card mt-16">
+        <div class="card-header"><h3>Director invitations</h3><span class="text-xs text-muted">Coordinator invitations are on each state's page</span></div>
+        <div class="card-body-flush" style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>Invited</th><th>State</th><th>Created</th><th>Status</th><th></th></tr></thead>
+            <tbody id="dirInvitesTbody"></tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
     <!-- SETTINGS -->

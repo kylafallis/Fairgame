@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="/umami-redact.js"></script>
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="fbdc0182-de28-426e-bd4f-9b22c5f8e220" data-before-send="fgUmamiRedact"></script>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <meta name="referrer" content="no-referrer" />
+  <title>Accept Invitation - FairGame Initiative</title>
+  <link rel="icon" href="/images/Logo_transparent.png" type="image/png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet" />
+  <style>
+    :root { --g: #357a38; --g-dark: #2a6230; --ink: #1a1e1a; --muted: #6b756b; --line: #c8cec8; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'DM Sans', system-ui, sans-serif; background: #f1faf2; color: var(--ink); min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
+    .box { max-width: 460px; width: 100%; background: #fff; padding: 34px 36px; border-top: 3px solid var(--g); box-shadow: 0 4px 20px rgba(0,0,0,.1); }
+    h1 { font-family: 'Playfair Display', serif; font-weight: 600; font-size: 1.35rem; margin: 0 0 6px; }
+    p { font-size: .88rem; line-height: 1.6; color: var(--muted); margin: 0 0 16px; }
+    .what { background: #f1faf2; border-left: 3px solid var(--g); padding: 12px 14px; font-size: .9rem; line-height: 1.55; margin-bottom: 18px; color: var(--ink); }
+    .btn { display: block; width: 100%; padding: 11px; border-radius: 3px; font: inherit; font-size: .88rem; font-weight: 600; cursor: pointer; text-align: center; text-decoration: none; border: 1.5px solid var(--g); background: var(--g); color: #fff; }
+    .btn:hover { background: var(--g-dark); }
+    .btn:disabled { opacity: .55; cursor: wait; }
+    .btn.ghost { background: #fff; color: var(--g); }
+    .btn.ghost:hover { background: #f1faf2; }
+    .btn + .btn { margin-top: 10px; }
+    .or { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: .75rem; margin: 18px 0; }
+    .or::before, .or::after { content: ''; flex: 1; height: 1px; background: #e2e6e2; }
+    label { display: block; font-size: .74rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--muted); margin-bottom: 5px; }
+    input { width: 100%; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 3px; font: inherit; font-size: .9rem; margin-bottom: 10px; }
+    input:focus { outline: none; border-color: var(--g); }
+    .msg { display: none; padding: 11px 14px; font-size: .84rem; line-height: 1.55; border-radius: 3px; margin: 14px 0 0; }
+    .msg.show { display: block; }
+    .msg.err { background: #fef2f2; border: 1.5px solid #dc2626; color: #7f1d1d; }
+    .msg.ok { background: #f1faf2; border: 1.5px solid var(--g); color: #1d4620; }
+    .msg.info { background: #fff8e1; border: 1.5px solid #f59e0b; color: #78350f; }
+    .small { font-size: .78rem; color: var(--muted); line-height: 1.55; margin-top: 16px; }
+    .small a { color: var(--g); }
+    .hidden { display: none; }
+    .spinner { width: 28px; height: 28px; border: 3px solid #e2e6e2; border-top-color: var(--g); border-radius: 50%; animation: spin .8s linear infinite; margin: 10px auto; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media (max-width: 480px) { .box { padding: 26px 20px; } }
+  </style>
+</head>
+<body>
+<main class="box">
+  <div id="loading"><div class="spinner"></div></div>
+
+  <div id="main" class="hidden">
+    <h1 id="title">You have been invited</h1>
+    <div class="what" id="what"></div>
+
+    <!-- Not signed in -->
+    <div id="signin" class="hidden">
+      <p>Sign in or create an account with <strong id="hint1"></strong> to accept. The link only works for that address.</p>
+      <button class="btn" type="button" id="googleBtn" onclick="googleSignIn()">Continue with Google</button>
+      <div class="or">or use your email</div>
+      <label for="email">Email address</label>
+      <input id="email" type="email" autocomplete="email" />
+      <button class="btn ghost" type="button" id="sendBtn" onclick="sendCode()">Email me a sign-in code</button>
+      <div id="codeStep" class="hidden" style="margin-top:16px;">
+        <label for="code">6-digit code from the email</label>
+        <input id="code" inputmode="numeric" autocomplete="one-time-code" maxlength="10" />
+        <button class="btn" type="button" id="verifyBtn" onclick="verifyCode()">Sign in and accept</button>
+      </div>
+    </div>
+
+    <!-- Signed in -->
+    <div id="ready" class="hidden">
+      <p>Signed in as <strong id="who"></strong>.</p>
+      <p id="replaceNote" class="hidden"></p>
+      <button class="btn" type="button" id="acceptBtn" onclick="accept()">Accept invitation</button>
+      <button class="btn ghost" type="button" onclick="switchAccount()">Use a different account</button>
+    </div>
+
+    <div class="msg" id="msg"></div>
+    <p class="small">Questions? Email <a href="mailto:fairgameinitiative@outlook.com">fairgameinitiative@outlook.com</a>.</p>
+  </div>
+
+  <div id="dead" class="hidden">
+    <h1 id="deadTitle">This link does not work</h1>
+    <p id="deadText"></p>
+    <a class="btn ghost" href="/login.html">Go to sign in</a>
+    <p class="small">Need a new link? Email <a href="mailto:fairgameinitiative@outlook.com?subject=New%20invitation%20link">fairgameinitiative@outlook.com</a> or whoever invited you.</p>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/portal-shared.js"></script>
+<script>
+'use strict';
+const $ = id => document.getElementById(id);
+const ROLE = { state_director: 'state director', regional_coordinator: 'regional coordinator' };
+let STATE_NAMES = {};
+let token = new URLSearchParams(location.search).get('token') || fgPendingInvite();
+let invite = null;
+let signedIn = null;
+
+function show(id) { ['loading', 'main', 'dead'].forEach(x => $(x).classList.toggle('hidden', x !== id)); }
+function msg(text, type) { const m = $('msg'); m.textContent = text; m.className = 'msg show ' + (type || 'err'); }
+function clearPending() { try { localStorage.removeItem(FG_INVITE_KEY); } catch (_) {} }
+function dead(title, text) { clearPending(); $('deadTitle').textContent = title; $('deadText').textContent = text; show('dead'); }
+const fmt = d => new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+const here = () => location.origin + '/accept-invite.html?token=' + encodeURIComponent(token);
+
+async function init() {
+  if (!sb) {
+    // A connection problem, not a bad link - keep the saved invitation.
+    $('deadTitle').textContent = 'Not available';
+    $('deadText').textContent = 'This page could not connect. Reload it in a minute; your invitation is still valid.';
+    show('dead');
+    return;
+  }
+  if (!token) { dead('This link is incomplete', 'The invitation code is missing from the link. Open it again from the email, or copy the whole link.'); return; }
+  // Keep the token across a sign-in round trip, wherever it lands.
+  try { localStorage.setItem(FG_INVITE_KEY, JSON.stringify({ token, at: Date.now() })); } catch (_) {}
+  // Keep the secret out of the address bar and browser history.
+  try { history.replaceState(null, '', '/accept-invite.html' + location.hash); } catch (_) {}
+
+  try { STATE_NAMES = Object.fromEntries((await (await fetch('/data/geo/regions.json')).json()).US.map(r => [r[0], r[1]])); } catch (_) {}
+
+  const { data, error } = await sb.rpc('fg_invite_preview', { p_token: token });
+  if (error) { dead('Something went wrong', /does not exist|schema cache/i.test(error.message) ? 'Invitations are not switched on yet. Try again later.' : error.message); return; }
+  if (!data) { dead('This link does not work', 'We could not find this invitation. Check that the whole link was copied.'); return; }
+  invite = data;
+  if (data.status === 'revoked') { dead('This invitation was withdrawn', 'Whoever sent it has cancelled it. Ask them for a new link if you still need one.'); return; }
+  if (data.status === 'expired') { dead('This invitation has expired', `It expired on ${fmt(data.expires_at)}. Ask whoever sent it for a new link.`); return; }
+
+  const state = STATE_NAMES[data.state_code] || data.state_code;
+  const greet = data.full_name ? data.full_name.split(/\s+/)[0] + ', you' : 'You';
+  $('what').innerHTML = data.role === 'state_director'
+    ? `${esc(greet)} have been invited to be the <strong>FairGame state director for ${esc(state)}</strong>.`
+    : `${esc(greet)} have been invited to be the <strong>FairGame regional coordinator for ${esc(data.region_name || 'a region')}</strong>, ${esc(state)}.`;
+  $('hint1').textContent = data.email_hint || 'the invited address';
+
+  const { data: { session } } = await sb.auth.getSession();
+  signedIn = session?.user || null;
+
+  if (data.status === 'accepted') {
+    if (signedIn) { await accept(true); return; }
+    dead('This invitation has already been used', 'If it was you, sign in and you will go straight to your state page.');
+    return;
+  }
+
+  show('main');
+  if (signedIn) await showReady();
+  else $('signin').classList.remove('hidden');
+}
+
+function esc(v) { return String(v ?? '').replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c])); }
+
+async function showReady() {
+  $('signin').classList.add('hidden');
+  $('ready').classList.remove('hidden');
+  $('who').textContent = signedIn.email;
+  const role = await getRole(signedIn.id);
+  if (role === 'admin') {
+    $('replaceNote').textContent = 'You are an admin, which already covers every state. There is nothing to accept with this account.';
+    $('replaceNote').classList.remove('hidden');
+    $('acceptBtn').disabled = true;
+  } else if (role && !ROLE[role]) {
+    $('replaceNote').innerHTML = `This account is currently set up as a <strong>${esc(role)}</strong>. Accepting replaces that with ${esc(ROLE[invite.role])} access. If you want to keep both, use a different email for this.`;
+    $('replaceNote').classList.remove('hidden');
+  }
+}
+
+async function accept(quiet) {
+  const btn = $('acceptBtn');
+  if (btn) { btn.disabled = true; btn.textContent = 'Accepting…'; }
+  const { data, error } = await sb.rpc('fg_accept_invite', { p_token: token });
+  if (error) {
+    if (btn) { btn.disabled = false; btn.textContent = 'Accept invitation'; }
+    if (quiet) { show('main'); await showReady(); }
+    msg(error.message, 'err');
+    return;
+  }
+  clearPending();
+  show('main');
+  $('signin').classList.add('hidden'); $('ready').classList.add('hidden');
+  msg(data.already ? 'You have already accepted this. Taking you to your state page…' : 'Done. Taking you to your state page…', 'ok');
+  window.fgTrack?.('invite-accepted', { role: data.role });
+  setTimeout(() => location.replace('/portal-state.html'), 1200);
+}
+
+async function googleSignIn() {
+  $('googleBtn').disabled = true;
+  const { error } = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: here() } });
+  if (error) { $('googleBtn').disabled = false; msg(error.message); }
+}
+
+async function sendCode() {
+  const email = $('email').value.trim();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { msg('Enter your email address.'); return; }
+  $('sendBtn').disabled = true; $('sendBtn').textContent = 'Sending…';
+  const { error } = await sb.auth.signInWithOtp({ email, options: {
+    shouldCreateUser: true,
+    emailRedirectTo: here(),
+    data: invite?.full_name ? { name: invite.full_name } : undefined,
+  } });
+  $('sendBtn').disabled = false; $('sendBtn').textContent = 'Email me a sign-in code';
+  if (error) {
+    msg(/rate|seconds/i.test(error.message) ? 'We sent a code to that address in the last minute. Check your inbox, then try again shortly.' : error.message);
+    return;
+  }
+  $('codeStep').classList.remove('hidden');
+  msg(`Code sent to ${email}. Enter it below, or press the link in the email.`, 'ok');
+  $('code').focus();
+}
+
+async function verifyCode() {
+  const email = $('email').value.trim();
+  const code = $('code').value.replace(/\s/g, '');
+  if (!code) { msg('Enter the code from the email.'); return; }
+  $('verifyBtn').disabled = true;
+  const { data, error } = await sb.auth.verifyOtp({ email, token: code, type: 'email' });
+  $('verifyBtn').disabled = false;
+  if (error) { msg(/expired|invalid/i.test(error.message) ? 'That code did not work. Check it, or send a new one.' : error.message); return; }
+  signedIn = data.user;
+  $('msg').className = 'msg';
+  await showReady();
+  await accept();
+}
+
+async function switchAccount() {
+  await sb.auth.signOut();
+  signedIn = null;
+  $('ready').classList.add('hidden');
+  $('signin').classList.remove('hidden');
+  $('msg').className = 'msg';
+}
+
+// Coming back from Google: the session arrives a moment after load.
+sb?.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_IN' && session?.user && !signedIn && invite && invite.status === 'open') {
+    signedIn = session.user;
+    show('main');
+    await showReady();
+  }
+});
+
+init().catch(e => dead('Something went wrong', e?.message || 'Try opening the link again.'));
+</script>
+</body>
+</html>
