@@ -85,6 +85,44 @@
   </div>
 </main>
 
+<!-- Practice link: /accept-invite.html?practice=OH
+     Shows what an invited state director sees here, then opens that
+     state's page. Nothing is created, checked or saved. Deliberately its
+     own script, ahead of Supabase and portal-shared.js, so nothing they do
+     (or a stale cached copy of them) can stop it from showing. -->
+<script>
+var PRACTICE = new URLSearchParams(location.search).get('practice');
+(function () {
+  if (!PRACTICE) return;
+  var NAMES = {AL:'Alabama',AK:'Alaska',AZ:'Arizona',AR:'Arkansas',CA:'California',CO:'Colorado',CT:'Connecticut',DE:'Delaware',DC:'District of Columbia',FL:'Florida',GA:'Georgia',HI:'Hawaii',ID:'Idaho',IL:'Illinois',IN:'Indiana',IA:'Iowa',KS:'Kansas',KY:'Kentucky',LA:'Louisiana',ME:'Maine',MD:'Maryland',MA:'Massachusetts',MI:'Michigan',MN:'Minnesota',MS:'Mississippi',MO:'Missouri',MT:'Montana',NE:'Nebraska',NV:'Nevada',NH:'New Hampshire',NJ:'New Jersey',NM:'New Mexico',NY:'New York',NC:'North Carolina',ND:'North Dakota',OH:'Ohio',OK:'Oklahoma',OR:'Oregon',PA:'Pennsylvania',RI:'Rhode Island',SC:'South Carolina',SD:'South Dakota',TN:'Tennessee',TX:'Texas',UT:'Utah',VT:'Vermont',VA:'Virginia',WA:'Washington',WV:'West Virginia',WI:'Wisconsin',WY:'Wyoming',PR:'Puerto Rico'};
+  var st = String(PRACTICE).toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2);
+  if (!NAMES[st]) st = 'OH';
+  var name = NAMES[st];
+  var g = function (id) { return document.getElementById(id); };
+  document.title = 'Practice invitation - FairGame';
+  g('loading').classList.add('hidden');
+  g('dead').classList.add('hidden');
+  g('main').classList.remove('hidden');
+  g('what').innerHTML = 'You have been invited to be the <strong>FairGame state director for ' + name + '</strong>.';
+  g('ready').classList.remove('hidden');
+  g('who').parentElement.classList.add('hidden');
+  g('replaceNote').innerHTML = '<strong>Practice link.</strong> This is what an invited director sees. Nothing is saved and no account changes. Accepting opens the ' + name + ' state page, which you need to be signed in as an admin to see.';
+  g('replaceNote').classList.remove('hidden');
+  g('acceptBtn').onclick = function () { location.assign('/portal-state.html?state=' + st); };
+  var back = document.querySelector('#ready .btn.ghost');
+  back.textContent = 'Back to the admin portal';
+  back.onclick = function () { location.assign('/portal-admin.html'); };
+})();
+
+/* Whatever happens below, never leave a spinner up for good. */
+setTimeout(function () {
+  var l = document.getElementById('loading');
+  if (l && !l.classList.contains('hidden')) {
+    l.innerHTML = '<p style="text-align:center;margin:8px 0 14px;">This is taking longer than it should.</p>' +
+      '<button class="btn" type="button" onclick="location.reload()">Reload the page</button>';
+  }
+}, 10000);
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/portal-shared.js"></script>
 <script>
@@ -92,19 +130,26 @@
 const $ = id => document.getElementById(id);
 const ROLE = { state_director: 'state director', regional_coordinator: 'regional coordinator' };
 let STATE_NAMES = {};
-let token = new URLSearchParams(location.search).get('token') || fgPendingInvite();
+const INVITE_KEY = 'fg_pending_invite';
+function storedToken() {
+  try {
+    const v = JSON.parse(localStorage.getItem(INVITE_KEY) || 'null');
+    return v?.token && Date.now() - (v.at || 0) < 86400000 ? v.token : null;
+  } catch (_) { return null; }
+}
+let token = new URLSearchParams(location.search).get('token') || storedToken();
 let invite = null;
 let signedIn = null;
 
 function show(id) { ['loading', 'main', 'dead'].forEach(x => $(x).classList.toggle('hidden', x !== id)); }
 function msg(text, type) { const m = $('msg'); m.textContent = text; m.className = 'msg show ' + (type || 'err'); }
-function clearPending() { try { localStorage.removeItem(FG_INVITE_KEY); } catch (_) {} }
+function clearPending() { try { localStorage.removeItem(INVITE_KEY); } catch (_) {} }
 function dead(title, text) { clearPending(); $('deadTitle').textContent = title; $('deadText').textContent = text; show('dead'); }
 const fmt = d => new Date(d).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 const here = () => location.origin + '/accept-invite.html?token=' + encodeURIComponent(token);
 
 async function init() {
-  if (!sb) {
+  if (typeof sb === 'undefined' || !sb) {
     // A connection problem, not a bad link - keep the saved invitation.
     $('deadTitle').textContent = 'Not available';
     $('deadText').textContent = 'This page could not connect. Reload it in a minute; your invitation is still valid.';
@@ -113,7 +158,7 @@ async function init() {
   }
   if (!token) { dead('This link is incomplete', 'The invitation code is missing from the link. Open it again from the email, or copy the whole link.'); return; }
   // Keep the token across a sign-in round trip, wherever it lands.
-  try { localStorage.setItem(FG_INVITE_KEY, JSON.stringify({ token, at: Date.now() })); } catch (_) {}
+  try { localStorage.setItem(INVITE_KEY, JSON.stringify({ token, at: Date.now() })); } catch (_) {}
   // Keep the secret out of the address bar and browser history.
   try { history.replaceState(null, '', '/accept-invite.html' + location.hash); } catch (_) {}
 
@@ -153,7 +198,8 @@ async function showReady() {
   $('signin').classList.add('hidden');
   $('ready').classList.remove('hidden');
   $('who').textContent = signedIn.email;
-  const role = await getRole(signedIn.id);
+  const { data: roleRow } = await sb.from('user_roles').select('role').eq('user_id', signedIn.id).maybeSingle();
+  const role = roleRow?.role || null;
   if (role === 'admin') {
     $('replaceNote').textContent = 'You are an admin, which already covers every state. There is nothing to accept with this account.';
     $('replaceNote').classList.remove('hidden');
@@ -230,40 +276,14 @@ async function switchAccount() {
 }
 
 // Coming back from Google: the session arrives a moment after load.
-sb?.auth.onAuthStateChange(async (event, session) => {
+if (!PRACTICE && typeof sb !== 'undefined' && sb) sb.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_IN' && session?.user && !signedIn && invite && invite.status === 'open') {
     signedIn = session.user;
-    show('main');
-    await showReady();
+    setTimeout(() => { show('main'); showReady(); }, 0);
   }
 });
 
-/* Practice link: /accept-invite.html?practice=OH
-   Shows exactly what an invited state director sees on this page, then
-   opens that state's page. Nothing is created, checked or saved, and no
-   role changes. The state page itself still needs an admin sign-in,
-   because it shows real judges. */
-function practice(code) {
-  const st = String(code).toUpperCase().replace(/[^A-Z]/g, '').slice(0, 2) || 'OH';
-  fetch('/data/geo/regions.json').then(r => r.json()).then(all => {
-    const name = (all.US.find(r => r[0] === st) || [st, st])[1];
-    document.title = 'Practice invitation - FairGame';
-    $('title').textContent = 'You have been invited';
-    $('what').innerHTML = `You have been invited to be the <strong>FairGame state director for ${esc(name)}</strong>.`;
-    $('ready').classList.remove('hidden');
-    $('who').parentElement.classList.add('hidden');
-    $('replaceNote').innerHTML = '<strong>Practice link.</strong> This is what an invited director sees. Nothing is saved and no account changes. Accepting opens the ' + esc(name) + ' state page, which you need to be signed in as an admin to see.';
-    $('replaceNote').classList.remove('hidden');
-    $('acceptBtn').onclick = () => location.assign('/portal-state.html?state=' + encodeURIComponent(st));
-    document.querySelector('#ready .btn.ghost').onclick = () => location.assign('/portal-admin.html');
-    document.querySelector('#ready .btn.ghost').textContent = 'Back to the admin portal';
-    show('main');
-  }).catch(() => dead('Something went wrong', 'Reload the page.'));
-}
-
-const practiceState = new URLSearchParams(location.search).get('practice');
-if (practiceState) practice(practiceState);
-else init().catch(e => dead('Something went wrong', e?.message || 'Try opening the link again.'));
+if (!PRACTICE) init().catch(e => dead('Something went wrong', e?.message || 'Try opening the link again.'));
 </script>
 </body>
 </html>
