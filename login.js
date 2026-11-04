@@ -5,7 +5,7 @@ try { if (SB_URL !== 'YOUR_SUPABASE_URL') sb = window.supabase.createClient(SB_U
 
 /* mentor was missing here, so a mentor signing in fell through to the
    student portal, which then bounced them back for having the wrong role. */
-const ROUTES = { teacher:'/portal-teacher.html', ambassador:'/portal-ambassador.html', student:'/portal-student.html', judge:'/portal-judge.html', mentor:'/portal-mentor.html', admin:'/portal-admin.html' };
+const ROUTES = { teacher:'/portal-teacher.html', ambassador:'/portal-ambassador.html', student:'/portal-student.html', judge:'/portal-judge.html', mentor:'/portal-mentor.html', admin:'/portal-admin.html', state_director:'/portal-state.html', regional_coordinator:'/portal-state.html' };
 
 // Roles that require admin approval before portal access
 const APPROVAL_ROLES = ['teacher', 'ambassador'];
@@ -326,6 +326,17 @@ if (sb) sb.auth.onAuthStateChange(async (event, session) => {
 async function go(user) {
   if (routingGuard) return;
   routingGuard = true;
+  // Signed in partway through accepting a state director or coordinator
+  // invitation (accept-invite.html stashed it) - go back and finish that
+  // before anything assigns a role from the signup form.
+  try {
+    const inv = JSON.parse(localStorage.getItem('fg_pending_invite') || 'null');
+    if (inv?.token && !inv.resumed && Date.now() - (inv.at || 0) < 86400000) {
+      localStorage.setItem('fg_pending_invite', JSON.stringify({ ...inv, resumed: true }));
+      window.location.replace('/accept-invite.html?token=' + encodeURIComponent(inv.token));
+      return;
+    }
+  } catch (_) {}
   try {
     let role = await fetchOrProvisionRole(user);
 

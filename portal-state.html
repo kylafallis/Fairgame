@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <script src="/umami-redact.js"></script>
+  <script defer src="https://cloud.umami.is/script.js" data-website-id="fbdc0182-de28-426e-bd4f-9b22c5f8e220" data-before-send="fgUmamiRedact"></script>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex" />
+  <title>State Portal - FairGame Initiative</title>
+  <link rel="icon" href="/images/Logo_transparent.png" type="image/png"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com" /><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/portal.css" />
+  <style>
+    .sp-preview { background:#1a3a1a; color:#fff; padding:12px 16px; display:flex; flex-wrap:wrap; gap:10px 16px; align-items:center; font-size:.82rem; margin-bottom:18px; }
+    .sp-preview strong { font-weight:600; }
+    .sp-preview select { width:auto; min-width:150px; padding:6px 30px 6px 10px; font-size:.8rem; background-color:#fff; }
+    .sp-preview a { color:#bfe3c0; }
+    .sp-issues { list-style:none; margin:0; padding:0; }
+    .sp-issues li { display:flex; gap:10px; align-items:flex-start; padding:10px 20px; border-bottom:1px solid var(--gray-100,#eef1ee); font-size:.84rem; line-height:1.5; }
+    .sp-issues li:last-child { border-bottom:none; }
+    .sp-dot { flex-shrink:0; width:8px; height:8px; border-radius:50%; margin-top:7px; background:#38bdf8; }
+    .sp-dot.warn { background:#f59e0b; }
+    .sp-kind { flex-shrink:0; font-size:.68rem; text-transform:uppercase; letter-spacing:.06em; color:var(--gray-400); width:52px; padding-top:2px; }
+    .sp-county-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:4px 12px; max-height:340px; overflow:auto; border:1.5px solid var(--gray-200,#e2e6e2); padding:10px 12px; }
+    .sp-county-grid label { display:flex; gap:7px; align-items:center; font-size:.8rem; cursor:pointer; line-height:1.3; }
+    .sp-county-grid label.taken { color:var(--gray-400); cursor:not-allowed; }
+    .sp-county-grid label.taken small { font-size:.66rem; }
+    .sp-county-grid input { width:auto; margin:0; }
+    .sp-tags { display:flex; flex-wrap:wrap; gap:4px; }
+    .sp-tag { font-size:.7rem; background:var(--g50,#f1faf2); color:var(--g700,#2d5f2f); padding:2px 7px; border-radius:10px; }
+    .sp-link-box { display:flex; gap:8px; align-items:stretch; margin-top:10px; }
+    .sp-link-box input { font-family:monospace; font-size:.76rem; }
+    .sp-toolbar { display:flex; flex-wrap:wrap; gap:8px; }
+    .sp-toolbar input, .sp-toolbar select { width:auto; flex:1 1 160px; }
+    .sp-readonly .sp-write { display:none !important; }
+    @media (max-width:640px) { .form-grid { grid-template-columns:1fr; } .sp-kind { display:none; } }
+  </style>
+</head>
+<body>
+
+<nav class="pnav">
+  <div class="pnav-logo">
+    <img src="/files/brand/fairgame-logo-white.svg" alt="" onerror="this.style.display='none'"/>
+    <div class="pnav-logo-text">
+      <div class="pnav-logo-name">FairGame</div>
+      <div class="pnav-logo-role" id="navRoleLabel">State Director</div>
+    </div>
+  </div>
+  <div class="pnav-body">
+    <div class="pnav-section" id="navStateName">My State</div>
+    <a class="pnav-link active" data-section="home"    data-label="Overview" onclick="showSection('home',this)">Overview <span class="pnav-badge" id="issueBadge" style="display:none;"></span></a>
+    <a class="pnav-link"        data-section="fairs"   data-label="Fairs"    onclick="showSection('fairs',this)">Fairs</a>
+    <a class="pnav-link"        data-section="judges"  data-label="Judges"   onclick="showSection('judges',this)">Judges</a>
+    <a class="pnav-link"        data-section="regions" data-label="Regions"  onclick="showSection('regions',this)">Regions</a>
+    <a class="pnav-link sp-team-link" data-section="team" data-label="Team" onclick="showSection('team',this)">Team &amp; Invitations</a>
+    <div class="pnav-divider"></div>
+    <a class="pnav-link" id="navAdminBack" href="/portal-admin.html" style="display:none;">← Admin portal</a>
+    <a class="pnav-link" href="/" style="font-size:.78rem;color:rgba(255,255,255,.3);">← Public site</a>
+  </div>
+  <div class="pnav-footer">
+    <div class="pnav-user-name" id="navUserName">–</div>
+    <div class="pnav-user-email" id="navUserEmail">–</div>
+    <button class="pnav-logout" onclick="portalLogout()">Sign out</button>
+  </div>
+</nav>
+<div class="pnav-overlay" onclick="closeMobileNav()"></div>
+
+<main class="portal-main">
+  <div class="portal-topbar">
+    <button class="pnav-toggle" onclick="openMobileNav()">☰</button>
+    <h1 id="topbarTitle">Overview</h1>
+  </div>
+
+  <div class="portal-content">
+
+    <!-- Admin preview bar. Only shown to admins, who can open any state. -->
+    <div class="sp-preview" id="previewBar" style="display:none;">
+      <span><strong>Admin preview.</strong> This is exactly what the director sees.</span>
+      <select id="previewState" aria-label="State" onchange="changePreview()"></select>
+      <select id="previewRegion" aria-label="View as" onchange="changePreview()">
+        <option value="">As state director</option>
+      </select>
+      <span class="text-xs" style="opacity:.75;">Edits you make here are real.</span>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div class="portal-section active" id="sec-home">
+      <div class="section-heading">
+        <h2 id="homeTitle">Your state</h2>
+        <p id="homeSub">Every fair and volunteer judge FairGame has here, and anything that needs a look.</p>
+      </div>
+      <div class="kpi-row">
+        <div class="kpi-card"><div class="kpi-card-n" id="kFairs">–</div><div class="kpi-card-l">Fairs</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kJudges">–</div><div class="kpi-card-l">Active judges</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kPending">–</div><div class="kpi-card-l">Judges in review</div></div>
+        <div class="kpi-card"><div class="kpi-card-n" id="kRegions">–</div><div class="kpi-card-l" id="kRegionsL">Regions</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>Things to check</h3><span class="text-xs text-muted" id="issueCount"></span></div>
+        <div class="card-body-flush" id="issuesList"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+      </div>
+      <div class="card mt-16">
+        <div class="card-header"><h3>Regions at a glance</h3></div>
+        <div class="card-body-flush" style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>Region</th><th>Counties</th><th>Fairs</th><th>Active judges</th><th>Coordinator</th></tr></thead>
+            <tbody id="regionSummary"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- FAIRS -->
+    <div class="portal-section" id="sec-fairs">
+      <div class="section-heading"><h2>Fairs</h2><p>From the FairGame fair directory. If something here is wrong, tell us at <a href="mailto:fairgameinitiative@outlook.com?subject=Fair%20correction">fairgameinitiative@outlook.com</a> and we will fix it.</p></div>
+      <div class="card">
+        <div class="card-body sp-toolbar">
+          <input type="search" id="fairSearch" placeholder="Search fairs or counties…" oninput="renderFairs()"/>
+          <select id="fairRegion" onchange="renderFairs()" aria-label="Region"><option value="">All regions</option></select>
+        </div>
+        <div class="card-body-flush" style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>Fair</th><th>Level</th><th>County</th><th>Region</th><th>Date</th><th>Judges</th><th>Status</th></tr></thead>
+            <tbody id="fairsTbody"><tr><td colspan="7"><div class="spinner-wrap"><div class="spinner"></div></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- JUDGES -->
+    <div class="portal-section" id="sec-judges">
+      <div class="section-heading"><h2>Judges</h2><p>Volunteer judges who live here. Contact details stay with the FairGame team; to reach a judge, ask us and we will pass your message on.</p></div>
+      <div class="card">
+        <div class="card-body sp-toolbar">
+          <input type="search" id="judgeSearch" placeholder="Search name, organization, city, county…" oninput="renderJudges()"/>
+          <select id="judgeRegion" onchange="renderJudges()" aria-label="Region"><option value="">All regions</option></select>
+          <select id="judgeStatus" onchange="renderJudges()" aria-label="Status">
+            <option value="">Any status</option><option value="active">Active</option>
+            <option value="unverified">In review</option><option value="inactive">Inactive</option>
+          </select>
+        </div>
+        <div class="card-body-flush" style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Expertise</th><th>City</th><th>County</th><th>Region</th><th>Levels</th><th>Status</th></tr></thead>
+            <tbody id="judgesTbody"><tr><td colspan="7"><div class="spinner-wrap"><div class="spinner"></div></div></td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- REGIONS -->
+    <div class="portal-section" id="sec-regions">
+      <div class="section-heading"><h2>Regions</h2><p id="regionsSub">Group your counties into regions. Each region can have its own coordinator, who sees only that region's fairs and judges. A county can be in one region at a time.</p></div>
+      <div class="card sp-write" id="regionEditor">
+        <div class="card-header"><h3 id="regionEditorTitle">New region</h3><button class="btn-xs" type="button" onclick="resetRegionForm()">Clear</button></div>
+        <div class="card-body">
+          <input type="hidden" id="regionId"/>
+          <div class="form-group">
+            <label class="form-label" for="regionName">Region name <span class="req">*</span></label>
+            <input id="regionName" maxlength="80" placeholder="e.g. Northwest Ohio"/>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Counties <span class="text-muted" id="regionPicked"></span></label>
+            <input type="search" id="countyFilter" placeholder="Filter counties…" oninput="filterCounties()" style="margin-bottom:6px;"/>
+            <div class="sp-county-grid" id="countyGrid"></div>
+            <div class="form-hint">Counties already in another region are greyed out. Remove them there first.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="regionNotes">Notes</label>
+            <input id="regionNotes" maxlength="300" placeholder="Optional - e.g. which district fair this feeds"/>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button class="btn-primary" type="button" id="regionSaveBtn" onclick="saveRegion()">Save region</button>
+            <button class="btn-outline" type="button" id="regionDeleteBtn" onclick="deleteRegion()" style="display:none;">Delete region</button>
+          </div>
+          <div class="msg-strip" id="regionMsg" style="margin-top:12px;"></div>
+        </div>
+      </div>
+      <div class="card mt-16">
+        <div class="card-header"><h3>Regions</h3><span class="text-xs text-muted" id="unassignedNote"></span></div>
+        <div class="card-body-flush" id="regionsList"></div>
+      </div>
+    </div>
+
+    <!-- TEAM -->
+    <div class="portal-section" id="sec-team">
+      <div class="section-heading"><h2>Team &amp; Invitations</h2><p>Invite a regional coordinator for each region. Each invitation is a one-time link for one email address and expires after 14 days.</p></div>
+
+      <div class="card sp-write" id="directorInviteCard" style="display:none;">
+        <div class="card-header"><h3>Invite the state director</h3><span class="text-xs text-muted">Admins only</span></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label" for="dName">Name</label><input id="dName" maxlength="120"/></div>
+            <div class="form-group"><label class="form-label" for="dEmail">Email <span class="req">*</span></label><input id="dEmail" type="email" maxlength="200"/></div>
+          </div>
+          <label class="text-sm" style="display:flex;gap:8px;align-items:center;margin-bottom:12px;"><input type="checkbox" id="dSend" checked style="width:auto;"/> Email them the link</label>
+          <button class="btn-primary" type="button" id="dBtn" onclick="inviteDirector()">Create invitation</button>
+          <div class="msg-strip" id="dMsg" style="margin-top:12px;"></div>
+          <div id="dLink"></div>
+        </div>
+      </div>
+
+      <div class="card sp-write mt-16" id="coordInviteCard">
+        <div class="card-header"><h3>Invite a regional coordinator</h3></div>
+        <div class="card-body">
+          <div class="form-grid">
+            <div class="form-group"><label class="form-label" for="cName">Name</label><input id="cName" maxlength="120"/></div>
+            <div class="form-group"><label class="form-label" for="cEmail">Email <span class="req">*</span></label><input id="cEmail" type="email" maxlength="200"/></div>
+          </div>
+          <div class="form-group"><label class="form-label" for="cRegion">Region <span class="req">*</span></label><select id="cRegion"></select></div>
+          <label class="text-sm" style="display:flex;gap:8px;align-items:center;margin-bottom:12px;"><input type="checkbox" id="cSend" checked style="width:auto;"/> Email them the link</label>
+          <button class="btn-primary" type="button" id="cBtn" onclick="inviteCoordinator()">Create invitation</button>
+          <div class="msg-strip" id="cMsg" style="margin-top:12px;"></div>
+          <div id="cLink"></div>
+        </div>
+      </div>
+
+      <div class="card mt-16">
+        <div class="card-header"><h3>People</h3></div>
+        <div class="card-body-flush" style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Region</th><th></th></tr></thead>
+            <tbody id="peopleTbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="card mt-16">
+        <div class="card-header"><h3>Invitations</h3><span class="text-xs text-muted">Last 180 days</span></div>
+        <div class="card-body-flush" style="overflow-x:auto;">
+          <table class="data-table">
+            <thead><tr><th>Invited</th><th>Role</th><th>Region</th><th>Sent</th><th>Status</th><th></th></tr></thead>
+            <tbody id="invitesTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/portal-shared.js"></script>
+<script src="/geo.js"></script>
+<script src="/portal-state.js"></script>
+</body>
+</html>

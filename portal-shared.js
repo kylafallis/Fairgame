@@ -28,6 +28,8 @@ const ROLE_ROUTES = {
   judge:      '/portal-judge.html',
   mentor:     '/portal-mentor.html',
   admin:      '/portal-admin.html',
+  state_director:       '/portal-state.html',
+  regional_coordinator: '/portal-state.html',
 };
 async function doSignOut() {
   if (sb) await sb.auth.signOut();
@@ -132,8 +134,85 @@ function readAuthHashError() {
 }
 window.readAuthHashError = readAuthHashError;
 
-/* ── Auth guard ──────────────────────────────────────────────── */
+/* ── Invitations (migration 18) ─────────────────────────────────
+   accept-invite.html stashes the link's secret here before sending the
+   person off to sign in. Whatever page they come back to - the router,
+   the login page, a portal - sends them back to finish accepting, so a
+   sign-in redirect that lands somewhere else does not lose the invite. */
+const FG_INVITE_KEY = 'fg_pending_invite';
+function fgPendingInvite() {
+  try {
+    const raw = localStorage.getItem(FG_INVITE_KEY);
+    if (!raw) return null;
+    const v = JSON.parse(raw);
+    // Only for a day - long enough to sign up, short enough not to haunt.
+    if (!v?.token || Date.now() - (v.at || 0) > 86400000) { localStorage.removeItem(FG_INVITE_KEY); return null; }
+    return v.token;
+  } catch (_) { return null; }
+}
+/* Sends the person back to the accept page once per sign-in round trip.
+   The accept page clears the flag each time it starts one, so someone who
+   gives up halfway is not bounced away from their own portal all day. */
+function fgResumeInvite() {
+  const t = fgPendingInvite();
+  if (!t || /\/accept-invite\.html$/.test(location.pathname)) return false;
+  try {
+    const v = JSON.parse(localStorage.getItem(FG_INVITE_KEY));
+    if (v.resumed) return false;
+    localStorage.setItem(FG_INVITE_KEY, JSON.stringify({ ...v, resumed: true }));
+  } catch (_) { return false; }
+  location.replace('/accept-invite.html?token=' + encodeURIComponent(t));
+  return true;
+}
+window.fgPendingInvite = fgPendingInvite;
+window.fgResumeInvite = fgResumeInvite;
+
+/* Creates an invitation and returns { link, email, expires_at, emailed,
+   email_error }. Goes through the create-invite Edge Function, which
+   emails the link; if that function is not deployed yet, creates the
+   invitation directly and returns the link to send by hand. Either way
+   the database decides whether this person may invite that one. */
+async function fgCreateInvite(p) {
+  if (!sb) throw new Error('Not connected.');
+  const body = { role: p.role, email: p.email, full_name: p.full_name || '',
+                 state: p.state || null, region_id: p.region_id || null,
+                 send_email: p.send_email !== false };
+  let notDeployed = false;
+  try {
+    const { data, error } = await sb.functions.invoke('create-invite', { body });
+    if (!error && data?.link) return data;
+    if (error) {
+      const res = error.context;
+      if (res && typeof res.status === 'number' && res.status !== 404) {
+        let msg = error.message;
+        try { msg = (await res.json()).error || msg; } catch (_) {}
+        throw new Error(msg);
+      }
+      notDeployed = true;
+    }
+  } catch (e) {
+    if (!/Failed to send a request|Failed to fetch|NetworkError|not found/i.test(e.message || '')) throw e;
+    notDeployed = true;
+  }
+  if (!notDeployed) throw new Error('Could not create the invitation.');
+  const { data: inv, error } = await sb.rpc('fg_create_invite', {
+    p_role: body.role, p_email: body.email, p_full_name: body.full_name,
+    p_state: body.state, p_region_id: body.region_id,
+  });
+  if (error) throw new Error(error.message);
+  return {
+    ...inv,
+    link: location.origin + '/accept-invite.html?token=' + encodeURIComponent(inv.token),
+    emailed: false,
+    email_error: body.send_email ? 'The invite email service is not set up yet.' : null,
+  };
+}
+window.fgCreateInvite = fgCreateInvite;
+
+/* ── Auth guard ──────────────────────────────────────────────────
+   expectedRole is one role, or a list of roles that share a page. */
 function requireAuth(expectedRole, onReady) {
+  const expected = Array.isArray(expectedRole) ? expectedRole : [expectedRole];
   const isDemo = new URLSearchParams(window.location.search).get('demo') === 'true';
   // Preview mode must not keep a live client. Every loader checks `if (sb)`
   // before choosing real data over sample data, so leaving it set made
@@ -141,8 +220,8 @@ function requireAuth(expectedRole, onReady) {
   // tables as an anonymous visitor.
   if (isDemo) sb = null;
   if (!sb || isDemo) {
-    currentUser = { id: 'demo', email: 'demo@fairgame.dev', user_metadata: { role: expectedRole, name: 'Preview Mode' } };
-    currentRole = expectedRole;
+    currentUser = { id: 'demo', email: 'demo@fairgame.dev', user_metadata: { role: expected[0], name: 'Preview Mode' } };
+    currentRole = expected[0];
     document.body.classList.add('ready');
     _populateNav();
     // Show a banner so it's clear this is a preview
@@ -169,6 +248,8 @@ function requireAuth(expectedRole, onReady) {
       window.location.replace('/login.html');
       return;
     }
+    // Signed in partway through accepting an invitation - finish that first.
+    if (fgResumeInvite()) return;
     // Refresh token so a fresh session is on hand before we look up the role
     const { data: refreshed } = await sb.auth.refreshSession();
     const user = refreshed?.session?.user || session.user;
@@ -217,7 +298,7 @@ function requireAuth(expectedRole, onReady) {
       const jStatus = await judgeStatus();
       if (jStatus && jStatus !== 'active') { _showJudgePending(user.email, jStatus); return; }
     }
-    if (role === 'admin' || role === expectedRole) {
+    if (role === 'admin' || expected.includes(role)) {
       // Teacher and Ambassador accounts require admin approval before portal access
       if (role === 'teacher' || role === 'ambassador') {
         const req = await myRequestStatus(role, user.email);

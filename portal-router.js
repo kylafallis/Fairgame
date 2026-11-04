@@ -9,6 +9,8 @@ const ROUTES = {
   judge:      '/portal-judge.html',
   mentor:     '/portal-mentor.html',
   admin:      '/portal-admin.html',
+  state_director:       '/portal-state.html',
+  regional_coordinator: '/portal-state.html',
 };
 
 /* Nothing on this page ever settles on its own - it either redirects or
@@ -28,6 +30,8 @@ function routerFail(html) {
 let routed = false;
 async function routeTo(role, user) {
   if (routed) return;
+  // Halfway through accepting an invitation: go back and finish it.
+  if (fgResumeInvite()) { routed = true; return; }
   // A role with no portal of its own used to fall through to the
   // ambassador portal, which bounced it back to the login page.
   if (!role) {

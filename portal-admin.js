@@ -183,6 +183,7 @@ requireAuth('admin', () => {
   onSectionLoad('mentors',   loadMentors);
   onSectionLoad('review',    loadReviewQueue);
   onSectionLoad('convos',    loadConvos);
+  onSectionLoad('states',    loadStates);
   refreshReviewBadge();
   onSectionLoad('settings',  loadStats);
 });
@@ -1726,3 +1727,135 @@ function renderConvoMessage(m) {
     </div>` : ''}
   </div>`;
 }
+
+
+/* ── States & Directors (migration 18) ─────────────────────────────
+   The state page itself is /portal-state.html; an admin opening it with
+   ?state=XX sees exactly what that state's director sees. This section
+   is the way in: pick a state to preview, invite its director, and see
+   which states have people yet. */
+const fmtDate = d => d ? new Date(d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '';
+let _stateNames = null;
+async function stateNames() {
+  if (_stateNames) return _stateNames;
+  try { _stateNames = Object.fromEntries((await FG_GEO.regions('US')).map(r => [r.code, r.name])); }
+  catch (_) { _stateNames = {}; }
+  return _stateNames;
+}
+
+async function fillStateSelects() {
+  const names = await stateNames();
+  const opts = Object.keys(names).sort((a, b) => names[a].localeCompare(names[b]))
+    .map(c => `<option value="${esc(c)}">${esc(names[c])}</option>`).join('');
+  ['stPreviewState', 'stState'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.options.length) { el.innerHTML = '<option value="">Pick a state…</option>' + opts; }
+  });
+  const p = document.getElementById('stPreviewState');
+  if (p && !p.value) p.value = 'OH';
+}
+
+function previewState(code) {
+  const st = code || document.getElementById('stPreviewState').value;
+  if (!st) { fgToast('Pick a state first.', 'err'); return; }
+  window.open('/portal-state.html?state=' + encodeURIComponent(st), '_blank', 'noopener');
+}
+window.previewState = previewState;
+
+async function loadStates() {
+  await fillStateSelects();
+  const names = await stateNames();
+  const migrationMissing = e => /function .* does not exist|schema cache|does not exist/i.test(e?.message || '');
+
+  await fgLoad('statesTbody', async () => {
+    if (!sb) return [{ state_code: 'OH', judges: 42, fairs: 18, regions: 3, directors: 1, coordinators: 2, open_invites: 1 }];
+    const { data, error } = await sb.rpc('fg_state_summary');
+    if (error) throw new Error(migrationMissing(error) ? 'Run migration 18 first.' : error.message);
+    return data || [];
+  }, rows => {
+    document.getElementById('statesTbody').innerHTML = rows.map(r => `<tr>
+      <td class="col-name">${esc(names[r.state_code] || r.state_code)}</td>
+      <td>${r.judges}</td><td>${r.fairs}</td><td>${r.regions}</td>
+      <td>${r.directors ? '<span class="chip chip-active">Yes</span>' : '<span class="text-muted">–</span>'}</td>
+      <td>${r.coordinators || '<span class="text-muted">–</span>'}</td>
+      <td>${r.open_invites || '<span class="text-muted">–</span>'}</td>
+      <td><button class="btn-xs" type="button" onclick="previewState('${esc(r.state_code)}')">Preview</button></td>
+    </tr>`).join('');
+  }, { empty: 'No states have judges or fairs yet.' });
+
+  await fgLoad('dirInvitesTbody', async () => {
+    if (!sb) return [];
+    const res = await sb.from('role_invites')
+      .select('id, email, full_name, state_code, created_at, expires_at, emailed_at, accepted_at, revoked_at')
+      .eq('role', 'state_director').order('created_at', { ascending: false }).limit(50);
+    return fgRows(res);
+  }, rows => {
+    const now = Date.now();
+    document.getElementById('dirInvitesTbody').innerHTML = rows.map(i => {
+      const status = i.revoked_at ? ['chip-declined', 'Withdrawn'] : i.accepted_at ? ['chip-active', 'Accepted']
+        : Date.parse(i.expires_at) < now ? ['chip-inactive', 'Expired'] : ['chip-interest', 'Waiting'];
+      const open = status[1] === 'Waiting';
+      return `<tr>
+        <td class="col-name">${esc(i.full_name || i.email)}<div class="text-xs text-muted">${esc(i.email)}</div></td>
+        <td class="col-sm">${esc(names[i.state_code] || i.state_code)}</td>
+        <td class="col-sm">${esc(fmtDate(i.created_at))}${i.emailed_at ? '' : '<div class="text-xs text-muted">Not emailed</div>'}</td>
+        <td><span class="chip ${status[0]}">${status[1]}</span>${open ? `<div class="text-xs text-muted">Expires ${esc(fmtDate(i.expires_at))}</div>` : ''}</td>
+        <td>${open ? `<button class="btn-xs danger" type="button" onclick="revokeDirectorInvite('${esc(i.id)}')">Withdraw</button>` : ''}</td>
+      </tr>`;
+    }).join('');
+  }, { empty: 'No director invitations yet.' });
+}
+window.loadStates = loadStates;
+
+async function inviteStateDirector() {
+  const email = document.getElementById('stEmail').value.trim();
+  const state = document.getElementById('stState').value;
+  const send = document.getElementById('stSend').checked;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showMsg('stMsg', 'Enter their email address.', 'err'); return; }
+  if (!state) { showMsg('stMsg', 'Pick a state.', 'err'); return; }
+  if (!sb) { showMsg('stMsg', 'Preview mode - no invitation was created.', 'info'); return; }
+  const btn = document.getElementById('stBtn');
+  btn.disabled = true; btn.textContent = 'Creating…';
+  document.getElementById('stLink').innerHTML = '';
+  try {
+    const res = await fgCreateInvite({
+      role: 'state_director', state, email,
+      full_name: document.getElementById('stName').value.trim(), send_email: send,
+    });
+    document.getElementById('stLink').innerHTML = `
+      <div class="text-sm mt-16"><strong>Invitation link for ${esc(res.email)}</strong> - copy it now. It will not be shown again.</div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <input id="stLinkInput" readonly value="${esc(res.link)}" onclick="this.select()" style="font-family:monospace;font-size:.76rem;"/>
+        <button class="btn-primary" type="button" onclick="copyInviteLink(this)">Copy</button>
+      </div>
+      <div class="form-hint">Works once, only for ${esc(res.email)}, until ${esc(fmtDate(res.expires_at))}. If it goes to the wrong person, withdraw it below.</div>`;
+    showMsg('stMsg', res.emailed ? `Invitation emailed to ${res.email}.`
+      : send ? `${res.email_error || 'Not emailed.'} Copy the link below and send it yourself.`
+      : 'Invitation created. Copy the link below and send it yourself.', res.emailed ? 'ok' : 'info');
+    document.getElementById('stEmail').value = '';
+    document.getElementById('stName').value = '';
+    loadStates();
+  } catch (e) {
+    showMsg('stMsg', e.message || 'Could not create the invitation.', 'err');
+  } finally {
+    btn.disabled = false; btn.textContent = 'Create invitation';
+  }
+}
+window.inviteStateDirector = inviteStateDirector;
+
+async function copyInviteLink(btn) {
+  const el = document.getElementById('stLinkInput');
+  try { await navigator.clipboard.writeText(el.value); } catch (_) { el.select(); document.execCommand('copy'); }
+  btn.textContent = 'Copied';
+  setTimeout(() => { btn.textContent = 'Copy'; }, 2000);
+}
+window.copyInviteLink = copyInviteLink;
+
+async function revokeDirectorInvite(id) {
+  if (!confirm('Withdraw this invitation? The link stops working straight away.')) return;
+  const { error } = await sb.rpc('fg_revoke_invite', { p_id: id });
+  if (error) { fgToast(esc(error.message), 'err'); return; }
+  fgToast('Invitation withdrawn.');
+  loadStates();
+}
+window.revokeDirectorInvite = revokeDirectorInvite;
