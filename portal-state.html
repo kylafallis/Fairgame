@@ -33,6 +33,31 @@
     .sp-toolbar { display:flex; flex-wrap:wrap; gap:8px; }
     .sp-toolbar input, .sp-toolbar select { width:auto; flex:1 1 160px; }
     .sp-readonly .sp-write { display:none !important; }
+    .sp-issues li.sp-go { cursor:pointer; }
+    .sp-issues li.sp-go:hover { background:var(--g50,#f1faf2); }
+    .sp-issues li .sp-arrow { margin-left:auto; color:var(--g600,#357a38); font-size:.8rem; white-space:nowrap; padding-left:10px; }
+    .sp-map svg { width:100%; height:auto; display:block; max-height:640px; }
+    .sp-map path { fill:#fff; stroke:#8f9a8f; stroke-width:.8; vector-effect:non-scaling-stroke; transition:fill .12s; }
+    .sp-map path:hover { stroke:#1c3a1c; stroke-width:2.4; }
+    .sp-map path.sel { fill:#4a9e4e; }
+    .sp-map path.sel:hover { fill:#357a38; }
+    .sp-map.sp-live path:not(.taken) { cursor:pointer; }
+    .sp-map path.taken { cursor:not-allowed; }
+    .sp-map path.hl { stroke:#1c3a1c; stroke-width:2.4; }
+    .sp-map-tip { position:absolute; pointer-events:none; background:#1c3a1c; color:#fff; font-size:.76rem; padding:5px 9px; border-radius:3px; white-space:nowrap; z-index:5; }
+    .sp-legend { display:flex; flex-wrap:wrap; gap:6px 12px; font-size:.74rem; color:var(--gray-500,#6b756b); }
+    .sp-legend i { display:inline-block; width:11px; height:11px; border:1px solid #8f9a8f; margin-right:5px; vertical-align:-1px; }
+    .sp-tag.rm { cursor:pointer; }
+    .sp-tag.rm:hover { background:#fde2e2; color:#7f1d1d; }
+    .sp-fair-box { max-width:760px; max-height:90vh; overflow:auto; }
+    .sp-fh { font-family:var(--ff-serif,serif); font-size:.92rem; color:var(--g900,#1a3a1a); margin:20px 0 10px; padding-top:14px; border-top:1px solid var(--gray-100,#eef1ee); }
+    .sp-fh:first-child { border-top:none; padding-top:0; margin-top:12px; }
+    .sp-check { display:flex; gap:8px; align-items:center; margin-bottom:12px; }
+    .sp-check input { width:auto; margin:0; }
+    #fairFields { border:none; padding:0; margin:0; }
+    #fairFields:disabled input, #fairFields:disabled select, #fairFields:disabled textarea { background:var(--gray-50,#f7f9f7); color:var(--gray-700,#3d453d); }
+    tr.sp-row { cursor:pointer; }
+    tr.sp-flash td { background:#fff8e1 !important; transition:background 1.5s; }
     @media (max-width:640px) { .form-grid { grid-template-columns:1fr; } .sp-kind { display:none; } }
   </style>
 </head>
@@ -112,15 +137,19 @@
 
     <!-- FAIRS -->
     <div class="portal-section" id="sec-fairs">
-      <div class="section-heading"><h2>Fairs</h2><p>From the FairGame fair directory. If something here is wrong, tell us at <a href="mailto:fairgameinitiative@outlook.com?subject=Fair%20correction">fairgameinitiative@outlook.com</a> and we will fix it.</p></div>
+      <div class="section-heading" style="display:flex;gap:16px;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;">
+        <div><h2>Fairs</h2><p id="fairsSub">Each fair has its own page on fairgameinitiative.org. Click a fair to check its details; once you mark it verified, its page goes public.</p></div>
+        <button class="btn-primary sp-write" type="button" onclick="openFair(null)">+ Add a fair</button>
+      </div>
       <div class="card">
         <div class="card-body sp-toolbar">
           <input type="search" id="fairSearch" placeholder="Search fairs or counties…" oninput="renderFairs()"/>
+          <select id="fairStatus" onchange="renderFairs()" aria-label="Status"><option value="">Any status</option><option value="todo">Needs checking</option><option value="verified">Verified</option></select>
           <select id="fairRegion" onchange="renderFairs()" aria-label="Region"><option value="">All regions</option></select>
         </div>
         <div class="card-body-flush" style="overflow-x:auto;">
           <table class="data-table">
-            <thead><tr><th>Fair</th><th>Level</th><th>County</th><th>Region</th><th>Date</th><th>Judges</th><th>Status</th></tr></thead>
+            <thead><tr><th>Fair</th><th>Level</th><th>County</th><th>Region</th><th>Date</th><th>Status</th><th>Page</th></tr></thead>
             <tbody id="fairsTbody"><tr><td colspan="7"><div class="spinner-wrap"><div class="spinner"></div></div></td></tr></tbody>
           </table>
         </div>
@@ -151,8 +180,20 @@
     <!-- REGIONS -->
     <div class="portal-section" id="sec-regions">
       <div class="section-heading"><h2>Regions</h2><p id="regionsSub">Group your counties into regions. Each region can have its own coordinator, who sees only that region's fairs and judges. A county can be in one region at a time.</p></div>
-      <div class="card sp-write" id="regionEditor">
-        <div class="card-header"><h3 id="regionEditorTitle">New region</h3><button class="btn-xs" type="button" onclick="resetRegionForm()">Clear</button></div>
+      <div class="card">
+        <div class="card-header" style="flex-wrap:wrap;gap:8px;">
+          <h3 id="mapTitle">County map</h3>
+          <div class="sp-legend" id="mapLegend"></div>
+        </div>
+        <div class="card-body" style="position:relative;">
+          <div id="countyMap" class="sp-map"><div class="spinner-wrap"><div class="spinner"></div></div></div>
+          <div id="mapTip" class="sp-map-tip" style="display:none;"></div>
+          <div class="form-hint sp-write" id="mapHint">Click counties to add them to the region below. Click again to take one out.</div>
+        </div>
+      </div>
+
+      <div class="card sp-write mt-16" id="regionEditor">
+        <div class="card-header"><h3 id="regionEditorTitle">New region</h3><button class="btn-xs" type="button" onclick="resetRegionForm()">Start a new region</button></div>
         <div class="card-body">
           <input type="hidden" id="regionId"/>
           <div class="form-group">
@@ -160,10 +201,13 @@
             <input id="regionName" maxlength="80" placeholder="e.g. Northwest Ohio"/>
           </div>
           <div class="form-group">
-            <label class="form-label">Counties <span class="text-muted" id="regionPicked"></span></label>
-            <input type="search" id="countyFilter" placeholder="Filter counties…" oninput="filterCounties()" style="margin-bottom:6px;"/>
-            <div class="sp-county-grid" id="countyGrid"></div>
-            <div class="form-hint">Counties already in another region are greyed out. Remove them there first.</div>
+            <label class="form-label">Counties in this region <span class="text-muted" id="regionPicked"></span></label>
+            <div class="sp-tags" id="regionChips"><span class="text-sm text-muted">None yet. Click counties on the map.</span></div>
+            <details class="mt-8">
+              <summary class="text-sm" style="cursor:pointer;color:var(--g700,#2d5f2f);">Pick from a list instead</summary>
+              <input type="search" id="countyFilter" placeholder="Filter counties…" oninput="filterCounties()" style="margin:8px 0 6px;"/>
+              <div class="sp-county-grid" id="countyGrid"></div>
+            </details>
           </div>
           <div class="form-group">
             <label class="form-label" for="regionNotes">Notes</label>
@@ -237,6 +281,87 @@
 
   </div>
 </main>
+
+<!-- Fair editor -->
+<div class="modal-overlay" id="fairModal" onclick="if(event.target===this)closeFair()">
+  <div class="modal-box modal-box-wide sp-fair-box">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+      <div><h3 id="fairModalTitle" style="margin-bottom:4px;">Fair</h3><div class="modal-sub" id="fairModalSub"></div></div>
+      <button class="btn-xs" type="button" onclick="closeFair()" aria-label="Close">✕</button>
+    </div>
+    <form id="fairForm" onsubmit="return false;">
+      <fieldset id="fairFields">
+        <h4 class="sp-fh">The basics</h4>
+        <div class="form-group"><label class="form-label" for="ff_name">Fair name <span class="req">*</span></label><input id="ff_name" data-f="name" maxlength="160"/></div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label" for="ff_level">Level</label>
+            <select id="ff_level" data-f="level"><option value="school">School</option><option value="district">District</option><option value="regional">Regional</option><option value="state">State</option><option value="national">National</option><option value="international">International</option></select></div>
+          <div class="form-group"><label class="form-label" for="ff_short_name">Short name</label><input id="ff_short_name" data-f="short_name" maxlength="60"/></div>
+          <div class="form-group"><label class="form-label" for="ff_grade_min">Lowest grade</label><input id="ff_grade_min" data-f="grade_min" type="number" min="0" max="12" placeholder="0 = K"/></div>
+          <div class="form-group"><label class="form-label" for="ff_grade_max">Highest grade</label><input id="ff_grade_max" data-f="grade_max" type="number" min="0" max="12"/></div>
+          <div class="form-group"><label class="form-label" for="ff_host_org">Run by</label><input id="ff_host_org" data-f="host_org" maxlength="160"/></div>
+          <div class="form-group"><label class="form-label" for="ff_cycle_year">Season (year)</label><input id="ff_cycle_year" data-f="cycle_year" type="number" min="2020" max="2100"/></div>
+        </div>
+        <label class="text-sm sp-check"><input type="checkbox" id="ff_isef_affiliate" data-f="isef_affiliate"/> Affiliated with ISEF</label>
+
+        <h4 class="sp-fh">When</h4>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label" for="ff_event_start_date">Fair date</label><input id="ff_event_start_date" data-f="event_start_date" type="date"/></div>
+          <div class="form-group"><label class="form-label" for="ff_event_end_date">Last day (if more than one)</label><input id="ff_event_end_date" data-f="event_end_date" type="date"/></div>
+          <div class="form-group"><label class="form-label" for="ff_judging_date">Judging date</label><input id="ff_judging_date" data-f="judging_date" type="date"/></div>
+          <div class="form-group"><label class="form-label" for="ff_awards_date">Awards date</label><input id="ff_awards_date" data-f="awards_date" type="date"/></div>
+          <div class="form-group"><label class="form-label" for="ff_judging_start_time">Judging starts</label><input id="ff_judging_start_time" data-f="judging_start_time" type="time"/></div>
+          <div class="form-group"><label class="form-label" for="ff_judging_end_time">Judging ends</label><input id="ff_judging_end_time" data-f="judging_end_time" type="time"/></div>
+        </div>
+        <div class="form-group"><label class="form-label" for="ff_schedule_note">Schedule note</label><input id="ff_schedule_note" data-f="schedule_note" maxlength="300" placeholder="e.g. Set-up 7:30 am, public viewing 1-3 pm"/></div>
+
+        <h4 class="sp-fh">Where</h4>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label" for="ff_venue_name">Venue</label><input id="ff_venue_name" data-f="venue_name" maxlength="160"/></div>
+          <div class="form-group"><label class="form-label" for="ff_venue_address">Address</label><input id="ff_venue_address" data-f="venue_address" maxlength="200"/></div>
+          <div class="form-group"><label class="form-label" for="ff_city">City</label><input id="ff_city" data-f="city" maxlength="100"/></div>
+          <div class="form-group"><label class="form-label" for="ff_county">County</label><select id="ff_county" data-f="county"></select></div>
+          <div class="form-group"><label class="form-label" for="ff_postal_code">ZIP code</label><input id="ff_postal_code" data-f="postal_code" maxlength="10"/></div>
+        </div>
+
+        <h4 class="sp-fh">Registration</h4>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label" for="ff_registration_opens">Opens</label><input id="ff_registration_opens" data-f="registration_opens" type="date"/></div>
+          <div class="form-group"><label class="form-label" for="ff_registration_deadline">Deadline</label><input id="ff_registration_deadline" data-f="registration_deadline" type="date"/></div>
+          <div class="form-group"><label class="form-label" for="ff_payment_deadline">Payment due</label><input id="ff_payment_deadline" data-f="payment_deadline" type="date"/></div>
+          <div class="form-group"><label class="form-label" for="ff_registration_platform">Register through</label><input id="ff_registration_platform" data-f="registration_platform" maxlength="100" placeholder="e.g. zFairs, STEM Wizard"/></div>
+        </div>
+        <div class="form-group"><label class="form-label" for="ff_registration_url">Registration link</label><input id="ff_registration_url" data-f="registration_url" type="url" placeholder="https://"/></div>
+        <div class="form-group"><label class="form-label" for="ff_fee_note">Fees</label><input id="ff_fee_note" data-f="fee_note" maxlength="300"/></div>
+        <div class="form-group"><label class="form-label" for="ff_divisions">Divisions or categories</label><input id="ff_divisions" data-f="divisions" data-kind="list" maxlength="400" placeholder="Separate with commas"/></div>
+
+        <h4 class="sp-fh">Judging</h4>
+        <label class="text-sm sp-check"><input type="checkbox" id="ff_judges_needed" data-f="judges_needed"/> This fair needs volunteer judges</label>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label" for="ff_judges_needed_count">About how many</label><input id="ff_judges_needed_count" data-f="judges_needed_count" type="number" min="0" max="5000"/></div>
+          <div class="form-group"><label class="form-label" for="ff_judging_format">Judging is</label>
+            <select id="ff_judging_format" data-f="judging_format"><option value="">Not sure</option><option value="in_person">In person</option><option value="virtual">Virtual</option><option value="hybrid">Both</option></select></div>
+        </div>
+        <div class="form-group"><label class="form-label" for="ff_judge_signup_url">The fair's own judge sign-up link</label><input id="ff_judge_signup_url" data-f="judge_signup_url" type="url" placeholder="Leave blank to send judges to FairGame's volunteer form"/></div>
+
+        <h4 class="sp-fh">On the public page</h4>
+        <div class="form-group"><label class="form-label" for="ff_about">About this fair</label><textarea id="ff_about" data-f="about" rows="4" maxlength="2000" placeholder="A few sentences for students, families and judges."></textarea></div>
+        <div class="form-grid">
+          <div class="form-group"><label class="form-label" for="ff_website_url">Fair website</label><input id="ff_website_url" data-f="website_url" type="url" placeholder="https://"/></div>
+          <div class="form-group"><label class="form-label" for="ff_rules_url">Rules link</label><input id="ff_rules_url" data-f="rules_url" type="url" placeholder="https://"/></div>
+        </div>
+        <div class="form-group"><label class="form-label" for="ff_public_email">Public contact email</label><input id="ff_public_email" data-f="public_email" type="email" placeholder="Only an address the fair is happy to publish"/></div>
+      </fieldset>
+    </form>
+    <div class="msg-strip" id="fairMsg" style="margin-top:6px;"></div>
+    <div class="modal-actions" style="flex-wrap:wrap;gap:8px;">
+      <a class="btn-outline" id="fairViewBtn" target="_blank" rel="noopener" style="margin-right:auto;">View page ↗</a>
+      <button class="btn-outline sp-write" type="button" id="fairRetireBtn" onclick="retireFair()">Remove fair</button>
+      <button class="btn-outline sp-write" type="button" id="fairSaveBtn" onclick="saveFair(false)">Save</button>
+      <button class="btn-primary sp-write" type="button" id="fairVerifyBtn" onclick="saveFair(true)">Save and mark verified</button>
+    </div>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/portal-shared.js"></script>

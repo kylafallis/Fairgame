@@ -28,6 +28,13 @@ look wrong.
    "Continue with Google" lands on the home page. The emailed 6-digit code
    still works either way.
 
+5. **Run migration 20** (`supabase/migrations/20_fair_pages.sql`). It adds
+   the public fair pages and fair editing, and **marks every current fair
+   "not verified"** (once; running it again does not repeat that). Fairs
+   then stay off the public site until a state director checks each one
+   and presses "Save and mark verified". The old status is kept, and the
+   undo is at the bottom of the file.
+
 Migration `17_homepage_stats.sql` is on the `claude/charming-gates-c3tnmq`
 branch and does not interact with 18 or 19, so the order between them does
 not matter.
@@ -56,6 +63,31 @@ their name, email and state, then press **Create invitation**.
 When they open it, they sign in with Google or an emailed code (an account
 is created if they do not have one), and land on their state page. From
 there they draw regions and invite coordinators the same way.
+
+## Fair pages
+
+Every fair has a public page at `/fair.html?f=<slug>`, and each state has a
+list at `/fair.html?state=OH`. Only verified fairs show to the public. A
+signed-in director (or admin) also sees their unverified fairs, marked as a
+preview, with a link back to the editor.
+
+Directors manage their fairs from **Fairs** in the state portal: click a
+fair to edit dates, venue, registration, judging needs, an "About" paragraph
+and links, then **Save** (stays as it is) or **Save and mark verified**
+(goes public). **+ Add a fair** creates a new one; **Remove fair** takes one
+down without deleting its record. Coordinators can open fairs but not edit.
+
+Every item in **Things to check** is clickable: fair items open that fair's
+editor, judge items jump to the judge, region items open the region.
+
+## Regions map
+
+The Regions tab shows the state's real county map (US Census boundaries,
+built by `scripts/build_county_shapes.js` into `data/geo/county-shapes/`).
+Hovering outlines a county; clicking adds it to the region being edited
+(green) or takes it out. Other regions are tinted and cannot be clicked
+until the county is taken out of them. "Pick from a list instead" does the
+same thing with checkboxes.
 
 ## Things to know
 
