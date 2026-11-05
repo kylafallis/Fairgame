@@ -544,6 +544,8 @@ async function runInvite(prefix, params) {
   const email = document.getElementById(prefix + 'Email').value.trim();
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showMsg(prefix + 'Msg', 'Enter their email address.', 'err'); return; }
   if (!sb) { showMsg(prefix + 'Msg', 'Preview mode - no invitation was created.', 'info'); return; }
+  // A browser still holding an older cached copy of portal-shared.js.
+  if (typeof fgCreateInvite !== 'function') { showMsg(prefix + 'Msg', 'This page was updated while you had it open. Reload the page, then try again.', 'err'); return; }
   const btn = document.getElementById(prefix + 'Btn');
   btn.disabled = true; btn.textContent = 'Creating…';
   document.getElementById(prefix + 'Link').innerHTML = '';

@@ -1814,6 +1814,7 @@ async function inviteStateDirector() {
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showMsg('stMsg', 'Enter their email address.', 'err'); return; }
   if (!state) { showMsg('stMsg', 'Pick a state.', 'err'); return; }
   if (!sb) { showMsg('stMsg', 'Preview mode - no invitation was created.', 'info'); return; }
+  if (typeof fgCreateInvite !== 'function') { showMsg('stMsg', 'This page was updated while you had it open. Reload the page, then try again.', 'err'); return; }
   const btn = document.getElementById('stBtn');
   btn.disabled = true; btn.textContent = 'Creating…';
   document.getElementById('stLink').innerHTML = '';
