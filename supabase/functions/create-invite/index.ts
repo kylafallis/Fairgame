@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
   });
   if (error) return json({ error: error.message }, 400);
 
-  const link = `${SITE}/accept-invite.html?token=${encodeURIComponent(inv.token)}`;
+  const link = `${SITE}/accept-invite?token=${encodeURIComponent(inv.token)}`;
   const stateName = STATE_NAMES[inv.state_code] ?? inv.state_code;
   const expires = new Date(inv.expires_at).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
 

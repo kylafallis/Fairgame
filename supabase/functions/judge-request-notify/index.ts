@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
     replyTo
       ? `Reply to this email to answer ${r.teacher_name} directly, or accept or decline in your portal:`
       : 'Accept or decline in your portal:',
-    `${SITE}/login.html`,
+    `${SITE}/login`,
     '',
     'Thank you for judging with FairGame.',
     '',

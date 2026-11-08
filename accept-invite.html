@@ -80,12 +80,12 @@
   <div id="dead" class="hidden">
     <h1 id="deadTitle">This link does not work</h1>
     <p id="deadText"></p>
-    <a class="btn ghost" href="/login.html">Go to sign in</a>
+    <a class="btn ghost" href="/login">Go to sign in</a>
     <p class="small">Need a new link? Email <a href="mailto:fairgameinitiative@outlook.com?subject=New%20invitation%20link">fairgameinitiative@outlook.com</a> or whoever invited you.</p>
   </div>
 </main>
 
-<!-- Practice link: /accept-invite.html?practice=OH
+<!-- Practice link: /accept-invite?practice=OH
      Shows what an invited state director sees here, then opens that
      state's page. Nothing is created, checked or saved. Deliberately its
      own script, ahead of Supabase and portal-shared.js, so nothing they do
@@ -108,10 +108,10 @@ var PRACTICE = new URLSearchParams(location.search).get('practice');
   g('who').parentElement.classList.add('hidden');
   g('replaceNote').innerHTML = '<strong>Practice link.</strong> This is what an invited director sees. Nothing is saved and no account changes. Accepting opens the ' + name + ' state page, which you need to be signed in as an admin to see.';
   g('replaceNote').classList.remove('hidden');
-  g('acceptBtn').onclick = function () { location.assign('/portal-state.html?state=' + st); };
+  g('acceptBtn').onclick = function () { location.assign('/portal-state?state=' + st); };
   var back = document.querySelector('#ready .btn.ghost');
   back.textContent = 'Back to the admin portal';
-  back.onclick = function () { location.assign('/portal-admin.html'); };
+  back.onclick = function () { location.assign('/portal-admin'); };
 })();
 
 /* Whatever happens below, never leave a spinner up for good. */
@@ -160,7 +160,7 @@ async function init() {
   // Keep the token across a sign-in round trip, wherever it lands.
   try { localStorage.setItem(INVITE_KEY, JSON.stringify({ token, at: Date.now() })); } catch (_) {}
   // Keep the secret out of the address bar and browser history.
-  try { history.replaceState(null, '', '/accept-invite.html' + location.hash); } catch (_) {}
+  try { history.replaceState(null, '', '/accept-invite' + location.hash); } catch (_) {}
 
   try { STATE_NAMES = Object.fromEntries((await (await fetch('/data/geo/regions.json')).json()).US.map(r => [r[0], r[1]])); } catch (_) {}
 
@@ -225,7 +225,7 @@ async function accept(quiet) {
   $('signin').classList.add('hidden'); $('ready').classList.add('hidden');
   msg(data.already ? 'You have already accepted this. Taking you to your state page…' : 'Done. Taking you to your state page…', 'ok');
   window.fgTrack?.('invite-accepted', { role: data.role });
-  setTimeout(() => location.replace('/portal-state.html'), 1200);
+  setTimeout(() => location.replace('/portal-state'), 1200);
 }
 
 async function googleSignIn() {

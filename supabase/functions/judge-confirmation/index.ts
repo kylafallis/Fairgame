@@ -35,7 +35,7 @@ function firstName(name: string | null): string {
 }
 
 function body(j: { name: string | null; code: string | null }): string {
-  const share = j.code ? `${SITE}/volunteer.html?ref=${encodeURIComponent(j.code)}#judge` : `${SITE}/volunteer.html`;
+  const share = j.code ? `${SITE}/volunteer?ref=${encodeURIComponent(j.code)}#judge` : `${SITE}/volunteer`;
   return [
     `Hi ${firstName(j.name)},`,
     '',
@@ -44,7 +44,7 @@ function body(j: { name: string | null; code: string | null }): string {
     'What happens next:',
     '  1. We review every judge personally, because judges see student work and school contact details. This usually takes 1 to 3 business days.',
     '  2. You will get a second email from us when you are approved.',
-    `  3. Then sign in at ${SITE}/login.html with this email address and the password you chose.`,
+    `  3. Then sign in at ${SITE}/login with this email address and the password you chose.`,
     '',
     'You may also get a separate "confirm your email" message for your portal account. Please click it, so signing in works the first time.',
     '',

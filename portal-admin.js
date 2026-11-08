@@ -51,7 +51,7 @@ const PENDING_STATUSES = ['pending', 'interest'];
 /* ── Welcome emails sent on approval ──────────────────────────────
    No mail server behind this page, so approving opens a pre-filled message
    in whatever mail client this machine uses. Edit the copy here. */
-const PORTAL_URL = 'https://fairgameinitiative.org/login.html';
+const PORTAL_URL = 'https://fairgameinitiative.org/login';
 const APPROVAL_SIGNOFF = 'Kyla Fallis\nFairGame Initiative\nfairgameinitiative@outlook.com';
 
 function firstName(name) {
@@ -114,8 +114,8 @@ function approvalEmailFor(type, name, extra = {}) {
         'https://fairgameinitiative.org/files/judges/fairgame-judge-welcome-guide.pdf\n' +
         'https://fairgameinitiative.org/files/judges/fairgame-judge-code-of-conduct.pdf\n\n' +
         'Know someone who would make a good judge? Send them your own link - everyone who applies through it is credited to you:\n' +
-        (extra.code ? 'https://fairgameinitiative.org/volunteer.html?ref=' + encodeURIComponent(extra.code) + '#judge'
-                    : 'https://fairgameinitiative.org/volunteer.html (your personal link is on your portal profile page)') + '\n\n' +
+        (extra.code ? 'https://fairgameinitiative.org/volunteer?ref=' + encodeURIComponent(extra.code) + '#judge'
+                    : 'https://fairgameinitiative.org/volunteer (your personal link is on your portal profile page)') + '\n\n' +
         APPROVAL_SIGNOFF
     };
   }
@@ -134,7 +134,7 @@ function approvalEmailFor(type, name, extra = {}) {
         "We've reviewed your mentor request and are matching you with a mentor whose background fits your project. " +
         "You'll hear from us directly with an introduction shortly.\n\n" +
         'In the meantime, feel free to keep working - the Research Guide has tips on experimental design and building your display board:\n' +
-        'https://fairgameinitiative.org/researchguide.html\n\n' + APPROVAL_SIGNOFF
+        'https://fairgameinitiative.org/researchguide\n\n' + APPROVAL_SIGNOFF
     };
   }
 
@@ -341,7 +341,7 @@ function renderApprovals() {
 
         const topics  = a.data?.topics || [];
         const matches = matchMentorsForTopics(topics);
-        const pairUrl = `/mentorlog.html?student=${encodeURIComponent(a.name||'')}&email=${encodeURIComponent(a.email||'')}&school=${encodeURIComponent(a.school||'')}&topic=${encodeURIComponent(a.data?.title || topics.join(', '))}`;
+        const pairUrl = `/mentorlog?student=${encodeURIComponent(a.name||'')}&email=${encodeURIComponent(a.email||'')}&school=${encodeURIComponent(a.school||'')}&topic=${encodeURIComponent(a.data?.title || topics.join(', '))}`;
         const detail = `<tr class="row-detail row-click" onclick="openPortfolio('${esc(a.id)}')">
         <td colspan="7" style="background:var(--g50,#f7faf7);padding:10px 16px;font-size:.8rem;color:var(--gray-600);">
           <strong>Topics:</strong> ${topics.map(esc).join(', ') || '–'}
@@ -478,7 +478,7 @@ function openPortfolio(id) {
   // could be filled by, so the matching work stays on the same sheet.
   if (a.type === 'student_mentor_request') {
     const matches = matchMentorsForTopics(data.topics || []);
-    const pairUrl = `/mentorlog.html?student=${encodeURIComponent(a.name || '')}&email=${encodeURIComponent(a.email || '')}&school=${encodeURIComponent(a.school || '')}&topic=${encodeURIComponent(data.title || (data.topics || []).join(', '))}`;
+    const pairUrl = `/mentorlog?student=${encodeURIComponent(a.name || '')}&email=${encodeURIComponent(a.email || '')}&school=${encodeURIComponent(a.school || '')}&topic=${encodeURIComponent(data.title || (data.topics || []).join(', '))}`;
     parts.push(`
     <div class="pf-group">
       <div class="pf-group-title">Matching</div>
@@ -1022,7 +1022,7 @@ async function openJudge(id) {
       ${pfPlainRow('Link tag', j.signup_source ? esc(j.signup_source) : '<span class="text-muted">None</span>')}
       ${pfPlainRow('Referred by', referrerHTML(j))}
       ${pfPlainRow('Their referrals', referralsHTML(j))}
-      ${j.code ? pfPlainRow('Referral link', `<a href="https://fairgameinitiative.org/volunteer.html?ref=${encodeURIComponent(j.code)}#judge" target="_blank" rel="noopener">volunteer.html?ref=${esc(j.code)}</a>`) : ''}
+      ${j.code ? pfPlainRow('Referral link', `<a href="https://fairgameinitiative.org/volunteer?ref=${encodeURIComponent(j.code)}#judge" target="_blank" rel="noopener">volunteer?ref=${esc(j.code)}</a>`) : ''}
     </div>`;
   document.getElementById('portfolioActions').innerHTML = `
     <button class="btn-ghost" onclick="closeModal('portfolioModal')">Close</button>
@@ -1758,7 +1758,7 @@ async function fillStateSelects() {
 function previewState(code) {
   const st = code || document.getElementById('stPreviewState').value;
   if (!st) { fgToast('Pick a state first.', 'err'); return; }
-  window.open('/portal-state.html?state=' + encodeURIComponent(st), '_blank', 'noopener');
+  window.open('/portal-state?state=' + encodeURIComponent(st), '_blank', 'noopener');
 }
 window.previewState = previewState;
 

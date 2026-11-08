@@ -22,14 +22,14 @@ try {
 } catch (e) { console.warn('[Portal] Supabase not configured - running in dev mode.'); }
 
 const ROLE_ROUTES = {
-  teacher:    '/portal-teacher.html',
-  ambassador: '/portal-ambassador.html',
-  student:    '/portal-student.html',
-  judge:      '/portal-judge.html',
-  mentor:     '/portal-mentor.html',
-  admin:      '/portal-admin.html',
-  state_director:       '/portal-state.html',
-  regional_coordinator: '/portal-state.html',
+  teacher:    '/portal-teacher',
+  ambassador: '/portal-ambassador',
+  student:    '/portal-student',
+  judge:      '/portal-judge',
+  mentor:     '/portal-mentor',
+  admin:      '/portal-admin',
+  state_director:       '/portal-state',
+  regional_coordinator: '/portal-state',
 };
 async function doSignOut() {
   if (sb) await sb.auth.signOut();
@@ -155,13 +155,13 @@ function fgPendingInvite() {
    gives up halfway is not bounced away from their own portal all day. */
 function fgResumeInvite() {
   const t = fgPendingInvite();
-  if (!t || /\/accept-invite\.html$/.test(location.pathname)) return false;
+  if (!t || /\/accept-invite(\.html)?$/.test(location.pathname)) return false;
   try {
     const v = JSON.parse(localStorage.getItem(FG_INVITE_KEY));
     if (v.resumed) return false;
     localStorage.setItem(FG_INVITE_KEY, JSON.stringify({ ...v, resumed: true }));
   } catch (_) { return false; }
-  location.replace('/accept-invite.html?token=' + encodeURIComponent(t));
+  location.replace('/accept-invite?token=' + encodeURIComponent(t));
   return true;
 }
 window.fgPendingInvite = fgPendingInvite;
@@ -202,7 +202,7 @@ async function fgCreateInvite(p) {
   if (error) throw new Error(error.message);
   return {
     ...inv,
-    link: location.origin + '/accept-invite.html?token=' + encodeURIComponent(inv.token),
+    link: location.origin + '/accept-invite?token=' + encodeURIComponent(inv.token),
     emailed: false,
     email_error: body.send_email ? 'The invite email service is not set up yet.' : null,
   };
@@ -245,7 +245,7 @@ function requireAuth(expectedRole, onReady) {
         _showLinkExpired(linkErr);
         return;
       }
-      window.location.replace('/login.html');
+      window.location.replace('/login');
       return;
     }
     // Signed in partway through accepting an invitation - finish that first.
@@ -275,7 +275,7 @@ function requireAuth(expectedRole, onReady) {
     if (!role) role = await claimJudgeRole();
     if (!role) {
       // An application on file but not yet activated is a waiting judge,
-      // not a failed sign-in. Bouncing them to /login.html is what made
+      // not a failed sign-in. Bouncing them to /login is what made
       // this look like a broken link for weeks.
       const jStatus = await judgeStatus();
       if (jStatus && jStatus !== 'active') { _showJudgePending(user.email, jStatus); return; }
@@ -285,11 +285,11 @@ function requireAuth(expectedRole, onReady) {
       // role for good once they were approved.
       const mStatus = await myRequestStatus('mentor', user.email);
       if (['pending', 'interest'].includes(mStatus.status)) { _showPortalPending(user.email, 'mentor'); return; }
-      window.location.replace('/login.html');
+      window.location.replace('/login');
       return;
     }
     // A role with no portal of its own (inactive, parent, fair_manager).
-    // Redirecting to /login.html sent it straight back here through the
+    // Redirecting to /login sent it straight back here through the
     // login page's own routing - an endless reload.
     if (!ROLE_ROUTES[role]) { _showNoPortal(user.email, role); return; }
     // Deactivating a judge in the admin closes their portal. The role
@@ -312,7 +312,7 @@ function requireAuth(expectedRole, onReady) {
       _populateNav();
       if (typeof onReady === 'function') onReady(user);
     } else {
-      window.location.replace(ROLE_ROUTES[role] || '/login.html');
+      window.location.replace(ROLE_ROUTES[role] || '/login');
     }
   });
 }
@@ -429,7 +429,7 @@ function _showLinkExpired(err) {
             : `The sign-in attempt was rejected: ${err.description || err.code}`}
         </div>
         <p style="font-size:.84rem;color:#6b756b;line-height:1.6;margin-bottom:18px;">Sign in with your email address and a code instead - codes are typed in, so nothing can use one up before you do.</p>
-        <a href="/login.html?code=1" style="display:block;text-align:center;width:100%;padding:11px;background:#357a38;color:#fff;text-decoration:none;border-radius:3px;font-size:.86rem;font-weight:600;">Email me a sign-in code &rarr;</a>
+        <a href="/login?code=1" style="display:block;text-align:center;width:100%;padding:11px;background:#357a38;color:#fff;text-decoration:none;border-radius:3px;font-size:.86rem;font-weight:600;">Email me a sign-in code &rarr;</a>
       </div>
     </div>`;
 }
@@ -445,7 +445,7 @@ function _populateNav() {
 
 async function portalLogout() {
   if (sb) await sb.auth.signOut();
-  window.location.replace('/login.html');
+  window.location.replace('/login');
 }
 window.portalLogout = portalLogout;
 

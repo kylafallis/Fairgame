@@ -3,14 +3,14 @@
    scope, so `sb` declared there is usable here by name. */
 
 const ROUTES = {
-  teacher:    '/portal-teacher.html',
-  ambassador: '/portal-ambassador.html',
-  student:    '/portal-student.html',
-  judge:      '/portal-judge.html',
-  mentor:     '/portal-mentor.html',
-  admin:      '/portal-admin.html',
-  state_director:       '/portal-state.html',
-  regional_coordinator: '/portal-state.html',
+  teacher:    '/portal-teacher',
+  ambassador: '/portal-ambassador',
+  student:    '/portal-student',
+  judge:      '/portal-judge',
+  mentor:     '/portal-mentor',
+  admin:      '/portal-admin',
+  state_director:       '/portal-state',
+  regional_coordinator: '/portal-state',
 };
 
 /* Nothing on this page ever settles on its own - it either redirects or
@@ -38,7 +38,7 @@ async function routeTo(role, user) {
     routed = true;
     routerFail('Your account does not have portal access yet.<br>' +
       'If you applied recently we are still reviewing it - you will get an email once approved.<br>' +
-      '<a href="/login.html">Back to sign in →</a>');
+      '<a href="/login">Back to sign in →</a>');
     return;
   }
   if (!ROUTES[role]) {
@@ -90,7 +90,7 @@ const ARRIVED_WITH_LINK = /access_token|refresh_token|token_hash|[#&?]type=|[?&]
 function toLogin() {
   if (routed) return;
   routed = true;
-  window.location.replace('/login.html');
+  window.location.replace('/login');
 }
 
 /* A dead link arrives as an error in the fragment, not as an auth event,
@@ -105,7 +105,7 @@ if (linkErr) {
     (expired
       ? 'This sign-in link has expired or was already used. If your school filters email, its scanner may have opened it first.'
       : 'Sign-in failed: ' + (linkErr.description || linkErr.code)) +
-    '<br><a href="/login.html?code=1">Email me a sign-in code instead →</a>');
+    '<br><a href="/login?code=1">Email me a sign-in code instead →</a>');
   try { history.replaceState(null, '', window.location.pathname); } catch (_) {}
 }
 
@@ -115,7 +115,7 @@ sb.auth.onAuthStateChange(async (event, session) => {
     routeTo(await resolveRole(session.user), session.user);
   }
   if (event === 'SIGNED_OUT') {
-    window.location.replace('/login.html');
+    window.location.replace('/login');
   }
 });
 
@@ -125,7 +125,7 @@ sb.auth.getSession().then(async ({ data: { session }, error }) => {
     // A saved sign-in that could not be refreshed is just a signed-out
     // visitor; only a link that failed needs explaining.
     if (!ARRIVED_WITH_LINK) { toLogin(); return; }
-    routerFail('Sign-in failed: ' + error.message + '<br><a href="/login.html">Try again →</a>');
+    routerFail('Sign-in failed: ' + error.message + '<br><a href="/login">Try again →</a>');
     return;
   }
   if (session?.user) {
@@ -138,7 +138,7 @@ sb.auth.getSession().then(async ({ data: { session }, error }) => {
       routerFail(
         'Your account does not have portal access yet.<br>' +
         'If you applied recently we are still reviewing it - you will get an email once approved.<br>' +
-        '<a href="/login.html">Back to sign in →</a>');
+        '<a href="/login">Back to sign in →</a>');
       return;
     }
     routeTo(role, session.user);
@@ -156,5 +156,5 @@ setTimeout(() => {
   window.fgTrack?.('login-link-failed', { code: 'timeout', page: 'router' });
   routerFail(
     'This sign-in link did not work. It may have expired or already been used.<br>' +
-    '<a href="/login.html?code=1">Email me a sign-in code instead →</a>');
+    '<a href="/login?code=1">Email me a sign-in code instead →</a>');
 }, 15000);

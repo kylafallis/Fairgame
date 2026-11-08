@@ -7,7 +7,7 @@
      - a state director gets their own state, whatever is asked for;
      - a regional coordinator gets their own region;
      - an admin gets whichever state (and region) is in the URL, so
-       /portal-state.html?state=OH is a preview of exactly what the Ohio
+       /portal-state?state=OH is a preview of exactly what the Ohio
        director sees.
    Writes go through fg_save_region / fg_delete_region / fg_revoke_invite
    / fg_remove_state_role, and invitations through fgCreateInvite in
@@ -316,13 +316,13 @@ function renderFairs() {
   document.getElementById('fairsSub').innerHTML = esc((SP.data.fairs || []).length
     ? `Each fair has its own page on fairgameinitiative.org. Click a fair to check its details; once you mark it verified, its page goes public.${todo ? ` ${todo} still need checking.` : ' Every fair is verified.'}`
     : 'Each fair has its own page on fairgameinitiative.org.') +
-    ` <a href="/fair.html?state=${encodeURIComponent(SP.state)}" target="_blank" rel="noopener">See the public ${esc(stateName(SP.state))} list ↗</a>`;
+    ` <a href="/fair?state=${encodeURIComponent(SP.state)}" target="_blank" rel="noopener">See the public ${esc(stateName(SP.state))} list ↗</a>`;
   if (!rows.length) { fgEmpty(tb, (SP.data.fairs || []).length ? 'No fairs match.' : 'No fairs here yet. Add the first one.'); return; }
   tb.innerHTML = rows.map(f => {
     const reg = fairRegion(f, idx);
     const date = f.event_start_date || f.judging_date;
     const [cls, label] = STATUS_CHIP[f.verification_status] || ['chip-pending', f.verification_status || '–'];
-    const page = f.slug ? `<a href="/fair.html?f=${encodeURIComponent(f.slug)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${f.verification_status === 'verified' ? 'Public ↗' : 'Preview ↗'}</a>` : '';
+    const page = f.slug ? `<a href="/fair?f=${encodeURIComponent(f.slug)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">${f.verification_status === 'verified' ? 'Public ↗' : 'Preview ↗'}</a>` : '';
     return `<tr class="sp-row" data-id="${esc(f.id)}" tabindex="0">
       <td class="col-name">${esc(f.name)}</td>
       <td class="col-sm" style="text-transform:capitalize;">${esc(f.level || '')}</td>
@@ -659,7 +659,7 @@ function openFair(id) {
     : `A new fair in ${stateName(SP.state)}. It stays off the public site until you mark it verified.`;
   const view = document.getElementById('fairViewBtn');
   view.style.display = f.slug ? '' : 'none';
-  if (f.slug) { view.href = '/fair.html?f=' + encodeURIComponent(f.slug); view.textContent = f.verification_status === 'verified' ? 'View public page ↗' : 'Preview page ↗'; }
+  if (f.slug) { view.href = '/fair?f=' + encodeURIComponent(f.slug); view.textContent = f.verification_status === 'verified' ? 'View public page ↗' : 'Preview page ↗'; }
   document.getElementById('fairRetireBtn').style.display = id && canEdit ? '' : 'none';
   document.getElementById('fairVerifyBtn').textContent = f.verification_status === 'verified' ? 'Save and re-verify' : 'Save and mark verified';
   document.getElementById('fairMsg').className = 'msg-strip';
@@ -708,7 +708,7 @@ async function saveFair(verify) {
   }
   closeFair();
   fgToast(verify
-    ? `${esc(fields.name)} is verified. <a href="/fair.html?f=${encodeURIComponent(data.slug)}" target="_blank" rel="noopener">See its public page ↗</a>`
+    ? `${esc(fields.name)} is verified. <a href="/fair?f=${encodeURIComponent(data.slug)}" target="_blank" rel="noopener">See its public page ↗</a>`
     : `Saved ${esc(fields.name)}.`);
   await loadOverview();
 }

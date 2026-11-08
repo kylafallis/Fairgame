@@ -75,7 +75,7 @@ function updateNavAuthState() {
          people to the wrong portal whenever the two disagreed - metadata
          keeps whatever the signup form wrote, so an account promoted later
          still pointed at the portal it first signed up for. */
-      btn.href = '/portal-router.html';
+      btn.href = '/portal-router';
     }
   });
 }
@@ -274,54 +274,54 @@ const QD = {
         role: 'Student: Project Planning',
         title: "Let's find your project idea",
         links: [
-          { t: 'Research Guide: Choosing a Topic',  d: 'Step-by-step topic selection framework',      h: '/researchguide.html'          },
-          { t: 'Winning Project Examples',           d: 'What ISEF winners actually researched',       h: '/researchguide.html#examples' },
-          { t: 'Get a Mentor Match',                 d: "We'll connect you with a STEM professional",  h: '/mentor-request.html'         },
+          { t: 'Research Guide: Choosing a Topic',  d: 'Step-by-step topic selection framework',      h: '/researchguide'          },
+          { t: 'Winning Project Examples',           d: 'What ISEF winners actually researched',       h: '/researchguide#examples' },
+          { t: 'Get a Mentor Match',                 d: "We'll connect you with a STEM professional",  h: '/mentor-request'         },
         ],
         cta: [
-          { t: 'Start Research Guide →', h: '/researchguide.html' },
-          { t: 'Get Mentor →',           h: '/mentor-request.html', o: true },
+          { t: 'Start Research Guide →', h: '/researchguide' },
+          { t: 'Get Mentor →',           h: '/mentor-request', o: true },
         ]
       },
       experiment: {
         role: 'Student: Experimental Design',
         title: 'Build a solid experiment',
         links: [
-          { t: 'Experimental Design Guide',    d: 'Hypothesis, variables, controls explained',   h: '/researchguide.html#design' },
-          { t: 'Data Collection Templates',    d: 'Printable lab notebooks & data sheets',       h: '/researchguide.html#data'   },
+          { t: 'Experimental Design Guide',    d: 'Hypothesis, variables, controls explained',   h: '/researchguide#design' },
+          { t: 'Data Collection Templates',    d: 'Printable lab notebooks & data sheets',       h: '/researchguide#data'   },
         ],
-        cta: [{ t: 'Open Research Guide →', h: '/researchguide.html' }]
+        cta: [{ t: 'Open Research Guide →', h: '/researchguide' }]
       },
       display: {
         role: 'Student: Presentation',
         title: 'Create a winning display',
         links: [
-          { t: 'Display Board Template', d: 'Downloadable layout with all required sections', h: '/researchguide.html#display'  },
-          { t: 'Presentation Tips',      d: 'What judges actually look for',                  h: '/researchguide.html#present'  },
+          { t: 'Display Board Template', d: 'Downloadable layout with all required sections', h: '/researchguide#display'  },
+          { t: 'Presentation Tips',      d: 'What judges actually look for',                  h: '/researchguide#present'  },
         ],
-        cta: [{ t: 'Get Display Templates →', h: '/researchguide.html' }]
+        cta: [{ t: 'Get Display Templates →', h: '/researchguide' }]
       },
       compete: {
         role: 'Student: Competitions',
         title: 'Navigate the competition path',
         links: [
-          { t: 'Ohio Competition Pathway', d: 'School → District → State → ISEF',         h: '/stateresources.html'          },
-          { t: 'Key Deadlines 2025–26',    d: 'Registration dates & requirements',         h: '/stateresources.html#ohio'     },
-          { t: 'National Competition List',d: 'ISEF, Broadcom, and more',                  h: '/stateresources.html#national' },
+          { t: 'Ohio Competition Pathway', d: 'School → District → State → ISEF',         h: '/stateresources'          },
+          { t: 'Key Deadlines 2025–26',    d: 'Registration dates & requirements',         h: '/stateresources#ohio'     },
+          { t: 'National Competition List',d: 'ISEF, Broadcom, and more',                  h: '/stateresources#national' },
         ],
         cta: [
-          { t: 'Browse State Resources →', h: '/stateresources.html' },
-          { t: 'Start Here →',             h: '/starthere.html', o: true },
+          { t: 'Browse State Resources →', h: '/stateresources' },
+          { t: 'Start Here →',             h: '/starthere', o: true },
         ]
       },
       mentor: {
         role: 'Student: Mentorship',
         title: 'Get matched with a mentor',
         links: [
-          { t: 'Request a Mentor',          d: "Tell us your topic, we'll match you to a mentor",    h: '/mentor-request.html' },
-          { t: 'STEM Professional Network', d: 'Scientists & engineers who can help',        h: '/volunteer.html'  },
+          { t: 'Request a Mentor',          d: "Tell us your topic, we'll match you to a mentor",    h: '/mentor-request' },
+          { t: 'STEM Professional Network', d: 'Scientists & engineers who can help',        h: '/volunteer'  },
         ],
-        cta: [{ t: 'Apply for Mentorship →', h: '/mentor-request.html' }]
+        cta: [{ t: 'Apply for Mentorship →', h: '/mentor-request' }]
       },
     }
   },
@@ -339,12 +339,12 @@ const QD = {
         role: 'Teacher: Fair Setup',
         title: "Start your school's science fair",
         links: [
-          { t: 'Complete Science Fair Setup Guide',   d: 'Month-by-month planning timeline',        h: '/setupguide.html'       },
+          { t: 'Complete Science Fair Setup Guide',   d: 'Month-by-month planning timeline',        h: '/setupguide'       },
           { t: 'Administrator Proposal Template',     d: 'Make the case to your principal',         h: '/#portal'               },
           { t: '12-Month Planning Checklist',         d: 'Printable step-by-step timeline',         h: '/#portal'               },
         ],
         cta: [
-          { t: 'Full Setup Guide →',       h: '/setupguide.html' },
+          { t: 'Full Setup Guide →',       h: '/setupguide' },
           { t: 'Access Teacher Portal →',  h: '/#portal', o: true },
         ]
       },
@@ -352,10 +352,10 @@ const QD = {
         role: 'Teacher: Fair Improvement',
         title: 'Level up your fair',
         links: [
-          { t: 'Best Practices from Top Schools', d: 'What high-participation fairs do differently', h: '/setupguide.html'      },
-          { t: 'Affiliate Registration Guide',      d: 'Connect to district & state competitions',    h: '/stateresources.html'  },
+          { t: 'Best Practices from Top Schools', d: 'What high-participation fairs do differently', h: '/setupguide'      },
+          { t: 'Affiliate Registration Guide',      d: 'Connect to district & state competitions',    h: '/stateresources'  },
         ],
-        cta: [{ t: 'Teacher Resources →', h: '/teachers-professionals.html' }]
+        cta: [{ t: 'Teacher Resources →', h: '/teachers-professionals' }]
       },
       judges: {
         role: 'Teacher: Judge Recruitment',
@@ -363,18 +363,18 @@ const QD = {
         links: [
           { t: 'Judge Recruitment Email Template', d: 'Tested cold email that gets responses',    h: '/#portal'                      },
           { t: 'Judge Training Materials',         d: 'OAS-approved orientation packet',         h: '/#portal'                      },
-          { t: 'Where to Find Judges',             d: 'Universities, industry partners, alumni', h: '/setupguide.html#judges'       },
+          { t: 'Where to Find Judges',             d: 'Universities, industry partners, alumni', h: '/setupguide#judges'       },
         ],
         cta: [
           { t: 'Get Judge Templates →',    h: '/#portal'           },
-          { t: 'Post a Judge Request →',   h: '/volunteer.html', o: true },
+          { t: 'Post a Judge Request →',   h: '/volunteer', o: true },
         ]
       },
       funding: {
         role: 'Teacher: Funding',
         title: 'Find money for your fair',
         links: [
-          { t: 'Ohio Science Fair Grant List',    d: 'Ohio-specific & national opportunities',          h: '/setupguide.html#funding' },
+          { t: 'Ohio Science Fair Grant List',    d: 'Ohio-specific & national opportunities',          h: '/setupguide#funding' },
           { t: 'Sponsorship Outreach Letter',     d: 'Tested template for local businesses',            h: '/#portal'                 },
           { t: 'Budget Template',                 d: 'Full cost breakdown for a $500–$5K fair',         h: '/#portal'                 },
         ],
@@ -396,17 +396,17 @@ const QD = {
         role: 'Administrator: Budget',
         title: 'The numbers behind science fairs',
         links: [
-          { t: 'Science Fair Cost Breakdown', d: 'Real numbers: $300–$5K by scale',       h: '/setupguide.html#cost'    },
-          { t: 'Funding Sources Guide',       d: 'Grants, sponsors, PTA, in-kind',        h: '/setupguide.html#funding' },
+          { t: 'Science Fair Cost Breakdown', d: 'Real numbers: $300–$5K by scale',       h: '/setupguide#cost'    },
+          { t: 'Funding Sources Guide',       d: 'Grants, sponsors, PTA, in-kind',        h: '/setupguide#funding' },
         ],
-        cta: [{ t: 'Full Setup Guide →', h: '/setupguide.html' }]
+        cta: [{ t: 'Full Setup Guide →', h: '/setupguide' }]
       },
       time: {
         role: 'Administrator: Planning',
         title: 'Realistic time investment',
         links: [
-          { t: '12-Month Timeline',        d: 'Teacher hours by phase (avg 5 hrs/month)',      h: '/setupguide.html'            },
-          { t: 'Committee Structure Guide',d: 'Distribute the load across multiple teachers',  h: '/setupguide.html#committee'  },
+          { t: '12-Month Timeline',        d: 'Teacher hours by phase (avg 5 hrs/month)',      h: '/setupguide'            },
+          { t: 'Committee Structure Guide',d: 'Distribute the load across multiple teachers',  h: '/setupguide#committee'  },
         ],
         cta: [{ t: 'Contact Us →', h: 'mailto:fairgameinitiative@outlook.com' }]
       },
@@ -414,16 +414,16 @@ const QD = {
         role: 'Administrator: Outcomes',
         title: 'Academic impact evidence',
         links: [
-          { t: 'Research on Science Fair Benefits', d: 'College prep, critical thinking, STEM identity', h: '/setupguide.html'          },
-          { t: 'Student Success Stories',           d: 'Outcomes from FairGame-supported schools',      h: '/successstories.html'      },
+          { t: 'Research on Science Fair Benefits', d: 'College prep, critical thinking, STEM identity', h: '/setupguide'          },
+          { t: 'Student Success Stories',           d: 'Outcomes from FairGame-supported schools',      h: '/successstories'      },
         ],
-        cta: [{ t: 'Read Success Stories →', h: '/successstories.html' }]
+        cta: [{ t: 'Read Success Stories →', h: '/successstories' }]
       },
       start: {
         role: 'Administrator: Getting Started',
         title: 'Pilot program options',
         links: [
-          { t: 'One-Grade Pilot Guide',    d: 'Start with 8th grade, expand from there',  h: '/setupguide.html'                          },
+          { t: 'One-Grade Pilot Guide',    d: 'Start with 8th grade, expand from there',  h: '/setupguide'                          },
           { t: 'Schedule a Consultation', d: '30-min free call with our team', h: 'mailto:fairgameinitiative@outlook.com' },
         ],
         cta: [{ t: 'Schedule Consultation →', h: 'mailto:fairgameinitiative@outlook.com' }]
@@ -443,19 +443,19 @@ const QD = {
         role: 'STEM Professional: Judging',
         title: 'Sign up to judge',
         links: [
-          { t: 'Judge Application Form', d: 'Register your expertise & availability', h: '/volunteer.html' },
-          { t: 'What to Expect',         d: '3–5 hour commitment, rubric provided',   h: '/volunteer.html' },
+          { t: 'Judge Application Form', d: 'Register your expertise & availability', h: '/volunteer' },
+          { t: 'What to Expect',         d: '3–5 hour commitment, rubric provided',   h: '/volunteer' },
         ],
-        cta: [{ t: 'Sign Up to Judge →', h: '/volunteer.html' }]
+        cta: [{ t: 'Sign Up to Judge →', h: '/volunteer' }]
       },
       mentor: {
         role: 'STEM Professional: Mentorship',
         title: 'Become a student mentor',
         links: [
-          { t: 'Mentor Program Overview',   d: 'What the commitment looks like',         h: '/volunteer.html' },
-          { t: 'Mentor Training Materials', d: 'How to guide without doing the work',    h: '/volunteer.html' },
+          { t: 'Mentor Program Overview',   d: 'What the commitment looks like',         h: '/volunteer' },
+          { t: 'Mentor Training Materials', d: 'How to guide without doing the work',    h: '/volunteer' },
         ],
-        cta: [{ t: 'Apply to Mentor →', h: '/volunteer.html' }]
+        cta: [{ t: 'Apply to Mentor →', h: '/volunteer' }]
       },
       speak: {
         role: 'STEM Professional: Outreach',
@@ -489,10 +489,10 @@ const QD = {
         role: 'Corporate: Volunteers',
         title: 'Employee volunteer program',
         links: [
-          { t: 'Corporate Judge Program', d: 'Counts toward employee volunteer hours', h: '/volunteer.html' },
-          { t: 'Mentorship Program',      d: 'Employees mentor students 1-on-1',       h: '/volunteer.html' },
+          { t: 'Corporate Judge Program', d: 'Counts toward employee volunteer hours', h: '/volunteer' },
+          { t: 'Mentorship Program',      d: 'Employees mentor students 1-on-1',       h: '/volunteer' },
         ],
-        cta: [{ t: 'Explore Volunteer Program →', h: '/volunteer.html' }]
+        cta: [{ t: 'Explore Volunteer Program →', h: '/volunteer' }]
       },
       partner: {
         role: 'Corporate: Partnership',
@@ -786,7 +786,7 @@ function initJudgeReferral() {
 }
 
 function judgeShareUrl(code) {
-  return 'https://fairgameinitiative.org/volunteer.html?ref=' + encodeURIComponent(code) + '#judge';
+  return 'https://fairgameinitiative.org/volunteer?ref=' + encodeURIComponent(code) + '#judge';
 }
 
 async function copyJudgeLink(btn) {
@@ -884,7 +884,7 @@ async function submitJudge() {
 
   const alreadyApplied = () => {
     msgEl.innerHTML = 'You have already applied with <strong>' + email.replace(/</g, '&lt;') + '</strong>, so there is nothing more to do here. '
-      + 'If you have been approved, <a href="/login.html">sign in</a>. To change your application, sign in and edit your profile, '
+      + 'If you have been approved, <a href="/login">sign in</a>. To change your application, sign in and edit your profile, '
       + 'or email <a href="mailto:fairgameinitiative@outlook.com">fairgameinitiative@outlook.com</a>.';
     msgEl.className = 'form-msg error';
     if (submitBtn) submitBtn.disabled = false;
@@ -1007,7 +1007,7 @@ async function submitJudge() {
   msgEl.innerHTML = `<strong>Application received!</strong> Your judge code is <strong>${code}</strong>.${confirmationSent ? ' A confirmation is on its way to your inbox.' : ''}<br><br>`
     + `We review every judge application personally, because judges see student work and school contact details. `
     + `You will get an email once you are approved - typically 1&ndash;3 business days. `
-    + `After that, sign in at <a href="/login.html">the portal</a> with this email address and the password you just chose.<br><br>`
+    + `After that, sign in at <a href="/login">the portal</a> with this email address and the password you just chose.<br><br>`
     + `<strong>Know someone who would make a good judge?</strong> Share your link - everyone who applies through it is credited to you:`
     + `<div class="ref-share"><input type="text" readonly value="${judgeShareUrl(code)}" onclick="this.select()" aria-label="Your referral link"/>`
     + `<button type="button" class="btn btn-primary" style="padding:8px 14px;font-size:.8rem;" onclick="copyJudgeLink(this)">Copy</button></div>`;
@@ -1517,7 +1517,7 @@ window.submitContactForm = submitContactForm;
         if (session?.user && btn) {
           // Same reason as the nav button above: user_roles decides this,
           // and only the router reads it.
-          btn.href = '/portal-router.html';
+          btn.href = '/portal-router';
           btn.title = 'Go to my portal';
           btn.classList.add('logged-in');
         }

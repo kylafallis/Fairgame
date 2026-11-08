@@ -5,7 +5,7 @@ try { if (SB_URL !== 'YOUR_SUPABASE_URL') sb = window.supabase.createClient(SB_U
 
 /* mentor was missing here, so a mentor signing in fell through to the
    student portal, which then bounced them back for having the wrong role. */
-const ROUTES = { teacher:'/portal-teacher.html', ambassador:'/portal-ambassador.html', student:'/portal-student.html', judge:'/portal-judge.html', mentor:'/portal-mentor.html', admin:'/portal-admin.html', state_director:'/portal-state.html', regional_coordinator:'/portal-state.html' };
+const ROUTES = { teacher:'/portal-teacher', ambassador:'/portal-ambassador', student:'/portal-student', judge:'/portal-judge', mentor:'/portal-mentor', admin:'/portal-admin', state_director:'/portal-state', regional_coordinator:'/portal-state' };
 
 // Roles that require admin approval before portal access
 const APPROVAL_ROLES = ['teacher', 'ambassador'];
@@ -333,7 +333,7 @@ async function go(user) {
     const inv = JSON.parse(localStorage.getItem('fg_pending_invite') || 'null');
     if (inv?.token && !inv.resumed && Date.now() - (inv.at || 0) < 86400000) {
       localStorage.setItem('fg_pending_invite', JSON.stringify({ ...inv, resumed: true }));
-      window.location.replace('/accept-invite.html?token=' + encodeURIComponent(inv.token));
+      window.location.replace('/accept-invite?token=' + encodeURIComponent(inv.token));
       return;
     }
   } catch (_) {}
@@ -508,7 +508,7 @@ function showRoleChooser(user) {
     <div class="msg" id="chooserMsg"></div>
     <p style="font-size:.78rem;color:var(--gray-500);line-height:1.6;margin:14px 0 16px;">
       Teacher and Student Ambassador accounts are reviewed before portal access is granted.
-      Judges and mentors register through the <a href="/volunteer.html">volunteer form</a>.
+      Judges and mentors register through the <a href="/volunteer">volunteer form</a>.
     </p>
     <button onclick="doSignOut()" style="width:100%;padding:10px;background:none;border:1.5px solid var(--gray-200);border-radius:3px;font-size:.82rem;color:var(--gray-500);cursor:pointer;">
       Sign out and switch accounts

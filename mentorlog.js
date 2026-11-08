@@ -584,7 +584,7 @@ async function sendConsent(mentorshipId) {
     .select('token').eq('id', consentId).maybeSingle();
   if (!row?.token) { msg.textContent = 'Created, but the link could not be read back.'; msg.style.color = '#c0392b'; return; }
 
-  const link = location.origin + '/consent.html?t=' + row.token;
+  const link = location.origin + '/consent?t=' + row.token;
   msg.textContent = '';
   // Redraw first, then append. loadGateReport replaces the container's
   // contents, so appending before it would wipe the link out again.

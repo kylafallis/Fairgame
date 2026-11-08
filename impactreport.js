@@ -169,7 +169,7 @@ function buildMentorshipSummary(m) {
     </div>
     <div style="font-size:0.84rem;color:var(--gray-700);margin-bottom:8px;">Avg. milestones completed per pair: <strong style="color:var(--green-700);">${m.avg_milestones} / 6</strong></div>
     <div style="font-size:0.84rem;color:var(--gray-700);">Completed pairs: <strong style="color:var(--green-700);">${m.completed}</strong></div>
-    <a href="/mentorlog.html" class="btn btn-outline" style="margin-top:16px;font-size:0.78rem;padding:8px 16px;">View Full Mentor Log →</a>`;
+    <a href="/mentorlog" class="btn btn-outline" style="margin-top:16px;font-size:0.78rem;padding:8px 16px;">View Full Mentor Log →</a>`;
 }
 
 function buildJudgeActivity(j) {
@@ -190,7 +190,7 @@ function buildJudgeActivity(j) {
         <div style="font-size:0.68rem;color:var(--gray-500);text-transform:uppercase;letter-spacing:0.08em;">Response Rate</div>
       </div>
     </div>
-    <a href="/judgemap.html" class="btn btn-outline" style="font-size:0.78rem;padding:8px 16px;">View Judge Map →</a>`;
+    <a href="/judgemap" class="btn btn-outline" style="font-size:0.78rem;padding:8px 16px;">View Judge Map →</a>`;
 }
 
 function buildGoalsTable() {

@@ -75,7 +75,7 @@ function prefillProfile(j) {
 async function showRefLink(code) {
   const input = document.getElementById('refLink');
   if (!input) return;
-  input.value = code ? 'https://fairgameinitiative.org/volunteer.html?ref=' + encodeURIComponent(code) + '#judge' : 'Save your profile to get a link';
+  input.value = code ? 'https://fairgameinitiative.org/volunteer?ref=' + encodeURIComponent(code) + '#judge' : 'Save your profile to get a link';
   if (!code || !sb) return;
   const { data, error } = await sb.rpc('fg_my_referral_count');
   const el = document.getElementById('refCount');
