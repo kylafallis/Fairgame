@@ -1,0 +1,33 @@
+/* Teacher onboarding — existing FairGame portal tokens and typography. */
+.fg-onboarding-backdrop{position:fixed;inset:0;background:rgba(15,30,16,.72);z-index:10000;display:flex;align-items:center;justify-content:center;padding:22px;overflow-y:auto}
+.fg-onboarding{width:min(900px,100%);max-height:min(92vh,900px);overflow:auto;background:var(--white);border-top:4px solid var(--g600);box-shadow:0 20px 70px rgba(0,0,0,.28)}
+.fg-onboarding-head{background:var(--g900);color:#fff;padding:28px 34px 24px;position:sticky;top:0;z-index:2}
+.fg-onboarding-eyebrow{font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;color:var(--g400);font-weight:600;margin-bottom:8px}
+.fg-onboarding-head h2{font-family:var(--ff-serif);font-size:1.7rem;line-height:1.2;color:#fff;margin:0 0 8px}
+.fg-onboarding-head p{font-size:.88rem;color:rgba(255,255,255,.68);margin:0;max-width:650px}
+.fg-onboarding-progress{height:4px;background:rgba(255,255,255,.13);margin-top:20px}
+.fg-onboarding-progress span{display:block;height:100%;background:var(--g400);transition:width .2s}
+.fg-onboarding-stepmeta{display:flex;justify-content:space-between;gap:12px;margin-top:9px;font-size:.7rem;color:rgba(255,255,255,.56)}
+.fg-onboarding-body{padding:28px 34px 12px}
+.fg-onboarding-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 20px}
+.fg-onboarding-field{min-width:0}.fg-onboarding-field.full{grid-column:1/-1}
+.fg-onboarding-field label{display:block;font-size:.78rem;font-weight:600;color:var(--g900);margin-bottom:7px}
+.fg-onboarding-field input,.fg-onboarding-field select,.fg-onboarding-field textarea{width:100%;font:400 .86rem var(--ff-sans);padding:11px 12px;border:1.5px solid var(--gray-300);border-radius:3px;background:#fff;color:var(--gray-900)}
+.fg-onboarding-field textarea{min-height:88px;resize:vertical}
+.fg-onboarding-checks{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.fg-onboarding-check{display:flex;align-items:flex-start;gap:9px;padding:10px 11px;border:1px solid var(--gray-200);background:var(--gray-50);font-size:.8rem;color:var(--gray-700);line-height:1.4;cursor:pointer}
+.fg-onboarding-check input{width:15px;height:15px;flex:0 0 15px;margin:1px 0 0;accent-color:var(--g600)}
+.fg-onboarding-foot{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:20px 34px 28px;border-top:1px solid var(--gray-200);margin-top:18px}
+.fg-onboarding-foot-left,.fg-onboarding-foot-right{display:flex;gap:9px;align-items:center}
+.fg-onboarding-btn{border:1px solid var(--g600);background:var(--g600);color:#fff;padding:11px 17px;font:500 .82rem var(--ff-sans);border-radius:3px}
+.fg-onboarding-btn:hover{background:var(--g700)}.fg-onboarding-btn.secondary{background:#fff;color:var(--g700);border-color:var(--gray-300)}
+.fg-onboarding-btn.secondary:hover{background:var(--g50);border-color:var(--g500)}
+.fg-onboarding-status{font-size:.76rem;color:var(--gray-500);min-height:18px}
+.fg-profile-card{margin-bottom:18px;border-top:3px solid var(--g600)}
+.fg-profile-card .card-body{display:flex;justify-content:space-between;gap:18px;align-items:center;flex-wrap:wrap}
+.fg-profile-summary{font-size:.84rem;color:var(--gray-500);line-height:1.6}
+.fg-priority-list{display:grid;gap:9px;margin-top:12px}
+.fg-priority-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--gray-50);border-left:3px solid var(--g500);font-size:.82rem;color:var(--gray-700)}
+.fg-priority-item a{color:var(--g600);font-weight:600;text-decoration:underline}
+@media(max-width:640px){.fg-onboarding-backdrop{padding:0;align-items:stretch}.fg-onboarding{max-height:none;min-height:100vh}.fg-onboarding-head{padding:24px 20px}.fg-onboarding-body{padding:22px 20px 8px}.fg-onboarding-foot{padding:18px 20px 24px;flex-wrap:wrap}.fg-onboarding-grid{grid-template-columns:1fr}.fg-onboarding-field.full{grid-column:auto}.fg-onboarding-checks{grid-template-columns:1fr 1fr}.fg-onboarding-foot-left,.fg-onboarding-foot-right{width:100%;justify-content:space-between}}
+@media(prefers-reduced-motion:reduce){.fg-onboarding-progress span{transition:none}}
