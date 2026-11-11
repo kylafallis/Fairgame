@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="/portal.css"/>
+  <link rel="stylesheet" href="/teacher-onboarding.css"/>
 </head>
 <body>
 <button class="pnav-mobile-toggle" onclick="openMobileNav()">☰</button>
@@ -33,6 +34,7 @@
     <div class="pnav-section">Support</div>
     <a class="pnav-link"       data-section="timeline"  data-label="Planning Timeline" onclick="showSection('timeline',this)">Timeline</a>
     <a class="pnav-link"       data-section="resources" data-label="Resources"        onclick="showSection('resources',this)">Resources</a>
+    <a class="pnav-link" href="#" onclick="openTeacherOnboarding();return false;">School Profile &amp; Setup</a>
     <div class="pnav-divider"></div>
     <a class="pnav-link" href="/" style="font-size:.78rem;color:rgba(255,255,255,.3);">← Public site</a>
   </div>
@@ -989,5 +991,6 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/portal-shared.js"></script>
 <script src="/portal-teacher.js"></script>
+<script src="/teacher-onboarding.js"></script>
 </body>
 </html>
