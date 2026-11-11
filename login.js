@@ -181,6 +181,9 @@ const linkQuery = (() => {
   return token_hash && LINK_TYPES.includes(type) ? { token_hash, type } : null;
 })();
 
+const switchAccountMode = new URLSearchParams(window.location.search).get('switch') === '1';
+if (switchAccountMode) suppressAutoRedirect = true;
+
 if (linkQuery) {
   // An older session in this browser must not route the person off before
   // they have confirmed the link they actually clicked.
@@ -294,7 +297,7 @@ async function ensurePortalRequest(email, name, role, details) {
 
 /* ── Already signed-in check ──────────────────────────────────── */
 if (sb) sb.auth.getSession().then(async ({ data: { session } }) => {
-  if (linkQuery) return;   // the confirm button decides where they go
+  if (linkQuery || switchAccountMode) return;   // explicit confirmation / account switching stays on this page
   if (session?.user) {
     // A recovery link also produces a session. Routing on it is what
     // sent people into their portal with the old password still live.
