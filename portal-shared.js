@@ -36,6 +36,21 @@ async function doSignOut() {
   window.location.reload();
 }
 
+/* Switch identities without ending sessions on other devices. The login
+   page's switch mode deliberately skips its normal existing-session redirect. */
+async function portalSwitchAccount() {
+  try {
+    if (sb) {
+      const { error } = await sb.auth.signOut({ scope: 'local' });
+      if (error) throw error;
+    }
+  } catch (error) {
+    console.warn('[Portal] Local sign-out before account switch failed:', error);
+  }
+  window.location.assign('/login.html?switch=1');
+}
+window.portalSwitchAccount = portalSwitchAccount;
+
 /* ── Role lookup ─────────────────────────────────────────────────
    user_roles is the only source of truth for access control. It can
    only be written by an admin session or the service key, unlike
