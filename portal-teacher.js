@@ -28,6 +28,8 @@ requireAuth('teacher', async (user) => {
   onSectionLoad('judges', loadJudgeSection);
   onSectionLoad('students', loadTeacherStudents);
   onSectionLoad('documents', loadSchoolDocs);
+  window.fgTeacherReadyUser = user;
+  window.dispatchEvent(new CustomEvent('fg:teacher-ready', { detail: { user } }));
 });
 
 function prefillFair(fair) {
