@@ -31,3 +31,6 @@
 .fg-priority-item a{color:var(--g600);font-weight:600;text-decoration:underline}
 @media(max-width:640px){.fg-onboarding-backdrop{padding:0;align-items:stretch}.fg-onboarding{max-height:none;min-height:100vh}.fg-onboarding-head{padding:24px 20px}.fg-onboarding-body{padding:22px 20px 8px}.fg-onboarding-foot{padding:18px 20px 24px;flex-wrap:wrap}.fg-onboarding-grid{grid-template-columns:1fr}.fg-onboarding-field.full{grid-column:auto}.fg-onboarding-checks{grid-template-columns:1fr 1fr}.fg-onboarding-foot-left,.fg-onboarding-foot-right{width:100%;justify-content:space-between}}
 @media(prefers-reduced-motion:reduce){.fg-onboarding-progress span{transition:none}}
+
+/* The native [hidden] attribute must win over the overlay's flex layout. */
+.fg-onboarding-backdrop[hidden]{display:none!important}
